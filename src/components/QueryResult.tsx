@@ -28,41 +28,6 @@ export const QueryResultView: React.FC<QueryResultProps> = ({
     );
   }
 
-  const handleCopyJson = async () => {
-    try {
-      if (result.columns && result.values) {
-        const json = result.values.map((row) => {
-          const obj: Record<string, any> = {};
-          result.columns.forEach((col, idx) => {
-            obj[col] = row[idx];
-          });
-          return obj;
-        });
-        await navigator.clipboard.writeText(JSON.stringify(json, null, 2));
-        setCopied(true);
-        setTimeout(() => setCopied(false), 2000);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  };
-
-  const handleExportCsv = () => {
-    if (!result.columns || !result.values) return;
-    const header = result.columns.join(',');
-    const rows = result.values.map((r) =>
-      r.map((val) => (val === null ? '' : `"${String(val).replace(/"/g, '""')}"`)).join(',')
-    );
-    const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [header, ...rows].join('\n');
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement('a');
-    link.setAttribute('href', encodedUri);
-    link.setAttribute('download', `sql_result_${Date.now()}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
   // 1. Error state
   if (result.error) {
     return (
@@ -105,10 +70,45 @@ export const QueryResultView: React.FC<QueryResultProps> = ({
     );
   }
 
-  // 2. DML or DDL state (No rows returned, e.g. INSERT, UPDATE, DELETE)
-  if (result.queryType === 'DML' || result.queryType === 'DDL' || result.columns.length === 0) {
+  const handleCopyJson = async () => {
+    try {
+      if (result.columns && result.values) {
+        const json = result.values.map((row) => {
+          const obj: Record<string, any> = {};
+          result.columns.forEach((col, idx) => {
+            obj[col] = row[idx];
+          });
+          return obj;
+        });
+        await navigator.clipboard.writeText(JSON.stringify(json, null, 2));
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const handleExportCsv = () => {
+    if (!result.columns || !result.values) return;
+    const header = result.columns.join(',');
+    const rows = result.values.map((r) =>
+      r.map((val) => (val === null ? '' : `"${String(val).replace(/"/g, '""')}"`)).join(',')
+    );
+    const csvContent = 'data:text/csv;charset=utf-8,\uFEFF' + [header, ...rows].join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `sql_result_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // 2. DML or DDL state (when no columns returned, e.g. INSERT, UPDATE, DELETE)
+  if ((result.queryType === 'DML' || result.queryType === 'DDL') && result.columns.length === 0) {
     return (
-      <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl p-4 shadow-2xs">
+      <div className="bg-emerald-50/80 border border-emerald-200 rounded-xl p-4 shadow-2xs">
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0 text-sm">
@@ -134,83 +134,98 @@ export const QueryResultView: React.FC<QueryResultProps> = ({
     );
   }
 
-  // 3. SELECT Tabular result
+  // 3. Tabular result (SELECT or queries with columns)
   return (
     <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden flex flex-col">
-      {/* Result Meta Header */}
-      <div className="p-3 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
-        <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-          <h3 className="font-bold text-slate-800 uppercase tracking-wider">
-            Kết Quả Truy Vấn (Query Result)
-          </h3>
-          <span className="bg-indigo-100 text-indigo-800 text-[11px] font-semibold px-2 py-0.5 rounded-full">
-            {result.values.length} dòng
-          </span>
-          <span className="text-slate-500 font-mono text-[11px]">
-            ({result.executionTimeMs} ms)
-          </span>
+      {/* Top Banner: Status & Metrics */}
+      <div className="p-3 bg-emerald-50/90 border-b border-emerald-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+        <div className="flex items-center gap-2.5">
+          <div className="w-6 h-6 rounded-md bg-emerald-100 text-emerald-700 flex items-center justify-center text-xs">
+            <i className="fa-solid fa-circle-check"></i>
+          </div>
+          <div className="flex items-center gap-2">
+            <h3 className="font-bold text-emerald-950 uppercase tracking-wider">
+              Thực thi lệnh SELECT thành công
+            </h3>
+            <span className="bg-emerald-600 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full shadow-2xs">
+              {result.values.length} dòng
+            </span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={handleCopyJson}
-            title="Sao chép kết quả dưới dạng JSON"
-            className="px-2 py-1 bg-white hover:bg-slate-100 border border-slate-200 rounded-md text-slate-700 cursor-pointer text-xs flex items-center gap-1"
-          >
-            <i className={`fa-solid ${copied ? 'fa-check text-emerald-600' : 'fa-copy'}`}></i>
-            <span className="hidden sm:inline">JSON</span>
-          </button>
-          <button
-            type="button"
-            onClick={handleExportCsv}
-            title="Tải kết quả về máy dạng CSV"
-            className="px-2 py-1 bg-white hover:bg-slate-100 border border-slate-200 rounded-md text-slate-700 cursor-pointer text-xs flex items-center gap-1"
-          >
-            <i className="fa-solid fa-file-csv text-emerald-600"></i>
-            <span className="hidden sm:inline">Xuất CSV</span>
-          </button>
+        <div className="flex items-center gap-3 text-slate-500 font-mono text-[11px]">
+          <span>{result.executionTimeMs} ms</span>
+          <span>•</span>
+          <span>{result.timestamp}</span>
+
+          <div className="flex items-center gap-1.5 ml-2">
+            <button
+              type="button"
+              onClick={handleCopyJson}
+              title="Sao chép kết quả dưới dạng JSON"
+              className="px-2 py-1 bg-white hover:bg-slate-100 border border-slate-300 rounded-md text-slate-700 cursor-pointer text-xs flex items-center gap-1 shadow-2xs"
+            >
+              <i className={`fa-solid ${copied ? 'fa-check text-emerald-600' : 'fa-copy'}`}></i>
+              <span className="hidden sm:inline">JSON</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleExportCsv}
+              title="Tải kết quả về máy dạng CSV"
+              className="px-2 py-1 bg-white hover:bg-slate-100 border border-slate-300 rounded-md text-slate-700 cursor-pointer text-xs flex items-center gap-1 shadow-2xs"
+            >
+              <i className="fa-solid fa-file-csv text-emerald-600"></i>
+              <span className="hidden sm:inline">Xuất CSV</span>
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* Result Table */}
-      <div className="overflow-x-auto max-h-72">
-        <table className="w-full text-left border-collapse text-xs">
-          <thead>
-            <tr className="bg-slate-100/90 border-b border-slate-200 text-slate-700 font-semibold sticky top-0 z-10 uppercase tracking-wider">
-              <th className="py-2 px-3 w-10 text-center text-slate-400 font-mono">#</th>
-              {result.columns.map((colName, idx) => (
-                <th key={idx} className="py-2 px-3 whitespace-nowrap text-slate-800 font-semibold">
-                  {colName}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100 font-mono">
-            {result.values.map((row, rowIdx) => (
-              <tr key={rowIdx} className="hover:bg-indigo-50/20 transition-colors">
-                <td className="py-1.5 px-3 text-center text-slate-400 text-[10px] select-none bg-slate-50/40">
-                  {rowIdx + 1}
-                </td>
-                {row.map((val, colIdx) => (
-                  <td key={colIdx} className="py-1.5 px-3 whitespace-nowrap text-slate-800">
-                    {val === null ? (
-                      <span className="italic text-slate-400 bg-slate-100 px-1 py-0.2 rounded text-[10px] font-sans">
-                        NULL
-                      </span>
-                    ) : typeof val === 'number' ? (
-                      <span className="text-blue-700 font-semibold">{val}</span>
-                    ) : (
-                      <span>{String(val)}</span>
-                    )}
-                  </td>
+      {/* Result Table or Zero Rows Notice */}
+      {result.values.length === 0 ? (
+        <div className="p-6 text-center text-slate-500 bg-slate-50/50">
+          <i className="fa-solid fa-inbox text-2xl text-slate-300 mb-2 block"></i>
+          <p className="text-xs font-medium">Không có dòng dữ liệu nào thỏa mãn điều kiện truy vấn (0 dòng).</p>
+          <p className="text-[11px] text-slate-400 mt-1">Các cột trong truy vấn: {result.columns.join(', ')}</p>
+        </div>
+      ) : (
+        <div className="overflow-x-auto max-h-80">
+          <table className="w-full text-left border-collapse text-xs">
+            <thead>
+              <tr className="bg-slate-100/90 border-b border-slate-200 text-slate-700 font-semibold sticky top-0 z-10 uppercase tracking-wider">
+                <th className="py-2.5 px-3 w-12 text-center text-slate-400 font-mono">#</th>
+                {result.columns.map((colName, idx) => (
+                  <th key={idx} className="py-2.5 px-3 whitespace-nowrap text-slate-800 font-bold border-l border-slate-200 first:border-l-0">
+                    {colName}
+                  </th>
                 ))}
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody className="divide-y divide-slate-100 font-mono">
+              {result.values.map((row, rowIdx) => (
+                <tr key={rowIdx} className="hover:bg-indigo-50/30 transition-colors odd:bg-white even:bg-slate-50/40">
+                  <td className="py-2 px-3 text-center text-slate-400 text-[11px] select-none bg-slate-100/40 font-semibold">
+                    {rowIdx + 1}
+                  </td>
+                  {row.map((val, colIdx) => (
+                    <td key={colIdx} className="py-2 px-3 whitespace-nowrap text-slate-800 border-l border-slate-100">
+                      {val === null ? (
+                        <span className="italic text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded text-[10px] font-sans">
+                          NULL
+                        </span>
+                      ) : typeof val === 'number' ? (
+                        <span className="text-blue-700 font-semibold">{val}</span>
+                      ) : (
+                        <span>{String(val)}</span>
+                      )}
+                    </td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };

@@ -24,14 +24,14 @@ CREATE TABLE HOC_SINH (
     `.trim(),
     seed: `
 INSERT INTO HOC_SINH (MaSo, HoDem, Ten, GT, DoanVien, NgSinh, DiaChi, To_hoc, Toan, Van) VALUES
-(1, 'Trần Minh', 'Hoàng', 'Nam', 1, '2007-03-15', '12 Phố Huế, Hà Nội', 1, 8.5, 7.5),
-(2, 'Nguyễn Thị', 'Mai', 'Nữ', 1, '2007-06-22', '45 Tràng Tiền, Hà Nội', 1, 9.0, 8.5),
-(3, 'Lê Văn', 'Tuấn', 'Nam', 0, '2007-01-10', '88 Cầu Giấy, Hà Nội', 2, 6.5, 6.0),
-(4, 'Phạm Thu', 'Hà', 'Nữ', 1, '2007-09-05', '19 Tôn Đức Thắng, Hà Nội', 2, 8.0, 9.0),
-(5, 'Vũ Đức', 'Nam', 'Nam', 0, '2007-11-18', '33 Bạch Mai, Hà Nội', 3, 7.0, 7.0),
-(6, 'Đỗ Quỳnh', 'Nga', 'Nữ', 1, '2007-04-30', '102 Nguyễn Trãi, Hà Nội', 3, 9.5, 9.2),
-(7, 'Hoàng Trọng', 'Khánh', 'Nam', 1, '2007-08-12', '56 Lạc Long Quân, Hà Nội', 1, 7.5, 8.0),
-(8, 'Bùi Thảo', 'Vy', 'Nữ', 0, '2007-12-25', '21 Ngọc Lâm, Long Biên', 2, 8.5, 8.8);
+(1, 'Trần Minh', 'Hoàng', 'Nam', 1, '2007-03-15', 'Hà Nội', 1, 8.5, 7.5),
+(2, 'Nguyễn Thị', 'Mai', 'Nữ', 1, '2007-06-22', 'Hà Nội', 1, 9.0, 8.5),
+(3, 'Lê Văn', 'Tuấn', 'Nam', 0, '2007-01-10', 'Đà Nẵng', 2, 6.5, 6.0),
+(4, 'Phạm Thu', 'Hà', 'Nữ', 1, '2007-09-05', 'Hà Nội', 2, 8.0, 9.0),
+(5, 'Vũ Đức', 'Nam', 'Nam', 0, '2007-11-18', 'Hà Nội', 3, 7.0, 7.0),
+(6, 'Đỗ Quỳnh', 'Nga', 'Nữ', 1, '2007-04-30', 'Hà Nội', 3, 9.5, 9.2),
+(7, 'Hoàng Trọng', 'Khánh', 'Nam', 1, '2007-08-12', 'Đà Nẵng', 1, 7.5, 8.0),
+(8, 'Bùi Thảo', 'Vy', 'Nữ', 0, '2007-12-25', 'Ngọc Lâm', 2, 8.5, 8.8);
     `.trim(),
     mermaidErd: `
 erDiagram
@@ -51,7 +51,7 @@ erDiagram
     sampleQueries: [
       {
         title: 'Học sinh Tổ 1 có điểm Toán từ 8.0 trở lên',
-        sql: `SELECT MaSo, HoDem || ' ' || Ten AS HoTen, GT, Toan, Van\nFROM HOC_SINH\nWHERE\nTo_hoc = 1 AND Toan >= 8.0;`,
+        sql: `SELECT MaSo, HoDem || ' ' || Ten AS HoTen, GT, Toan, Van\nFROM HOC_SINH\nWHERE To_hoc = 1 AND Toan >= 8.0;`,
         explanation: 'Truy vấn lọc các học sinh thuộc Tổ 1 và có điểm môn Toán đạt từ 8.0 trở lên, ghép cột Họ đệm và Tên.',
         difficulty: 'Cơ bản',
       },
@@ -63,19 +63,19 @@ erDiagram
       },
       {
         title: 'Danh sách Đoàn viên có điểm trung bình hai môn >= 8.0',
-        sql: `SELECT MaSo, HoDem, Ten, Toan, Van, ROUND((Toan + Van) / 2.0, 2) AS DTB\nFROM HOC_SINH\nWHERE\nDoanVien = 1 AND (Toan + Van) / 2.0 >= 8.0\nORDER BY DTB DESC;`,
+        sql: `SELECT MaSo, HoDem, Ten, Toan, Van, ROUND((Toan + Van) / 2.0, 2) AS DTB\nFROM HOC_SINH\nWHERE DoanVien = 1 AND (Toan + Van) / 2.0 >= 8.0\nORDER BY DTB DESC;`,
         explanation: 'Lọc đoàn viên có điểm trung bình Toán - Văn từ 8.0 trở lên, sắp xếp giảm dần theo điểm trung bình.',
         difficulty: 'Trung bình',
       },
       {
         title: 'Cập nhật điểm Văn cho bạn học sinh mã số 3 lên 7.0',
-        sql: `UPDATE HOC_SINH\nSET Van = 7.0\nWHERE\nMaSo = 3;`,
+        sql: `UPDATE HOC_SINH\nSET Van = 7.0\nWHERE MaSo = 3;`,
         explanation: 'Lệnh DML UPDATE dùng để chỉnh sửa thông tin điểm số của học sinh có MaSo = 3.',
         difficulty: 'Cơ bản',
       },
       {
         title: 'Học sinh có điểm Toán cao nhất trong mỗi Tổ (Subquery)',
-        sql: `SELECT h.To_hoc, h.HoDem || ' ' || h.Ten AS ThuKhoaToan, h.Toan\nFROM HOC_SINH h\nWHERE\nh.Toan = (\n    SELECT MAX(sub.Toan)\n    FROM HOC_SINH sub\n    WHERE\n    sub.To_hoc = h.To_hoc\n);`,
+        sql: `SELECT h.To_hoc, h.HoDem || ' ' || h.Ten AS ThuKhoaToan, h.Toan\nFROM HOC_SINH h\nWHERE h.Toan = (\n    SELECT MAX(sub.Toan)\n    FROM HOC_SINH sub\n    WHERE sub.To_hoc = h.To_hoc\n);`,
         explanation: 'Sử dụng Correlated Subquery để tìm học sinh đạt điểm Toán cao nhất ở từng tổ.',
         difficulty: 'Nâng cao',
       },
@@ -279,118 +279,15 @@ erDiagram
       },
       {
         title: 'Tìm học sinh đạt điểm môn Tin học cao nhất',
-        sql: `SELECT hs.Ma_hoc_sinh, hs.Ho_dem || ' ' || hs.Ten AS Ho_ten, bd.Diem_so\nFROM BANG_DIEM bd\nJOIN HOC_SINH hs ON bd.Ma_hoc_sinh = hs.Ma_hoc_sinh\nWHERE\nbd.Ma_mon_hoc = 'TIN'\nORDER BY bd.Diem_so DESC\nLIMIT 1;`,
+        sql: `SELECT hs.Ma_hoc_sinh, hs.Ho_dem || ' ' || hs.Ten AS Ho_ten, bd.Diem_so\nFROM BANG_DIEM bd\nJOIN HOC_SINH hs ON bd.Ma_hoc_sinh = hs.Ma_hoc_sinh\nWHERE bd.Ma_mon_hoc = 'TIN'\nORDER BY bd.Diem_so DESC\nLIMIT 1;`,
         explanation: 'Lọc riêng môn Tin học và lấy học sinh có điểm cao nhất.',
         difficulty: 'Cơ bản',
       },
       {
         title: 'Thống kê số lượng bài kiểm tra loại Giỏi (>= 8.5) theo môn học',
-        sql: `SELECT mh.Ten_mon_hoc, COUNT(*) AS So_luong_diem_gioi\nFROM BANG_DIEM bd\nJOIN MON_HOC mh ON bd.Ma_mon_hoc = mh.Ma_mon_hoc\nWHERE\nbd.Diem_so >= 8.5\nGROUP BY mh.Ten_mon_hoc;`,
+        sql: `SELECT mh.Ten_mon_hoc, COUNT(*) AS So_luong_diem_gioi\nFROM BANG_DIEM bd\nJOIN MON_HOC mh ON bd.Ma_mon_hoc = mh.Ma_mon_hoc\nWHERE bd.Diem_so >= 8.5\nGROUP BY mh.Ten_mon_hoc;`,
         explanation: 'Đếm số bài kiểm tra đạt từ 8.5 trở lên cho mỗi môn học.',
         difficulty: 'Trung bình',
-      },
-    ],
-  },
-
-  THU_VIEN: {
-    id: 'THU_VIEN',
-    name: 'CSDL Thư Viện',
-    subtitle: 'Mượn trả sách thư viện trường (Hình 4)',
-    description: 'Cơ sở dữ liệu thư viện chuẩn xác theo đề bài Hình 4: Quản lý người mượn, đầu sách và thông tin mượn trả.',
-    badge: '3 Bảng • Thư Viện',
-    iconClass: 'fa-solid fa-book-bookmark',
-    ddl: `
-CREATE TABLE NGUOI_MUON (
-  So_the TEXT PRIMARY KEY,
-  Ho_ten TEXT NOT NULL,
-  Ngay_sinh DATE,
-  Lop TEXT NOT NULL
-);
-
-CREATE TABLE SACH (
-  Ma_so_sach TEXT PRIMARY KEY,
-  Ten_sach TEXT NOT NULL,
-  So_trang INTEGER NOT NULL,
-  Tac_gia TEXT NOT NULL
-);
-
-CREATE TABLE MUON_SACH (
-  So_the TEXT NOT NULL,
-  Ma_so_sach TEXT NOT NULL,
-  Ngay_muon DATE NOT NULL,
-  Ngay_tra DATE,
-  PRIMARY KEY (So_the, Ma_so_sach, Ngay_muon),
-  FOREIGN KEY (So_the) REFERENCES NGUOI_MUON(So_the),
-  FOREIGN KEY (Ma_so_sach) REFERENCES SACH(Ma_so_sach)
-);
-    `.trim(),
-    seed: `
-INSERT INTO NGUOI_MUON (So_the, Ho_ten, Ngay_sinh, Lop) VALUES
-('TV-01', 'Nguyễn Anh', '2007-04-15', '12A'),
-('TV-02', 'Trần Cương', '2008-09-20', '11B'),
-('TV-03', 'Lê Văn Bình', '2007-11-05', '12B'),
-('TV-04', 'Nguyễn Thị Dung', '2009-02-18', '10C');
-
-INSERT INTO SACH (Ma_so_sach, Ten_sach, So_trang, Tac_gia) VALUES
-('TN-102', 'Dế mèn phiêu lưu kí', 195, 'Tô Hoài'),
-('TN-103', 'Hai vạn dặm dưới biển', 450, 'Giuyn Véc-nơ'),
-('TI-01', 'Những điều kì diệu về máy tính', 280, 'Nguyễn Thế Hùng'),
-('TO-012', 'Sáng tạo Toán học', 320, 'Polya');
-
-INSERT INTO MUON_SACH (So_the, Ma_so_sach, Ngay_muon, Ngay_tra) VALUES
-('TV-01', 'TN-102', '2024-03-01', '2024-03-10'),
-('TV-02', 'TN-103', '2024-03-05', NULL),
-('TV-02', 'TO-012', '2024-03-12', '2024-03-20'),
-('TV-03', 'TI-01', '2024-03-15', '2024-03-22'),
-('TV-04', 'TN-102', '2024-03-18', NULL);
-    `.trim(),
-    mermaidErd: `
-erDiagram
-    NGUOI_MUON ||--o{ MUON_SACH : "mượn sách"
-    SACH ||--o{ MUON_SACH : "được mượn"
-    NGUOI_MUON {
-        string So_the PK "Số thẻ bạn đọc"
-        string Ho_ten "Họ và tên người mượn"
-        date Ngay_sinh "Ngày sinh"
-        string Lop "Lớp học"
-    }
-    SACH {
-        string Ma_so_sach PK "Mã số sách"
-        string Ten_sach "Tên cuốn sách"
-        int So_trang "Số trang sách"
-        string Tac_gia "Tác giả cuốn sách"
-    }
-    MUON_SACH {
-        string So_the PK "Khóa chính và Khóa ngoại NGUOI_MUON"
-        string Ma_so_sach PK "Khóa chính và Khóa ngoại SACH"
-        date Ngay_muon PK "Ngày mượn sách"
-        date Ngay_tra "Ngày trả sách (NULL nếu chưa trả)"
-    }
-    `.trim(),
-    sampleQueries: [
-      {
-        title: 'Tìm những cuốn sách có trên 200 trang mà Trần Cương đã mượn',
-        sql: `SELECT s.Ma_so_sach, s.Ten_sach, s.So_trang, s.Tac_gia, ms.Ngay_muon, ms.Ngay_tra\nFROM MUON_SACH ms\nJOIN NGUOI_MUON nm ON ms.So_the = nm.So_the\nJOIN SACH s ON ms.Ma_so_sach = s.Ma_so_sach\nWHERE\nnm.Ho_ten = 'Trần Cương' AND s.So_trang > 200;`,
-        explanation: 'Truy vấn chính xác theo câu hỏi mẫu trong đề bài: kết hợp 3 bảng, lọc theo tên bạn đọc và số trang sách > 200.',
-        difficulty: 'Trung bình',
-      },
-      {
-        title: 'Danh sách những bạn đọc hiện đang mượn sách chưa trả',
-        sql: `SELECT nm.So_the, nm.Ho_ten, nm.Lop, s.Ten_sach, ms.Ngay_muon\nFROM MUON_SACH ms\nJOIN NGUOI_MUON nm ON ms.So_the = nm.So_the\nJOIN SACH s ON ms.Ma_so_sach = s.Ma_so_sach\nWHERE\nms.Ngay_tra IS NULL;`,
-        explanation: 'Kiểm tra điều kiện Ngay_tra IS NULL để xác định các lượt mượn chưa được trả sách về thư viện.',
-        difficulty: 'Cơ bản',
-      },
-      {
-        title: 'Thống kê số lần mượn của từng đầu sách',
-        sql: `SELECT s.Ma_so_sach, s.Ten_sach, s.Tac_gia, COUNT(ms.So_the) AS So_lan_muon\nFROM SACH s\nLEFT JOIN MUON_SACH ms ON s.Ma_so_sach = ms.Ma_so_sach\nGROUP BY s.Ma_so_sach, s.Ten_sach\nORDER BY So_lan_muon DESC;`,
-        explanation: 'Sử dụng LEFT JOIN và GROUP BY để đếm tần suất mượn của tất cả các đầu sách.',
-        difficulty: 'Trung bình',
-      },
-      {
-        title: 'Cập nhật trả sách cho bạn Trần Cương (sách TN-103) ngày hôm nay',
-        sql: `UPDATE MUON_SACH\nSET Ngay_tra = '2024-03-25'\nWHERE\nSo_the = 'TV-02' AND Ma_so_sach = 'TN-103' AND Ngay_tra IS NULL;`,
-        explanation: 'Cập nhật trường Ngay_tra để ghi nhận việc trả sách.',
-        difficulty: 'Cơ bản',
       },
     ],
   },
@@ -503,8 +400,507 @@ erDiagram
       },
       {
         title: 'Tìm các ca sĩ đã từng thể hiện sáng tác của nhạc sĩ Văn Cao',
-        sql: `SELECT DISTINCT cs.Sid, cs.TenCS\nFROM CA_SI cs\nJOIN BAN_THU_AM bta ON cs.Sid = bta.Sid\nJOIN BAN_NHAC bn ON bta.Mid = bn.Mid\nJOIN NHAC_SI ns ON bn.Aid = ns.Aid\nWHERE\nns.TenNS = 'Văn Cao';`,
+        sql: `SELECT DISTINCT cs.Sid, cs.TenCS\nFROM CA_SI cs\nJOIN BAN_THU_AM bta ON cs.Sid = bta.Sid\nJOIN BAN_NHAC bn ON bta.Mid = bn.Mid\nJOIN NHAC_SI ns ON bn.Aid = ns.Aid\nWHERE ns.TenNS = 'Văn Cao';`,
         explanation: 'Sử dụng DISTINCT để loại bỏ ca sĩ trùng lặp khi hát nhiều bài của nhạc sĩ Văn Cao.',
+        difficulty: 'Nâng cao',
+      },
+    ],
+  },
+
+  QL_XE: {
+    id: 'QL_XE',
+    name: 'CSDL QL_XE',
+    subtitle: 'Loại xe, Danh mục xe & Hóa đơn bán hàng',
+    description: 'Cơ sở dữ liệu quản lý bán xe gồm 3 bảng quan hệ: LOAI_XE, DANH_MUC_XE và HOA_DON bán lẻ.',
+    badge: '3 Bảng • Quản Lý Xe',
+    iconClass: 'fa-solid fa-motorcycle',
+    ddl: `
+CREATE TABLE LOAI_XE (
+  MaLoai TEXT PRIMARY KEY,
+  LoaiXe TEXT NOT NULL
+);
+
+CREATE TABLE DANH_MUC_XE (
+  MaXe TEXT PRIMARY KEY,
+  TenXe TEXT NOT NULL,
+  MaLoai TEXT NOT NULL,
+  FOREIGN KEY (MaLoai) REFERENCES LOAI_XE(MaLoai)
+);
+
+CREATE TABLE HOA_DON (
+  SoHD TEXT PRIMARY KEY,
+  MaXe TEXT NOT NULL,
+  NgayBan DATE NOT NULL,
+  SoLuong INTEGER NOT NULL CHECK(SoLuong > 0),
+  DonGia REAL NOT NULL CHECK(DonGia > 0),
+  FOREIGN KEY (MaXe) REFERENCES DANH_MUC_XE(MaXe)
+);
+    `.trim(),
+    seed: `
+INSERT INTO LOAI_XE (MaLoai, LoaiXe) VALUES
+('L01', 'Xe số'),
+('L02', 'Xe tay ga'),
+('L03', 'Xe côn tay'),
+('L04', 'Xe máy điện');
+
+INSERT INTO DANH_MUC_XE (MaXe, TenXe, MaLoai) VALUES
+('X01', 'Wave Alpha', 'L01'),
+('X02', 'Future 125 FI', 'L01'),
+('X03', 'Vision', 'L02'),
+('X04', 'Air Blade 160', 'L02'),
+('X05', 'SH 150i', 'L02'),
+('X06', 'Winner X', 'L03'),
+('X07', 'Exciter 155 VVA', 'L03'),
+('X08', 'VinFast Feliz S', 'L04'),
+('X09', 'VinFast Klara S', 'L04');
+
+INSERT INTO HOA_DON (SoHD, MaXe, NgayBan, SoLuong, DonGia) VALUES
+('HD01', 'X01', '2024-01-15', 2, 18500000),
+('HD02', 'X03', '2024-01-18', 1, 33500000),
+('HD03', 'X04', '2024-02-02', 3, 44000000),
+('HD04', 'X05', '2024-02-10', 1, 98000000),
+('HD05', 'X06', '2024-02-15', 2, 46000000),
+('HD06', 'X02', '2024-03-01', 1, 31500000),
+('HD07', 'X03', '2024-03-12', 4, 33000000),
+('HD08', 'X07', '2024-03-20', 2, 49000000),
+('HD09', 'X08', '2024-04-05', 5, 29900000),
+('HD10', 'X04', '2024-04-18', 2, 44500000);
+    `.trim(),
+    mermaidErd: `
+erDiagram
+    LOAI_XE ||--o{ DANH_MUC_XE : "thuộc loại"
+    DANH_MUC_XE ||--o{ HOA_DON : "được bán trong"
+    LOAI_XE {
+        string MaLoai PK "Mã loại xe (VD: L01, L02)"
+        string LoaiXe "Tên loại xe (Xe số, Xe tay ga...)"
+    }
+    DANH_MUC_XE {
+        string MaXe PK "Mã xe (VD: X01, X02)"
+        string TenXe "Tên dòng xe"
+        string MaLoai FK "Mã loại xe tham chiếu LOAI_XE"
+    }
+    HOA_DON {
+        string SoHD PK "Số hóa đơn bán lẻ"
+        string MaXe FK "Mã xe tham chiếu DANH_MUC_XE"
+        date NgayBan "Ngày bán hàng"
+        int SoLuong "Số lượng bán (CHECK > 0)"
+        float DonGia "Đơn giá bán thực tế (CHECK > 0)"
+    }
+    `.trim(),
+    sampleQueries: [
+      {
+        title: 'Danh sách xe kèm tên loại xe tương ứng (INNER JOIN)',
+        sql: `SELECT x.MaXe, x.TenXe, l.LoaiXe\nFROM DANH_MUC_XE x\nJOIN LOAI_XE l ON x.MaLoai = l.MaLoai\nORDER BY l.LoaiXe, x.TenXe;`,
+        explanation: 'Kết hợp bảng DANH_MUC_XE và LOAI_XE qua khóa ngoại MaLoai để xem loại của từng dòng xe.',
+        difficulty: 'Cơ bản',
+      },
+      {
+        title: 'Chi tiết các hóa đơn: Tên xe, Ngày bán, Số lượng, Đơn giá và Thành tiền',
+        sql: `SELECT hd.SoHD, hd.NgayBan, x.TenXe, l.LoaiXe, hd.SoLuong, hd.DonGia, (hd.SoLuong * hd.DonGia) AS ThanhTien\nFROM HOA_DON hd\nJOIN DANH_MUC_XE x ON hd.MaXe = x.MaXe\nJOIN LOAI_XE l ON x.MaLoai = l.MaLoai\nORDER BY hd.NgayBan DESC;`,
+        explanation: 'Nối 3 bảng để hiển thị đầy đủ thông tin hóa đơn bán hàng và tính cột Thành tiền = Số lượng * Đơn giá.',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Thống kê tổng số xe đã bán và tổng doanh thu theo từng Loại xe',
+        sql: `SELECT l.MaLoai, l.LoaiXe,\n       COALESCE(SUM(hd.SoLuong), 0) AS TongSoLuongBan,\n       COALESCE(SUM(hd.SoLuong * hd.DonGia), 0) AS TongDoanhThu\nFROM LOAI_XE l\nLEFT JOIN DANH_MUC_XE x ON l.MaLoai = x.MaLoai\nLEFT JOIN HOA_DON hd ON x.MaXe = hd.MaXe\nGROUP BY l.MaLoai, l.LoaiXe\nORDER BY TongDoanhThu DESC;`,
+        explanation: 'Sử dụng LEFT JOIN và GROUP BY để tính tổng số lượng xe bán và tổng doanh thu cho từng loại xe.',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Top dòng xe bán chạy nhất (Tổng số lượng bán >= 3 xe)',
+        sql: `SELECT x.MaXe, x.TenXe, SUM(hd.SoLuong) AS TongDaBan, SUM(hd.SoLuong * hd.DonGia) AS DoanhThuXe\nFROM DANH_MUC_XE x\nJOIN HOA_DON hd ON x.MaXe = hd.MaXe\nGROUP BY x.MaXe, x.TenXe\nHAVING SUM(hd.SoLuong) >= 3\nORDER BY TongDaBan DESC;`,
+        explanation: 'Gộp theo từng xe và sử dụng điều kiện nhóm HAVING SUM(hd.SoLuong) >= 3 để lọc các xe bán chạy.',
+        difficulty: 'Nâng cao',
+      },
+      {
+        title: 'Tìm các dòng xe trong danh mục chưa bán được hóa đơn nào',
+        sql: `SELECT x.MaXe, x.TenXe, l.LoaiXe\nFROM DANH_MUC_XE x\nJOIN LOAI_XE l ON x.MaLoai = l.MaLoai\nLEFT JOIN HOA_DON hd ON x.MaXe = hd.MaXe\nWHERE hd.SoHD IS NULL;`,
+        explanation: 'Sử dụng LEFT JOIN kết hợp điều kiện WHERE hd.SoHD IS NULL để tìm xe chưa có phát sinh giao dịch bán.',
+        difficulty: 'Nâng cao',
+      },
+    ],
+  },
+
+  QL_VANG: {
+    id: 'QL_VANG',
+    name: 'CSDL QL_VANG',
+    subtitle: 'Quản Lý Kinh Doanh Vàng Bạc Đá Quý (3 Bảng)',
+    description: 'Cơ sở dữ liệu quản lý tiệm vàng gồm bảng Loại vàng (LOAI_VANG), Danh mục sản phẩm vàng & trang sức (SAN_PHAM), và Phiếu bán hàng (PHIEU_BAN) có trọng lượng, tiền công và đơn giá niêm yết.',
+    badge: '3 Bảng • Kinh Doanh Vàng',
+    iconClass: 'fa-solid fa-coins',
+    ddl: `
+CREATE TABLE LOAI_VANG (
+  MaLoai TEXT PRIMARY KEY,
+  TenLoai TEXT NOT NULL,
+  GiaNiemYet REAL NOT NULL CHECK(GiaNiemYet > 0)
+);
+
+CREATE TABLE SAN_PHAM (
+  MaSP TEXT PRIMARY KEY,
+  TenSP TEXT NOT NULL,
+  MaLoai TEXT NOT NULL,
+  TrongLuong REAL NOT NULL CHECK(TrongLuong > 0),
+  TienCong REAL NOT NULL DEFAULT 0 CHECK(TienCong >= 0),
+  FOREIGN KEY (MaLoai) REFERENCES LOAI_VANG(MaLoai)
+);
+
+CREATE TABLE PHIEU_BAN (
+  SoPhieu TEXT PRIMARY KEY,
+  MaSP TEXT NOT NULL,
+  NgayBan DATE NOT NULL,
+  SoLuong INTEGER NOT NULL CHECK(SoLuong > 0),
+  DonGiaBan REAL NOT NULL CHECK(DonGiaBan > 0),
+  FOREIGN KEY (MaSP) REFERENCES SAN_PHAM(MaSP)
+);
+    `.trim(),
+    seed: `
+INSERT INTO LOAI_VANG (MaLoai, TenLoai, GiaNiemYet) VALUES
+('LV01', 'Vàng 24K (999.9)', 8250000),
+('LV02', 'Vàng miếng SJC', 8550000),
+('LV03', 'Vàng Tây 18K (75%)', 5950000),
+('LV04', 'Vàng Trắng 14K (58.3%)', 4650000);
+
+INSERT INTO SAN_PHAM (MaSP, TenSP, MaLoai, TrongLuong, TienCong) VALUES
+('SP01', 'Nhẫn tròn trơn 1 chỉ', 'LV01', 1.0, 50000),
+('SP02', 'Nhẫn tròn trơn 2 chỉ', 'LV01', 2.0, 80000),
+('SP03', 'Kiềng cưới hoa mai 24K', 'LV01', 5.0, 750000),
+('SP04', 'Vàng miếng SJC 1 lượng', 'LV02', 10.0, 0),
+('SP05', 'Vàng miếng SJC 5 chỉ', 'LV02', 5.0, 0),
+('SP06', 'Dây chuyền nam mắt xích 18K', 'LV03', 3.5, 450000),
+('SP07', 'Lắc tay nữ đính đá 18K', 'LV03', 2.2, 380000),
+('SP08', 'Nhẫn đính hôn kim cương 14K', 'LV04', 0.8, 600000),
+('SP09', 'Bông tai ngọc trai 14K', 'LV04', 1.2, 320000),
+('SP10', 'Mặt dây chuyền thánh giá 18K', 'LV03', 1.5, 250000);
+
+INSERT INTO PHIEU_BAN (SoPhieu, MaSP, NgayBan, SoLuong, DonGiaBan) VALUES
+('PB01', 'SP01', '2024-03-01', 2, 8250000),
+('PB02', 'SP04', '2024-03-05', 1, 85500000),
+('PB03', 'SP06', '2024-03-08', 1, 21200000),
+('PB04', 'SP02', '2024-03-15', 3, 16550000),
+('PB05', 'SP08', '2024-03-20', 1, 4320000),
+('PB06', 'SP03', '2024-04-02', 1, 42000000),
+('PB07', 'SP07', '2024-04-10', 2, 13470000),
+('PB08', 'SP01', '2024-04-18', 4, 8280000),
+('PB09', 'SP09', '2024-05-02', 1, 5900000),
+('PB10', 'SP06', '2024-05-15', 1, 21300000);
+    `.trim(),
+    mermaidErd: `
+erDiagram
+    LOAI_VANG ||--o{ SAN_PHAM : "phân loại"
+    SAN_PHAM ||--o{ PHIEU_BAN : "bán trong"
+    LOAI_VANG {
+        string MaLoai PK "Mã loại vàng (LV01, LV02...)"
+        string TenLoai "Tên loại vàng (24K, SJC, 18K, 14K)"
+        float GiaNiemYet "Giá niêm yết (VNĐ/chỉ)"
+    }
+    SAN_PHAM {
+        string MaSP PK "Mã sản phẩm trang sức/vàng"
+        string TenSP "Tên sản phẩm"
+        string MaLoai FK "Mã loại vàng tham chiếu LOAI_VANG"
+        float TrongLuong "Trọng lượng (chỉ)"
+        float TienCong "Tiền công chế tác (VNĐ)"
+    }
+    PHIEU_BAN {
+        string SoPhieu PK "Số phiếu bán lẻ"
+        string MaSP FK "Mã sản phẩm tham chiếu SAN_PHAM"
+        date NgayBan "Ngày lập phiếu bán"
+        int SoLuong "Số lượng sản phẩm bán (CHECK > 0)"
+        float DonGiaBan "Đơn giá bán thực tế (CHECK > 0)"
+    }
+    `.trim(),
+    sampleQueries: [
+      {
+        title: 'Danh sách sản phẩm kèm tên loại vàng và giá niêm yết (JOIN)',
+        sql: `SELECT sp.MaSP, sp.TenSP, lv.TenLoai, sp.TrongLuong, sp.TienCong, lv.GiaNiemYet\nFROM SAN_PHAM sp\nJOIN LOAI_VANG lv ON sp.MaLoai = lv.MaLoai\nORDER BY lv.TenLoai, sp.TrongLuong DESC;`,
+        explanation: 'Nối bảng SAN_PHAM và LOAI_VANG để xem chi tiết sản phẩm cùng giá niêm yết hiện hành của loại vàng tương ứng.',
+        difficulty: 'Cơ bản',
+      },
+      {
+        title: 'Chi tiết các phiếu bán hàng: Tên sản phẩm, Ngày bán, Số lượng, Đơn giá & Thành tiền',
+        sql: `SELECT pb.SoPhieu, pb.NgayBan, sp.TenSP, lv.TenLoai, pb.SoLuong, pb.DonGiaBan, (pb.SoLuong * pb.DonGiaBan) AS ThanhTien\nFROM PHIEU_BAN pb\nJOIN SAN_PHAM sp ON pb.MaSP = sp.MaSP\nJOIN LOAI_VANG lv ON sp.MaLoai = lv.MaLoai\nORDER BY pb.NgayBan DESC;`,
+        explanation: 'Kết hợp 3 bảng để hiển thị đầy đủ phiếu bán hàng và tính toán tổng tiền thanh toán của mỗi giao dịch.',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Tổng doanh thu và số lượng bán theo từng Loại vàng (LEFT JOIN & GROUP BY)',
+        sql: `SELECT lv.MaLoai, lv.TenLoai,\n       COALESCE(SUM(pb.SoLuong), 0) AS TongSoLuongBan,\n       COALESCE(SUM(pb.SoLuong * pb.DonGiaBan), 0) AS TongDoanhThu\nFROM LOAI_VANG lv\nLEFT JOIN SAN_PHAM sp ON lv.MaLoai = sp.MaLoai\nLEFT JOIN PHIEU_BAN pb ON sp.MaSP = pb.MaSP\nGROUP BY lv.MaLoai, lv.TenLoai\nORDER BY TongDoanhThu DESC;`,
+        explanation: 'Sử dụng LEFT JOIN kết hợp hàm gộp SUM để thống kê doanh số bán theo từng loại vàng, kể cả loại chưa bán.',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Top các sản phẩm trang sức có doanh thu bán trên 30 triệu đồng',
+        sql: `SELECT sp.MaSP, sp.TenSP, SUM(pb.SoLuong) AS TongDaBan, SUM(pb.SoLuong * pb.DonGiaBan) AS DoanhThuSP\nFROM SAN_PHAM sp\nJOIN PHIEU_BAN pb ON sp.MaSP = pb.MaSP\nGROUP BY sp.MaSP, sp.TenSP\nHAVING SUM(pb.SoLuong * pb.DonGiaBan) >= 30000000\nORDER BY DoanhThuSP DESC;`,
+        explanation: 'Gộp theo sản phẩm và áp dụng điều kiện nhóm HAVING trên doanh thu bán để lọc ra các sản phẩm đem lại doanh thu cao.',
+        difficulty: 'Nâng cao',
+      },
+      {
+        title: 'Tìm các sản phẩm vàng trong danh mục chưa có phát sinh giao dịch bán (LEFT JOIN)',
+        sql: `SELECT sp.MaSP, sp.TenSP, lv.TenLoai, sp.TrongLuong, sp.TienCong\nFROM SAN_PHAM sp\nJOIN LOAI_VANG lv ON sp.MaLoai = lv.MaLoai\nLEFT JOIN PHIEU_BAN pb ON sp.MaSP = pb.MaSP\nWHERE pb.SoPhieu IS NULL;`,
+        explanation: 'Sử dụng LEFT JOIN kết hợp điều kiện WHERE pb.SoPhieu IS NULL để lọc ra các mẫu sản phẩm chưa từng xuất hiện trên phiếu bán nào.',
+        difficulty: 'Nâng cao',
+      },
+    ],
+  },
+
+  QL_CANBO: {
+    id: 'QL_CANBO',
+    name: 'CSDL QL_Canbo',
+    subtitle: 'Quản Lý Cán Bộ & Phòng Ban (3 Bảng)',
+    description: 'Cơ sở dữ liệu quản lý nhân sự cơ quan gồm 3 bảng: Phòng ban (PHONG), Danh sách cán bộ (CANBO) và Trình độ văn hóa, chuyên môn & ngoại ngữ (TRINHDOVANHOA).',
+    badge: '3 Bảng • Quản Lý Cán Bộ',
+    iconClass: 'fa-solid fa-id-card-clip',
+    ddl: `
+CREATE TABLE PHONG (
+  MaPh TEXT PRIMARY KEY,
+  TenPh TEXT NOT NULL,
+  DiaChi TEXT
+);
+
+CREATE TABLE CANBO (
+  MaCB TEXT PRIMARY KEY,
+  Ten TEXT NOT NULL,
+  NgaySinh DATE,
+  Luong REAL NOT NULL CHECK(Luong > 0),
+  MaPh TEXT NOT NULL,
+  FOREIGN KEY (MaPh) REFERENCES PHONG(MaPh)
+);
+
+CREATE TABLE TRINHDOVANHOA (
+  MaCB TEXT PRIMARY KEY,
+  TrinhDoHV TEXT NOT NULL,
+  TrinhDoNN TEXT NOT NULL,
+  FOREIGN KEY (MaCB) REFERENCES CANBO(MaCB)
+);
+    `.trim(),
+    seed: `
+INSERT INTO PHONG (MaPh, TenPh, DiaChi) VALUES
+('PH01', 'Phòng Kỹ thuật', 'Tầng 1 Nhà A'),
+('PH02', 'Phòng Tổ chức', 'Tầng 2 Nhà A'),
+('PH03', 'Phòng Kế toán', 'Tầng 1 Nhà B'),
+('PH04', 'Phòng Kế hoạch', 'Tầng 3 Nhà B'),
+('PH05', 'Phòng Đối ngoại', 'Tầng 4 Nhà C');
+
+INSERT INTO CANBO (MaCB, Ten, NgaySinh, Luong, MaPh) VALUES
+('CB01', 'Nguyễn Văn An', '1985-03-15', 18500000, 'PH01'),
+('CB02', 'Trần Thị Bình', '1990-08-22', 14000000, 'PH02'),
+('CB03', 'Lê Hoàng Cường', '1982-11-05', 24000000, 'PH01'),
+('CB04', 'Phạm Minh Đức', '1995-04-18', 12500000, 'PH03'),
+('CB05', 'Vũ Thị Hoa', '1988-12-30', 16000000, 'PH02'),
+('CB06', 'Đặng Quốc Hưng', '1980-06-14', 28000000, 'PH04'),
+('CB07', 'Hoàng Ngọc Lan', '1993-01-20', 13500000, 'PH03'),
+('CB08', 'Bùi Văn Long', '1987-09-09', 19000000, 'PH01'),
+('CB09', 'Đỗ Mai Phương', '1992-05-27', 15500000, 'PH04'),
+('CB10', 'Ngô Quang Thắng', '1998-10-12', 11000000, 'PH01');
+
+INSERT INTO TRINHDOVANHOA (MaCB, TrinhDoHV, TrinhDoNN) VALUES
+('CB01', 'Thạc sĩ', 'Tiếng Anh B2'),
+('CB02', 'Cử nhân', 'Tiếng Pháp B1'),
+('CB03', 'Tiến sĩ', 'Tiếng Anh C1'),
+('CB04', 'Cử nhân', 'Tiếng Anh B1'),
+('CB05', 'Thạc sĩ', 'Tiếng Trung HSK5'),
+('CB06', 'Tiến sĩ', 'Tiếng Anh C1'),
+('CB07', 'Cử nhân', 'Tiếng Anh B2'),
+('CB08', 'Kỹ sư', 'Tiếng Nhật N2'),
+('CB09', 'Thạc sĩ', 'Tiếng Anh B2');
+    `.trim(),
+    mermaidErd: `
+erDiagram
+    PHONG ||--o{ CANBO : "thuộc về"
+    CANBO ||--o| TRINHDOVANHOA : "có trình độ"
+    PHONG {
+        string MaPh PK "Mã phòng ban (PH01, PH02...)"
+        string TenPh "Tên phòng ban"
+        string DiaChi "Địa chỉ / Vị trí phòng"
+    }
+    CANBO {
+        string MaCB PK "Mã cán bộ (CB01, CB02...)"
+        string Ten "Họ và tên cán bộ"
+        date NgaySinh "Ngày sinh"
+        float Luong "Lương cơ bản (VNĐ)"
+        string MaPh FK "Mã phòng tham chiếu PHONG"
+    }
+    TRINHDOVANHOA {
+        string MaCB PK,FK "Mã cán bộ tham chiếu CANBO"
+        string TrinhDoHV "Trình độ học vấn (Tiến sĩ, Thạc sĩ...)"
+        string TrinhDoNN "Trình độ ngoại ngữ (Tiếng Anh, Pháp...)"
+    }
+    `.trim(),
+    sampleQueries: [
+      {
+        title: 'Danh sách cán bộ kèm tên phòng ban và địa chỉ làm việc (INNER JOIN)',
+        sql: `SELECT cb.MaCB, cb.Ten, cb.NgaySinh, cb.Luong, p.TenPh, p.DiaChi\nFROM CANBO cb\nJOIN PHONG p ON cb.MaPh = p.MaPh\nORDER BY p.TenPh, cb.Luong DESC;`,
+        explanation: 'Nối bảng CANBO và PHONG qua khóa ngoại MaPh để hiển thị đầy đủ thông tin nhân sự và đơn vị trực thuộc.',
+        difficulty: 'Cơ bản',
+      },
+      {
+        title: 'Hồ sơ cán bộ đầy đủ: Tên, Phòng ban, Lương, Trình độ học vấn & Ngoại ngữ',
+        sql: `SELECT cb.MaCB, cb.Ten, p.TenPh, cb.Luong, td.TrinhDoHV, td.TrinhDoNN\nFROM CANBO cb\nJOIN PHONG p ON cb.MaPh = p.MaPh\nLEFT JOIN TRINHDOVANHOA td ON cb.MaCB = td.MaCB\nORDER BY cb.Luong DESC;`,
+        explanation: 'Kết hợp 3 bảng (sử dụng LEFT JOIN với TRINHDOVANHOA) để xem toàn bộ thông tin lương và văn hóa của từng cán bộ.',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Thống kê số lượng cán bộ và tổng quỹ lương theo từng Phòng ban (LEFT JOIN & GROUP BY)',
+        sql: `SELECT p.MaPh, p.TenPh,\n       COUNT(cb.MaCB) AS SoCanBo,\n       COALESCE(SUM(cb.Luong), 0) AS TongQuyLuong,\n       COALESCE(ROUND(AVG(cb.Luong), 2), 0) AS LuongTrungBinh\nFROM PHONG p\nLEFT JOIN CANBO cb ON p.MaPh = cb.MaPh\nGROUP BY p.MaPh, p.TenPh\nORDER BY TongQuyLuong DESC;`,
+        explanation: 'Thống kê quy mô nhân sự và quỹ lương của từng phòng ban, bao gồm cả phòng chưa có cán bộ (PH05).',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Tìm các phòng ban có mức lương bình quân từ 18.000.000 đồng trở lên',
+        sql: `SELECT p.MaPh, p.TenPh, COUNT(cb.MaCB) AS SoCanBo, ROUND(AVG(cb.Luong), 2) AS LuongBinhQuan\nFROM PHONG p\nJOIN CANBO cb ON p.MaPh = cb.MaPh\nGROUP BY p.MaPh, p.TenPh\nHAVING AVG(cb.Luong) >= 18000000\nORDER BY LuongBinhQuan DESC;`,
+        explanation: 'Nhóm theo phòng ban và sử dụng mệnh đề HAVING để lọc ra các đơn vị có thu nhập bình quân cao.',
+        difficulty: 'Nâng cao',
+      },
+      {
+        title: 'Tìm phòng ban chưa có nhân sự hoặc cán bộ chưa có thông tin trình độ (LEFT JOIN)',
+        sql: `SELECT p.MaPh, p.TenPh, p.DiaChi\nFROM PHONG p\nLEFT JOIN CANBO cb ON p.MaPh = cb.MaPh\nWHERE cb.MaCB IS NULL;`,
+        explanation: 'Sử dụng LEFT JOIN kết hợp WHERE IS NULL để phát hiện phòng ban mới thành lập chưa phân bổ cán bộ.',
+        difficulty: 'Nâng cao',
+      },
+    ],
+  },
+
+  QL_TV: {
+    id: 'QL_TV',
+    name: 'CSDL QL_TV',
+    subtitle: 'Quản Lý Thư Viện (4 Bảng)',
+    description: 'Cơ sở dữ liệu quản lý thư viện trường học gồm 4 bảng: Tác giả (TACGIA), Sách (SACH), Độc giả (DOCGIA) và Nhật ký Mượn trả sách (MUON_TRA).',
+    badge: '4 Bảng • Quản Lý Thư Viện',
+    iconClass: 'fa-solid fa-book-atlas',
+    ddl: `
+CREATE TABLE TACGIA (
+  MaTG TEXT PRIMARY KEY,
+  TenTG TEXT NOT NULL,
+  DiaChi TEXT,
+  SoDT TEXT
+);
+
+CREATE TABLE SACH (
+  MaSach TEXT PRIMARY KEY,
+  TenSach TEXT NOT NULL,
+  TheLoai TEXT NOT NULL,
+  NamXB INTEGER,
+  MaTG TEXT NOT NULL,
+  FOREIGN KEY (MaTG) REFERENCES TACGIA(MaTG)
+);
+
+CREATE TABLE DOCGIA (
+  MaDG TEXT PRIMARY KEY,
+  TenDG TEXT NOT NULL,
+  NgaySinh DATE,
+  DiaChi TEXT,
+  SoDT TEXT
+);
+
+CREATE TABLE MUON_TRA (
+  MaPhieu TEXT PRIMARY KEY,
+  MaDG TEXT NOT NULL,
+  MaSach TEXT NOT NULL,
+  NgayMuon DATE NOT NULL,
+  NgayTra DATE,
+  TrangThai TEXT NOT NULL CHECK(TrangThai IN ('Đang mượn', 'Đã trả', 'Quá hạn')),
+  FOREIGN KEY (MaDG) REFERENCES DOCGIA(MaDG),
+  FOREIGN KEY (MaSach) REFERENCES SACH(MaSach)
+);
+    `.trim(),
+    seed: `
+INSERT INTO TACGIA (MaTG, TenTG, DiaChi, SoDT) VALUES
+('TG01', 'Nguyễn Nhật Ánh', 'Quảng Nam', '0912345678'),
+('TG02', 'Tô Hoài', 'Hà Nội', '0923456789'),
+('TG03', 'Nam Cao', 'Hà Nam', '0934567890'),
+('TG04', 'Ngô Tất Tố', 'Bắc Ninh', '0945678901'),
+('TG05', 'J.K. Rowling', 'Vương quốc Anh', '0956789012');
+
+INSERT INTO SACH (MaSach, TenSach, TheLoai, NamXB, MaTG) VALUES
+('S01', 'Mắt biếc', 'Tiểu thuyết', 1990, 'TG01'),
+('S02', 'Tôi thấy hoa vàng trên cỏ xanh', 'Truyện dài', 2010, 'TG01'),
+('S03', 'Dế mèn phiêu lưu ký', 'Truyện thiếu nhi', 1941, 'TG02'),
+('S04', 'Chí Phèo', 'Truyện ngắn', 1941, 'TG03'),
+('S05', 'Tắt đèn', 'Tiểu thuyết hiện thực', 1939, 'TG04'),
+('S06', 'Harry Potter và Hòn đá Phù thủy', 'Giả tưởng', 1997, 'TG05'),
+('S07', 'Lão Hạc', 'Truyện ngắn', 1943, 'TG03'),
+('S08', 'Cho tôi xin một vé đi tuổi thơ', 'Truyện dài', 2008, 'TG01');
+
+INSERT INTO DOCGIA (MaDG, TenDG, NgaySinh, DiaChi, SoDT) VALUES
+('DG01', 'Trần Bảo An', '2006-05-14', 'Hà Nội', '0981112233'),
+('DG02', 'Lê Minh Tuấn', '2005-11-20', 'Đà Nẵng', '0982223344'),
+('DG03', 'Phạm Quỳnh Nga', '2007-02-18', 'TP Hồ Chí Minh', '0983334455'),
+('DG04', 'Nguyễn Hoàng Long', '2006-08-30', 'Hải Phòng', '0984445566'),
+('DG05', 'Đỗ Thùy Linh', '2005-12-05', 'Cần Thơ', '0985556677'),
+('DG06', 'Vũ Đức Thịnh', '2007-09-12', 'Hà Nội', '0986667788');
+
+INSERT INTO MUON_TRA (MaPhieu, MaDG, MaSach, NgayMuon, NgayTra, TrangThai) VALUES
+('PM01', 'DG01', 'S01', '2024-03-01', '2024-03-10', 'Đã trả'),
+('PM02', 'DG01', 'S03', '2024-03-15', NULL, 'Đang mượn'),
+('PM03', 'DG02', 'S02', '2024-02-20', '2024-03-05', 'Đã trả'),
+('PM04', 'DG03', 'S06', '2024-03-10', NULL, 'Đang mượn'),
+('PM05', 'DG04', 'S04', '2024-01-10', '2024-01-25', 'Đã trả'),
+('PM06', 'DG05', 'S05', '2024-02-15', NULL, 'Quá hạn'),
+('PM07', 'DG02', 'S08', '2024-03-12', NULL, 'Đang mượn'),
+('PM08', 'DG03', 'S01', '2024-03-18', NULL, 'Đang mượn');
+    `.trim(),
+    mermaidErd: `
+erDiagram
+    TACGIA ||--o{ SACH : "sáng tác"
+    DOCGIA ||--o{ MUON_TRA : "mượn"
+    SACH ||--o{ MUON_TRA : "được mượn"
+    TACGIA {
+        string MaTG PK "Mã tác giả"
+        string TenTG "Tên tác giả"
+        string DiaChi "Địa chỉ / Quê quán"
+        string SoDT "Số điện thoại"
+    }
+    SACH {
+        string MaSach PK "Mã sách"
+        string TenSach "Tên tác phẩm"
+        string TheLoai "Thể loại sách"
+        int NamXB "Năm xuất bản"
+        string MaTG FK "Mã tác giả tham chiếu TACGIA"
+    }
+    DOCGIA {
+        string MaDG PK "Mã độc giả"
+        string TenDG "Họ và tên độc giả"
+        date NgaySinh "Ngày sinh độc giả"
+        string DiaChi "Địa chỉ cư trú"
+        string SoDT "Số điện thoại liên hệ"
+    }
+    MUON_TRA {
+        string MaPhieu PK "Mã phiếu mượn trả"
+        string MaDG FK "Mã độc giả tham chiếu DOCGIA"
+        string MaSach FK "Mã sách tham chiếu SACH"
+        date NgayMuon "Ngày mượn sách"
+        date NgayTra "Ngày trả sách"
+        string TrangThai "Trạng thái mượn trả"
+    }
+    `.trim(),
+    sampleQueries: [
+      {
+        title: 'Danh sách sách kèm tên tác giả và năm xuất bản (JOIN SACH & TACGIA)',
+        sql: `SELECT s.MaSach, s.TenSach, s.TheLoai, s.NamXB, tg.TenTG\nFROM SACH s\nJOIN TACGIA tg ON s.MaTG = tg.MaTG\nORDER BY s.NamXB DESC;`,
+        explanation: 'Nối bảng SACH và TACGIA qua khóa ngoại MaTG để hiển thị danh mục sách cùng tên tác giả.',
+        difficulty: 'Cơ bản',
+      },
+      {
+        title: 'Nhật ký mượn trả chi tiết: Độc giả, Tên sách, Tác giả, Ngày mượn & Trạng thái',
+        sql: `SELECT mt.MaPhieu, dg.TenDG, s.TenSach, tg.TenTG, mt.NgayMuon, mt.NgayTra, mt.TrangThai\nFROM MUON_TRA mt\nJOIN DOCGIA dg ON mt.MaDG = dg.MaDG\nJOIN SACH s ON mt.MaSach = s.MaSach\nJOIN TACGIA tg ON s.MaTG = tg.MaTG\nORDER BY mt.NgayMuon DESC;`,
+        explanation: 'Kết hợp liên bảng qua 4 bảng để hiển thị toàn diện lịch sử các giao dịch mượn trả sách trong thư viện.',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Thống kê số lần mượn sách theo từng Độc giả (LEFT JOIN & GROUP BY)',
+        sql: `SELECT dg.MaDG, dg.TenDG, COUNT(mt.MaPhieu) AS SoLanMuon\nFROM DOCGIA dg\nLEFT JOIN MUON_TRA mt ON dg.MaDG = mt.MaDG\nGROUP BY dg.MaDG, dg.TenDG\nORDER BY SoLanMuon DESC;`,
+        explanation: 'Dùng LEFT JOIN để đếm số lượt mượn của tất cả độc giả, kể cả độc giả mới làm thẻ chưa mượn cuốn nào.',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Tìm các tác giả có từ 2 đầu sách trở lên trong thư viện (GROUP BY & HAVING)',
+        sql: `SELECT tg.MaTG, tg.TenTG, COUNT(s.MaSach) AS SoDauSach\nFROM TACGIA tg\nJOIN SACH s ON tg.MaTG = s.MaTG\nGROUP BY tg.MaTG, tg.TenTG\nHAVING COUNT(s.MaSach) >= 2\nORDER BY SoDauSach DESC;`,
+        explanation: 'Nhóm theo tác giả và dùng mệnh đề HAVING để lọc ra những tác giả có đóng góp từ 2 đầu sách trở lên trong thư viện.',
+        difficulty: 'Nâng cao',
+      },
+      {
+        title: 'Tìm các đầu sách trong kho chưa từng được ai mượn (LEFT JOIN & WHERE IS NULL)',
+        sql: `SELECT s.MaSach, s.TenSach, s.TheLoai, tg.TenTG\nFROM SACH s\nJOIN TACGIA tg ON s.MaTG = tg.MaTG\nLEFT JOIN MUON_TRA mt ON s.MaSach = mt.MaSach\nWHERE mt.MaPhieu IS NULL;`,
+        explanation: 'Dùng LEFT JOIN kết hợp WHERE mt.MaPhieu IS NULL để phát hiện các đầu sách chưa từng phát sinh lượt mượn nào.',
         difficulty: 'Nâng cao',
       },
     ],

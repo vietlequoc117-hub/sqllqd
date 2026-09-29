@@ -1,6 +1,6 @@
 {
   "name": "SQL Lab Visualizer",
-  "description": "Ứng dụng học tập và thực hành SQL trực quan với 5 CSDL mẫu, ERD diagram Mermaid, SQLite WebAssembly engine và trợ lý Gemini AI.",
+  "description": "Ứng dụng học tập và thực hành SQL trực quan với 9 CSDL mẫu (Học sinh, Kinh doanh, Học tập, Thư viện, Âm nhạc, QL_XE, QL_VANG, QL_Canbo, QL_TV), ERD Mermaid, SQLite WebAssembly engine và trợ lý Gemini AI.",
   "requestFramePermissions": [],
   "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
 }

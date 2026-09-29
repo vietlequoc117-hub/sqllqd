@@ -72,17 +72,21 @@ export function formatSql(rawSql: string): string {
     .filter((line) => line.length > 0);
 
   const formattedLines: string[] = [];
-  for (const line of rawLines) {
-    // If line starts with "WHERE " and has condition(s) after it, put WHERE on its own line
-    if (/^WHERE\s+(.+)$/i.test(line)) {
-      const match = line.match(/^WHERE\s+(.+)$/i);
-      formattedLines.push('WHERE');
-      if (match && match[1]) {
-        formattedLines.push(match[1].trim());
+  for (let i = 0; i < rawLines.length; i++) {
+    const line = rawLines[i];
+    // If line is just "WHERE" and has a condition on next line, keep condition on the same line (WHERE condition)
+    if (/^WHERE$/i.test(line) && i + 1 < rawLines.length) {
+      const nextLine = rawLines[i + 1];
+      const isNextClause = clauseKeywords.some(
+        (kw) => kw !== 'WHERE' && new RegExp(`^${kw}\\b`, 'i').test(nextLine)
+      );
+      if (!isNextClause) {
+        formattedLines.push(`WHERE ${nextLine}`);
+        i++;
+        continue;
       }
-    } else {
-      formattedLines.push(line);
     }
+    formattedLines.push(line);
   }
 
   let result = formattedLines.join('\n');

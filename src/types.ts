@@ -1,4 +1,35 @@
-export type DatabaseId = 'HOC_SINH' | 'KINH_DOANH' | 'HOC_TAP' | 'THU_VIEN' | 'AM_NHAC';
+export type DatabaseId = 'HOC_SINH' | 'KINH_DOANH' | 'HOC_TAP' | 'AM_NHAC' | 'QL_XE' | 'QL_VANG' | 'QL_CANBO' | 'QL_TV';
+
+export type ExerciseLevel = 'Nhận biết' | 'Thông hiểu' | 'Vận dụng';
+export type QuizLevel = 'Nhận biết' | 'Thông hiểu' | 'Vận dụng';
+
+export interface Exercise {
+  id: string;
+  level: ExerciseLevel;
+  order: number;
+  question: string;
+  hint: string;
+  solutionSql: string;
+  explanation: string;
+}
+
+export interface QuizOption {
+  key: 'A' | 'B' | 'C' | 'D';
+  text: string;
+}
+
+export interface QuizQuestion {
+  id: string;
+  databaseId: DatabaseId;
+  level: QuizLevel;
+  order: number;
+  question: string;
+  sqlSnippet?: string;
+  options: QuizOption[];
+  correctAnswer: 'A' | 'B' | 'C' | 'D';
+  explanation: string;
+  relatedSql?: string;
+}
 
 export interface SampleQuery {
   title: string;

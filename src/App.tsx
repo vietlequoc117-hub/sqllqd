@@ -17,16 +17,20 @@ import {
 import { Header } from './components/Header';
 import { DataViewer } from './components/DataViewer';
 import { ErdViewer } from './components/ErdViewer';
+import { ExerciseViewer } from './components/ExerciseViewer';
+import { QuizViewer } from './components/QuizViewer';
 import { SqlEditor } from './components/SqlEditor';
 import { QueryResultView } from './components/QueryResult';
 import { GeminiPanel } from './components/GeminiPanel';
+import { EXERCISES_BY_DATABASE } from './data/exercises';
+import { QUIZZES_BY_DATABASE } from './data/quizzes';
 
 export default function App() {
   const [currentDbId, setCurrentDbId] = useState<DatabaseId>('HOC_SINH');
   const [apiKey, setApiKey] = useState<string>('');
   const [isEngineReady, setIsEngineReady] = useState<boolean>(false);
   const [isDbLoading, setIsDbLoading] = useState<boolean>(true);
-  const [activeTab, setActiveTab] = useState<'data' | 'erd'>('data');
+  const [activeTab, setActiveTab] = useState<'data' | 'erd' | 'quiz' | 'exercises'>('data');
   const [sqlInput, setSqlInput] = useState<string>('');
   const [queryResult, setQueryResult] = useState<QueryResult | null>(null);
   const [tablesData, setTablesData] = useState<TableData[]>([]);
@@ -125,6 +129,14 @@ export default function App() {
     try {
       const res = executeQuery(sqlToRun);
       setQueryResult(res);
+
+      if (!res.error) {
+        if (res.queryType === 'SELECT') {
+          showNotification('Thực thi lệnh SELECT thành công');
+        } else {
+          showNotification(`Thực thi lệnh ${res.queryType} thành công!`);
+        }
+      }
 
       // If DML or DDL, auto-refresh the tables data viewer!
       if (res.queryType === 'DML' || res.queryType === 'DDL') {
@@ -278,23 +290,23 @@ export default function App() {
 
           <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
             {/* Tab switch for Left Panel */}
-            <div className="inline-flex p-1 bg-slate-100 rounded-lg border border-slate-200 text-xs">
+            <div className="inline-flex p-1 bg-slate-100 rounded-lg border border-slate-200 text-xs flex-wrap gap-0.5">
               <button
                 type="button"
                 onClick={() => setActiveTab('data')}
-                className={`px-3 py-1 font-semibold rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+                className={`px-2.5 py-1 font-semibold rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
                   activeTab === 'data'
                     ? 'bg-white text-indigo-700 shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
                 <i className="fa-solid fa-table"></i>
-                <span>Dữ liệu các bảng ({tablesData.length})</span>
+                <span>Dữ liệu ({tablesData.length})</span>
               </button>
               <button
                 type="button"
                 onClick={() => setActiveTab('erd')}
-                className={`px-3 py-1 font-semibold rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+                className={`px-2.5 py-1 font-semibold rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
                   activeTab === 'erd'
                     ? 'bg-white text-indigo-700 shadow-xs'
                     : 'text-slate-600 hover:text-slate-900'
@@ -303,6 +315,30 @@ export default function App() {
                 <i className="fa-solid fa-diagram-project"></i>
                 <span>Sơ đồ ERD</span>
               </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('quiz')}
+                className={`px-2.5 py-1 font-semibold rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === 'quiz'
+                    ? 'bg-white text-indigo-700 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <i className="fa-solid fa-list-check text-indigo-600"></i>
+                <span>Trắc nghiệm ({QUIZZES_BY_DATABASE[currentDbId]?.length || 10} câu)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('exercises')}
+                className={`px-2.5 py-1 font-semibold rounded-md transition-all cursor-pointer flex items-center gap-1.5 ${
+                  activeTab === 'exercises'
+                    ? 'bg-white text-indigo-700 shadow-xs'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <i className="fa-solid fa-graduation-cap text-indigo-500"></i>
+                <span>Tự luận ({EXERCISES_BY_DATABASE[currentDbId]?.length || 15} câu)</span>
+              </button>
             </div>
           </div>
         </div>
@@ -310,7 +346,7 @@ export default function App() {
         {/* 2-Column Main Workspace */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-6 items-start">
           
-          {/* Left Column: Schema & Data Viewer (Tabs: Data Viewer / ERD) */}
+          {/* Left Column: Schema, Data Viewer, ERD, Quiz, or Exercises */}
           <section className="lg:col-span-6 flex flex-col gap-4">
             {activeTab === 'data' ? (
               <DataViewer
@@ -321,10 +357,34 @@ export default function App() {
                   showNotification('Đã làm mới dữ liệu các bảng!');
                 }}
               />
-            ) : (
+            ) : activeTab === 'erd' ? (
               <ErdViewer
                 mermaidCode={activeDbConfig.mermaidErd}
                 databaseName={activeDbConfig.name}
+              />
+            ) : activeTab === 'quiz' ? (
+              <QuizViewer
+                quizzes={QUIZZES_BY_DATABASE[currentDbId] || []}
+                databaseName={activeDbConfig.name}
+                databaseId={currentDbId}
+                dbConfig={activeDbConfig}
+                onApplySql={handleApplySql}
+                onPracticePrompt={(prompt) => {
+                  setSqlInput(prompt);
+                  showNotification('Đã nạp đề bài vào khung soạn thảo!');
+                }}
+              />
+            ) : (
+              <ExerciseViewer
+                exercises={EXERCISES_BY_DATABASE[currentDbId] || []}
+                databaseName={activeDbConfig.name}
+                databaseId={currentDbId}
+                dbConfig={activeDbConfig}
+                onApplySql={handleApplySql}
+                onPracticePrompt={(prompt) => {
+                  setSqlInput(prompt);
+                  showNotification('Đã nạp đề bài vào khung soạn thảo!');
+                }}
               />
             )}
 

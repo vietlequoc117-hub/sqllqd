@@ -17,6 +17,16 @@ async function startServer() {
     res.json({ status: 'ok', time: new Date().toISOString() });
   });
 
+  // Serve static downloads for Word docx files
+  app.use('/downloads', express.static(path.join(process.cwd(), 'public', 'downloads'), {
+    setHeaders: (res, filePath) => {
+      if (filePath.endsWith('.docx')) {
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+        res.setHeader('Content-Disposition', 'attachment');
+      }
+    }
+  }));
+
   // Gemini AI endpoint
   app.post('/api/gemini/generate', async (req, res) => {
     try {

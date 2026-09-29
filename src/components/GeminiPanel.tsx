@@ -42,10 +42,10 @@ export const GeminiPanel: React.FC<GeminiPanelProps> = ({
       'Thống kê số bài kiểm tra của từng học sinh',
       'Học sinh nào có điểm thi môn Ngữ văn cao nhất?',
     ],
-    THU_VIEN: [
-      'Tìm những cuốn sách có trên 200 trang mà Trần Cương đã mượn',
-      'Liệt kê các bạn đọc chưa trả sách',
-      'Đếm xem mỗi bạn đã mượn bao nhiêu cuốn sách',
+    QL_TV: [
+      'Tìm tất cả các cuốn sách của tác giả Nguyễn Nhật Ánh',
+      'Liệt kê danh sách các phiếu mượn đang ở trạng thái "Đang mượn"',
+      'Thống kê số lượng sách theo từng thể loại',
     ],
     AM_NHAC: [
       'Liệt kê các bản nhạc của nhạc sĩ Văn Cao kèm ca sĩ thu âm',
