@@ -442,10 +442,10 @@ export default function App() {
       <footer className="mt-8 border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
           <p>
-            <strong>SQL Lab Visualizer</strong> • Môi trường thực hành CSDL trực quan trên trình duyệt (WebAssembly SQLite & Mermaid ERD).
+            <strong className="font-mono">LQD_SQL_LAB</strong> • Môi trường thực hành CSDL trực quan trên trình duyệt (WebAssembly SQLite & Mermaid ERD).
           </p>
           <div className="flex items-center gap-4 text-slate-400">
-            <span>5 Bộ CSDL: Học sinh, Kinh doanh, Học tập, Thư viện, Âm nhạc</span>
+            <span>8 Bộ CSDL mẫu chuẩn Tin học 12 & CSDL Quan hệ</span>
             <span>•</span>
             <span>Gemini Flash AI</span>
           </div>

@@ -48,15 +48,12 @@ export const Header: React.FC<HeaderProps> = ({
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-1.5">
-                  SQL Lab Visualizer
+                <h1 className="text-lg font-bold text-slate-900 tracking-tight flex items-center gap-1.5 font-mono">
+                  LQD_SQL_LAB
                 </h1>
-                <span className="text-[11px] font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 px-1.5 py-0.5 rounded-md">
-                  WASM SQLite
-                </span>
               </div>
               <p className="text-xs text-slate-500 hidden sm:block">
-                Môi trường học & thực hành SQL trực quan với Trợ lý Gemini AI
+                Phòng thực hành ảo SQL
               </p>
             </div>
           </div>
