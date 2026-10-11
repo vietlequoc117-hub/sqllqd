@@ -8,8 +8,6 @@ import {
   getSqlInstance,
 } from './lib/sqlEngine';
 import {
-  getStoredApiKey,
-  setStoredApiKey,
   generateTextToSql,
   explainSql,
   fixSqlError,
@@ -27,7 +25,6 @@ import { QUIZZES_BY_DATABASE } from './data/quizzes';
 
 export default function App() {
   const [currentDbId, setCurrentDbId] = useState<DatabaseId>('HOC_SINH');
-  const [apiKey, setApiKey] = useState<string>('');
   const [isEngineReady, setIsEngineReady] = useState<boolean>(false);
   const [isDbLoading, setIsDbLoading] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<'data' | 'erd' | 'quiz' | 'exercises'>('data');
@@ -50,20 +47,6 @@ export default function App() {
   } | null>(null);
 
   const activeDbConfig = DATABASES[currentDbId];
-
-  // Load saved API Key from localStorage
-  useEffect(() => {
-    const savedKey = getStoredApiKey();
-    if (savedKey) {
-      setApiKey(savedKey);
-    }
-  }, []);
-
-  const handleApiKeyChange = (newKey: string) => {
-    setApiKey(newKey);
-    setStoredApiKey(newKey);
-    showNotification('Đã cập nhật Gemini API Key!');
-  };
 
   const showNotification = (msg: string) => {
     setNotification(msg);
@@ -159,7 +142,7 @@ export default function App() {
       rawText: 'Đang liên hệ Gemini AI...',
     });
 
-    const res = await generateTextToSql(prompt, activeDbConfig, apiKey);
+    const res = await generateTextToSql(prompt, activeDbConfig);
     if (res.error) {
       setAiOutput({
         type: 'text-to-sql',
@@ -188,7 +171,7 @@ export default function App() {
       rawText: 'Gemini đang phân tích chi tiết từng mệnh đề...',
     });
 
-    const res = await explainSql(sqlInput, activeDbConfig, apiKey);
+    const res = await explainSql(sqlInput, activeDbConfig);
     if (res.error) {
       setAiOutput({
         type: 'explain',
@@ -215,7 +198,7 @@ export default function App() {
       rawText: 'Đang kiểm tra cú pháp và lược đồ quan hệ...',
     });
 
-    const res = await fixSqlError(sql, errorMsg, activeDbConfig, apiKey);
+    const res = await fixSqlError(sql, errorMsg, activeDbConfig);
     if (res.error) {
       setAiOutput({
         type: 'fix',
@@ -261,8 +244,6 @@ export default function App() {
         onSelectDb={handleSelectDb}
         onResetDb={handleResetDb}
         isDbLoading={isDbLoading}
-        apiKey={apiKey}
-        onApiKeyChange={handleApiKeyChange}
         isEngineReady={isEngineReady}
       />
 

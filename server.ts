@@ -35,7 +35,7 @@ async function startServer() {
 
       if (!keyToUse) {
         return res.status(400).json({
-          error: 'Chưa có Gemini API Key. Vui lòng nhập API Key ở thanh tiêu đề hoặc cấu hình biến môi trường GEMINI_API_KEY.',
+          error: 'Dịch vụ AI máy chủ tạm thời chưa sẵn sàng. Trợ lý sư phạm tự động sẽ hỗ trợ bạn.',
         });
       }
 

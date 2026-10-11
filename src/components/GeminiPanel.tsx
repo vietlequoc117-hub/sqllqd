@@ -70,13 +70,13 @@ export const GeminiPanel: React.FC<GeminiPanelProps> = ({
           </div>
           <div>
             <h2 className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-1.5">
-              Trợ Lý Gemini AI SQL
-              <span className="text-[10px] font-semibold bg-purple-500/30 text-purple-200 border border-purple-400/30 px-1.5 py-0.2 rounded-md">
-                Gemini Flash
+              Trợ Lý AI SQL
+              <span className="text-[10px] font-semibold bg-emerald-500/30 text-emerald-200 border border-emerald-400/30 px-1.5 py-0.2 rounded-md">
+                Tự động • Không cần Key
               </span>
             </h2>
             <p className="text-[11px] text-indigo-300">
-              Chuyển ngôn ngữ tự nhiên thành SQL • Giải thích cú pháp • Tự động sửa lỗi
+              Nhập tiếng Việt sinh SQL • Giải thích cú pháp • Tự động sửa lỗi (Sẵn sàng 100% cho học sinh)
             </p>
           </div>
         </div>
