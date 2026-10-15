@@ -3,6 +3,7 @@ import { DatabaseConfig, DatabaseId, Exercise, ExerciseLevel } from '../types';
 import { DATABASES } from '../data/databases';
 import { EXERCISES_BY_DATABASE } from '../data/exercises';
 import { createDatabaseDocx, downloadDocxBlob } from '../lib/docxExport';
+import { highlightSqlToHtml } from '../lib/sqlHighlighter';
 
 interface ExerciseViewerProps {
   exercises: Exercise[];
@@ -361,10 +362,11 @@ export const ExerciseViewer: React.FC<ExerciseViewerProps> = ({
                     </div>
                   </div>
 
-                  {/* SQL Code Block */}
-                  <pre className="font-mono text-xs leading-relaxed text-emerald-300 bg-slate-950 p-2.5 rounded border border-slate-800 overflow-x-auto whitespace-pre-wrap">
-                    {ex.solutionSql}
-                  </pre>
+                  {/* SQL Code Block with syntax highlighting */}
+                  <pre
+                    className="font-mono text-xs leading-relaxed text-slate-800 bg-slate-50 p-2.5 rounded border border-slate-200 overflow-x-auto whitespace-pre-wrap"
+                    dangerouslySetInnerHTML={{ __html: highlightSqlToHtml(ex.solutionSql) }}
+                  />
 
                   {/* Pedagogical Explanation */}
                   <div className="mt-2.5 pt-2 border-t border-slate-800 text-[11px] text-slate-300 flex items-start gap-1.5 leading-relaxed">

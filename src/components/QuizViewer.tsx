@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { DatabaseConfig, DatabaseId, QuizLevel, QuizQuestion } from '../types';
+import { highlightSqlToHtml } from '../lib/sqlHighlighter';
 
 interface QuizViewerProps {
   quizzes: QuizQuestion[];
@@ -293,9 +294,10 @@ export const QuizViewer: React.FC<QuizViewerProps> = ({
                       ></i>
                     </button>
                   </div>
-                  <pre className="p-3 bg-slate-900 text-indigo-200 font-mono text-xs overflow-x-auto leading-relaxed">
-                    {q.sqlSnippet}
-                  </pre>
+                  <pre
+                    className="p-3 bg-slate-50 text-slate-800 border-t border-slate-200 font-mono text-xs overflow-x-auto leading-relaxed"
+                    dangerouslySetInnerHTML={{ __html: highlightSqlToHtml(q.sqlSnippet) }}
+                  />
                 </div>
               )}
 

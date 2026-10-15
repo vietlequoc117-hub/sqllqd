@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { SampleQuery } from '../types';
 import { formatSql } from '../lib/formatSql';
+import { highlightSqlToHtml } from '../lib/sqlHighlighter';
 
 interface SqlEditorProps {
   sql: string;
@@ -23,18 +24,57 @@ export const SqlEditor: React.FC<SqlEditorProps> = ({
 }) => {
   const [selectedSample, setSelectedSample] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
+  const [isDarkTheme, setIsDarkTheme] = useState<boolean>(false);
 
-  // Handle Ctrl + Enter / Cmd + Enter
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const preRef = useRef<HTMLPreElement>(null);
+  const gutterRef = useRef<HTMLDivElement>(null);
+
+  // Synchronize scrolling between textarea, highlighted pre, and line numbers gutter
+  const handleScroll = () => {
+    if (textareaRef.current) {
+      const top = textareaRef.current.scrollTop;
+      const left = textareaRef.current.scrollLeft;
+      if (preRef.current) {
+        preRef.current.scrollTop = top;
+        preRef.current.scrollLeft = left;
+      }
+      if (gutterRef.current) {
+        gutterRef.current.scrollTop = top;
+      }
+    }
+  };
+
+  // Keyboard shortcuts: Ctrl/Cmd + Enter to run, Tab to indent 2 spaces
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
       e.preventDefault();
       onExecute();
+      return;
+    }
+
+    if (e.key === 'Tab') {
+      e.preventDefault();
+      const textarea = textareaRef.current;
+      if (!textarea) return;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const updated = sql.substring(0, start) + '  ' + sql.substring(end);
+      onChange(updated);
+      setTimeout(() => {
+        if (textareaRef.current) {
+          textareaRef.current.selectionStart = textareaRef.current.selectionEnd = start + 2;
+        }
+      }, 0);
     }
   };
 
   const handleApplySample = (q: SampleQuery) => {
     onChange(q.sql);
     setSelectedSample(q.title);
+    if (textareaRef.current) {
+      textareaRef.current.focus();
+    }
   };
 
   const handleCopySql = async () => {
@@ -53,6 +93,10 @@ export const SqlEditor: React.FC<SqlEditorProps> = ({
     onChange(formatted);
   };
 
+  // Calculate lines for the line-number gutter (at least 5 lines)
+  const lineCount = Math.max(sql.split('\n').length, 5);
+  const lines = Array.from({ length: lineCount }, (_, i) => i + 1);
+
   return (
     <div className="bg-white border border-slate-200 rounded-xl shadow-2xs overflow-hidden flex flex-col">
       {/* Editor Header */}
@@ -61,9 +105,14 @@ export const SqlEditor: React.FC<SqlEditorProps> = ({
           <div className="w-6 h-6 rounded bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs">
             <i className="fa-solid fa-terminal"></i>
           </div>
-          <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-            Trình Soạn Thảo SQL (SQLite)
-          </h2>
+          <div>
+            <h2 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+              <span>Trình Soạn Thảo SQL (SQLite)</span>
+              <span className="text-[10px] font-normal normal-case text-indigo-600 bg-indigo-50 border border-indigo-200/80 px-1.5 py-0.2 rounded">
+                Tô màu cú pháp chuẩn
+              </span>
+            </h2>
+          </div>
         </div>
 
         <div className="flex items-center gap-1.5 flex-wrap">
@@ -71,11 +120,21 @@ export const SqlEditor: React.FC<SqlEditorProps> = ({
           <button
             type="button"
             onClick={handleFormatSql}
-            title="Định dạng chuẩn cấu trúc câu lệnh SQL (SELECT, FROM, WHERE xuống dòng, viết hoa từ khóa)"
-            className="px-2.5 py-1 text-xs text-indigo-700 hover:text-indigo-900 bg-indigo-50/70 hover:bg-indigo-100 border border-indigo-200/80 rounded-md cursor-pointer transition-colors flex items-center gap-1 font-medium"
+            title="Định dạng chuẩn câu lệnh SQL (SELECT, FROM, WHERE xuống dòng, viết hoa từ khóa)"
+            className="px-2.5 py-1 text-xs text-indigo-700 hover:text-indigo-900 bg-indigo-50/80 hover:bg-indigo-100 border border-indigo-200/80 rounded-md cursor-pointer transition-colors flex items-center gap-1 font-medium"
           >
             <i className="fa-solid fa-align-left text-[11px] text-indigo-600"></i>
             <span>Format Cấu trúc</span>
+          </button>
+
+          {/* Theme Toggle Light/Dark */}
+          <button
+            type="button"
+            onClick={() => setIsDarkTheme(!isDarkTheme)}
+            title={isDarkTheme ? 'Chuyển sang nền sáng' : 'Chuyển sang nền tối'}
+            className="p-1.5 text-xs text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-100 border border-slate-200 rounded-md cursor-pointer transition-colors"
+          >
+            <i className={`fa-solid ${isDarkTheme ? 'fa-sun text-amber-500' : 'fa-moon text-indigo-600'}`}></i>
           </button>
 
           {/* Copy SQL */}
@@ -127,24 +186,78 @@ export const SqlEditor: React.FC<SqlEditorProps> = ({
         </div>
       </div>
 
-      {/* Textarea Area */}
-      <div className="relative">
-        <textarea
-          value={sql}
-          onChange={(e) => onChange(e.target.value)}
-          onKeyDown={handleKeyDown}
-          placeholder="Nhập câu lệnh SQL tại đây... (Ví dụ: SELECT * FROM HOC_SINH WHERE Toan >= 8.0;)"
-          rows={5}
-          spellCheck={false}
-          className="w-full p-3 font-mono text-xs sm:text-sm bg-slate-950 text-indigo-100 placeholder:text-slate-500 focus:outline-hidden resize-y leading-relaxed selection:bg-indigo-500 selection:text-white"
-        />
-        <div className="absolute right-2 bottom-2 text-[10px] text-slate-500 font-mono pointer-events-none select-none">
-          {sql.trim().split(/\s+/).filter(Boolean).length} từ • {sql.length} ký tự
+      {/* Editor Body: Line Numbers + Synchronized Highlighted Code */}
+      <div
+        className={`relative flex items-stretch border-b transition-colors ${
+          isDarkTheme ? 'bg-slate-950 border-slate-800' : 'bg-white border-slate-200'
+        }`}
+      >
+        {/* Line Numbers Gutter */}
+        <div
+          ref={gutterRef}
+          aria-hidden="true"
+          className={`w-10 sm:w-11 shrink-0 select-none py-3 pr-2.5 text-right font-mono text-xs sm:text-sm leading-6 overflow-hidden border-r transition-colors ${
+            isDarkTheme
+              ? 'bg-slate-900/90 border-slate-800 text-slate-500'
+              : 'bg-slate-50 border-slate-200 text-slate-400'
+          }`}
+        >
+          {lines.map((num) => (
+            <div key={num} className="h-6">
+              {num}
+            </div>
+          ))}
+        </div>
+
+        {/* Code Input Area with Real-time Syntax Highlighting Overlay */}
+        <div className="relative flex-1 min-h-[140px] h-44 overflow-hidden">
+          {/* Syntax Highlighted Code Behind */}
+          <pre
+            ref={preRef}
+            aria-hidden="true"
+            className={`absolute inset-0 m-0 p-3 font-mono text-xs sm:text-sm leading-6 overflow-hidden whitespace-pre-wrap break-words pointer-events-none select-none transition-colors ${
+              isDarkTheme ? 'text-slate-100' : 'text-slate-800'
+            }`}
+            style={{ tabSize: 2 }}
+            dangerouslySetInnerHTML={{
+              __html: (highlightSqlToHtml(sql, { isDark: isDarkTheme }) || '') + (sql.endsWith('\n') ? ' ' : ''),
+            }}
+          />
+
+          {/* Transparent Input Textarea On Top */}
+          <textarea
+            ref={textareaRef}
+            value={sql}
+            onChange={(e) => onChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onScroll={handleScroll}
+            placeholder="Nhập câu lệnh SQL tại đây... (Ví dụ: SELECT * FROM HOC_SINH WHERE Toan >= 8.0;)"
+            spellCheck={false}
+            autoCapitalize="off"
+            autoComplete="off"
+            className={`absolute inset-0 w-full h-full m-0 p-3 font-mono text-xs sm:text-sm leading-6 overflow-auto resize-none bg-transparent focus:outline-hidden whitespace-pre-wrap break-words transition-colors ${
+              sql ? 'text-transparent' : isDarkTheme ? 'text-indigo-100 placeholder:text-slate-600' : 'text-slate-800 placeholder:text-slate-400'
+            } ${
+              isDarkTheme
+                ? 'caret-blue-400 selection:bg-blue-600/30 selection:text-transparent'
+                : 'caret-blue-600 selection:bg-indigo-300/40 selection:text-transparent'
+            }`}
+            style={{ tabSize: 2 }}
+          />
+
+          {/* Word and character count indicator */}
+          <div
+            className={`absolute right-3 bottom-2 text-[10px] font-mono pointer-events-none select-none px-2 py-0.5 rounded backdrop-blur-xs ${
+              isDarkTheme ? 'bg-slate-900/80 text-slate-400' : 'bg-slate-100/80 text-slate-500'
+            }`}
+          >
+            {sql.trim().split(/\s+/).filter(Boolean).length} từ • {sql.length} ký tự
+          </div>
         </div>
       </div>
 
       {/* Practice Suggestions / Sample Queries */}
-      <div className="p-3 bg-slate-50/70 border-t border-slate-200">
+      <div className="p-3 bg-slate-50/70">
         <div className="flex items-center justify-between mb-2">
           <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
             <i className="fa-solid fa-list-check text-indigo-600"></i>

@@ -12,6 +12,7 @@ import {
   explainSql,
   fixSqlError,
 } from './lib/gemini';
+import { highlightSqlToHtml } from './lib/sqlHighlighter';
 import { Header } from './components/Header';
 import { DataViewer } from './components/DataViewer';
 import { ErdViewer } from './components/ErdViewer';
@@ -379,9 +380,10 @@ export default function App() {
                   </div>
                   <i className="fa-solid fa-chevron-down text-slate-400 group-open:rotate-180 transition-transform text-xs"></i>
                 </summary>
-                <pre className="mt-2.5 p-3 bg-slate-900 text-indigo-200 rounded-lg text-[11px] font-mono overflow-x-auto leading-relaxed max-h-48">
-                  {activeDbConfig.ddl}
-                </pre>
+                <pre
+                  className="mt-2.5 p-3 bg-slate-50 text-slate-800 border border-slate-200 rounded-lg text-[11px] font-mono overflow-x-auto leading-relaxed max-h-48"
+                  dangerouslySetInnerHTML={{ __html: highlightSqlToHtml(activeDbConfig.ddl) }}
+                />
               </details>
             </div>
           </section>
