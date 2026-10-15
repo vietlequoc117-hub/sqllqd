@@ -36,6 +36,7 @@ export default function App() {
   const [notification, setNotification] = useState<string | null>(null);
 
   // AI Assistant states
+  const [isAiModalOpen, setIsAiModalOpen] = useState<boolean>(false);
   const [isGenerating, setIsGenerating] = useState<boolean>(false);
   const [isExplaining, setIsExplaining] = useState<boolean>(false);
   const [isFixing, setIsFixing] = useState<boolean>(false);
@@ -48,6 +49,17 @@ export default function App() {
   } | null>(null);
 
   const activeDbConfig = DATABASES[currentDbId];
+
+  // Close AI modal on Escape key
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && isAiModalOpen) {
+        setIsAiModalOpen(false);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isAiModalOpen]);
 
   const showNotification = (msg: string) => {
     setNotification(msg);
@@ -165,6 +177,7 @@ export default function App() {
   // Gemini: Explain SQL
   const handleExplainSql = async () => {
     if (!sqlInput.trim()) return;
+    setIsAiModalOpen(true);
     setIsExplaining(true);
     setAiOutput({
       type: 'explain',
@@ -192,6 +205,7 @@ export default function App() {
 
   // Gemini: Fix SQL Error
   const handleFixSql = async (sql: string, errorMsg: string) => {
+    setIsAiModalOpen(true);
     setIsFixing(true);
     setAiOutput({
       type: 'fix',
@@ -246,6 +260,8 @@ export default function App() {
         onResetDb={handleResetDb}
         isDbLoading={isDbLoading}
         isEngineReady={isEngineReady}
+        isAiOpen={isAiModalOpen}
+        onToggleAi={() => setIsAiModalOpen((prev) => !prev)}
       />
 
       {/* Main Workspace Layout */}
@@ -388,18 +404,8 @@ export default function App() {
             </div>
           </section>
 
-          {/* Right Column: SQL Editor, Gemini AI Assistant & Query Result */}
+          {/* Right Column: SQL Editor & Query Result */}
           <section className="lg:col-span-6 flex flex-col gap-4">
-            {/* Gemini Assistant (Text-to-SQL + Explanations) */}
-            <GeminiPanel
-              dbConfig={activeDbConfig}
-              onApplySql={handleApplySql}
-              onGenerateTextToSql={handleTextToSql}
-              isGenerating={isGenerating}
-              aiOutput={aiOutput}
-              onCloseOutput={() => setAiOutput(null)}
-            />
-
             {/* SQL Practice Editor */}
             <SqlEditor
               sql={sqlInput}
@@ -409,6 +415,7 @@ export default function App() {
               sampleQueries={activeDbConfig.sampleQueries}
               onExplain={handleExplainSql}
               isExplaining={isExplaining}
+              onOpenAi={() => setIsAiModalOpen(true)}
             />
 
             {/* Query Result View */}
@@ -434,6 +441,30 @@ export default function App() {
           </div>
         </div>
       </footer>
+      {/* Gemini AI Assistant Modal Dialog (Displays when clicking 'Trợ Lý AI') */}
+      {isAiModalOpen && (
+        <div
+          className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-xs flex items-center justify-center p-3 sm:p-4 overflow-y-auto animate-in fade-in duration-150"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) setIsAiModalOpen(false);
+          }}
+        >
+          <div className="relative max-w-2xl w-full my-auto animate-in zoom-in-95 duration-150">
+            <GeminiPanel
+              dbConfig={activeDbConfig}
+              onApplySql={(sql, autoRun) => {
+                handleApplySql(sql, autoRun);
+                setIsAiModalOpen(false);
+              }}
+              onGenerateTextToSql={handleTextToSql}
+              isGenerating={isGenerating}
+              aiOutput={aiOutput}
+              onCloseOutput={() => setAiOutput(null)}
+              onClose={() => setIsAiModalOpen(false)}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

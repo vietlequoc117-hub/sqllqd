@@ -8,6 +8,8 @@ interface HeaderProps {
   onResetDb: () => void;
   isDbLoading: boolean;
   isEngineReady: boolean;
+  isAiOpen: boolean;
+  onToggleAi: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
@@ -16,6 +18,8 @@ export const Header: React.FC<HeaderProps> = ({
   onResetDb,
   isDbLoading,
   isEngineReady,
+  isAiOpen,
+  onToggleAi,
 }) => {
 
   return (
@@ -90,16 +94,24 @@ export const Header: React.FC<HeaderProps> = ({
               <span>{isEngineReady ? 'Engine sẵn sàng' : 'Đang tải engine...'}</span>
             </div>
 
-            {/* Automatic AI Assistant Badge (Zero-config for high school students) */}
-            <div
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg bg-emerald-50 text-emerald-700 border border-emerald-200/90 shadow-2xs select-none"
-              title="Trợ lý AI đã được kích hoạt tự động. Học sinh có thể sử dụng ngay mà không cần cấu hình API Key."
+            {/* Automatic AI Assistant Button */}
+            <button
+              type="button"
+              id="btn-toggle-ai"
+              onClick={onToggleAi}
+              className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-semibold rounded-lg transition-all shadow-2xs cursor-pointer active:scale-98 ${
+                isAiOpen
+                  ? 'bg-indigo-600 text-white ring-2 ring-indigo-400/40 shadow-sm'
+                  : 'bg-emerald-50 text-emerald-700 hover:bg-emerald-100/90 border border-emerald-200/90 hover:border-emerald-300'
+              }`}
+              title={isAiOpen ? 'Đóng Trợ Lý AI' : 'Nhấp để mở Trợ Lý AI'}
             >
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              <i className="fa-solid fa-wand-magic-sparkles text-emerald-600"></i>
-              <span className="hidden sm:inline">Trợ lý AI: Tự động</span>
-              <span className="sm:hidden">AI ✓</span>
-            </div>
+              <span className={`w-2 h-2 rounded-full ${isAiOpen ? 'bg-white animate-pulse' : 'bg-emerald-500 animate-pulse'}`}></span>
+              <i className={`fa-solid fa-wand-magic-sparkles ${isAiOpen ? 'text-white' : 'text-emerald-600'}`}></i>
+              <span className="hidden sm:inline">Trợ Lý AI</span>
+              <span className="sm:hidden">Trợ Lý AI</span>
+              <i className={`fa-solid ${isAiOpen ? 'fa-xmark ml-1 text-xs' : 'fa-chevron-down ml-0.5 text-[10px] opacity-75'}`}></i>
+            </button>
           </div>
         </div>
       </div>

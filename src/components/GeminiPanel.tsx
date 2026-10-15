@@ -15,6 +15,7 @@ interface GeminiPanelProps {
     error?: string;
   } | null;
   onCloseOutput: () => void;
+  onClose?: () => void;
 }
 
 export const GeminiPanel: React.FC<GeminiPanelProps> = ({
@@ -24,6 +25,7 @@ export const GeminiPanel: React.FC<GeminiPanelProps> = ({
   isGenerating,
   aiOutput,
   onCloseOutput,
+  onClose,
 }) => {
   const [naturalLanguageInput, setNaturalLanguageInput] = useState<string>('');
 
@@ -83,6 +85,17 @@ export const GeminiPanel: React.FC<GeminiPanelProps> = ({
             </p>
           </div>
         </div>
+
+        {onClose && (
+          <button
+            type="button"
+            onClick={onClose}
+            className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 rounded-lg transition-colors cursor-pointer"
+            title="Đóng bảng Trợ Lý AI"
+          >
+            <i className="fa-solid fa-xmark text-sm"></i>
+          </button>
+        )}
       </div>
 
       {/* Text-to-SQL Input Box */}

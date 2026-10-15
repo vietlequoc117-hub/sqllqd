@@ -11,6 +11,7 @@ interface SqlEditorProps {
   sampleQueries: SampleQuery[];
   onExplain: () => void;
   isExplaining: boolean;
+  onOpenAi?: () => void;
 }
 
 export const SqlEditor: React.FC<SqlEditorProps> = ({
@@ -21,6 +22,7 @@ export const SqlEditor: React.FC<SqlEditorProps> = ({
   sampleQueries,
   onExplain,
   isExplaining,
+  onOpenAi,
 }) => {
   const [selectedSample, setSelectedSample] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
@@ -126,6 +128,19 @@ export const SqlEditor: React.FC<SqlEditorProps> = ({
             <i className="fa-solid fa-align-left text-[11px] text-indigo-600"></i>
             <span>Format Cấu trúc</span>
           </button>
+
+          {/* Open AI Assistant Button */}
+          {onOpenAi && (
+            <button
+              type="button"
+              onClick={onOpenAi}
+              title="Mở Trợ Lý AI hỗ trợ viết câu lệnh và giải thích"
+              className="px-2.5 py-1 text-xs text-emerald-700 hover:text-emerald-900 bg-emerald-50 hover:bg-emerald-100/80 border border-emerald-200/90 rounded-md cursor-pointer transition-colors flex items-center gap-1.5 font-medium"
+            >
+              <i className="fa-solid fa-wand-magic-sparkles text-[11px] text-emerald-600"></i>
+              <span>Trợ Lý AI</span>
+            </button>
+          )}
 
           {/* Theme Toggle Light/Dark */}
           <button
