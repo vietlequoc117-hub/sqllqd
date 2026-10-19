@@ -146,27 +146,28 @@ export default function App() {
     }
   };
 
-  // Gemini: Text-to-SQL
+  // Gemini: Text-to-SQL & SQL Syntax Q&A
   const handleTextToSql = async (prompt: string) => {
     setIsGenerating(true);
     setAiOutput({
       type: 'text-to-sql',
-      title: 'Kết quả sinh câu lệnh SQL từ Gemini',
-      rawText: 'Đang liên hệ Gemini AI...',
+      title: 'Chuyên gia cấp cao SQL đang xử lý...',
+      rawText: 'Đang phân tích câu hỏi, biên soạn giải thích cú pháp và ví dụ minh họa...',
     });
 
     const res = await generateTextToSql(prompt, activeDbConfig);
     if (res.error) {
       setAiOutput({
         type: 'text-to-sql',
-        title: 'Lỗi sinh SQL từ Gemini',
+        title: 'Lỗi phản hồi từ Chuyên gia SQL',
         rawText: '',
         error: res.error,
       });
     } else {
+      const displayTitle = prompt.length > 50 ? `${prompt.slice(0, 48)}...` : prompt;
       setAiOutput({
         type: 'text-to-sql',
-        title: `SQL cho yêu cầu: "${prompt}"`,
+        title: `Phản hồi từ Chuyên gia SQL: "${displayTitle}"`,
         rawText: res.text,
         sqlOnly: res.sqlOnly,
       });
@@ -449,7 +450,7 @@ export default function App() {
             if (e.target === e.currentTarget) setIsAiModalOpen(false);
           }}
         >
-          <div className="relative max-w-2xl w-full my-auto animate-in zoom-in-95 duration-150">
+          <div className="relative max-w-3xl w-full my-auto animate-in zoom-in-95 duration-150">
             <GeminiPanel
               dbConfig={activeDbConfig}
               onApplySql={(sql, autoRun) => {
