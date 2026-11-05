@@ -436,7 +436,7 @@ export default function App() {
             <strong className="font-mono">LQD_SQL_LAB</strong> • Môi trường thực hành CSDL trực quan trên trình duyệt (WebAssembly SQLite & Mermaid ERD).
           </p>
           <div className="flex items-center gap-4 text-slate-400">
-            <span>13 Bộ CSDL mẫu chuẩn Tin học 12 & CSDL Quan hệ</span>
+            <span>15 Bộ CSDL mẫu chuẩn Tin học 12 & CSDL Quan hệ</span>
             <span>•</span>
             <span>Gemini Flash AI</span>
           </div>

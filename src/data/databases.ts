@@ -1511,4 +1511,277 @@ erDiagram
       },
     ],
   },
+
+  CSDL_QLTAU: {
+    id: 'CSDL_QLTAU',
+    name: 'CSDL_QLTAU',
+    subtitle: 'Lịch trình, Tàu, Thuyền viên & Mặt hàng vận chuyển (4 Bảng)',
+    description: 'Cơ sở dữ liệu quản lý vận tải đường thủy gồm 4 bảng quan hệ: TAU (MaTau, TenTau, TrongTaiToiDa), THUYENVIEN (MaThuyenVien, TenThuyenVien, ChucDanh, MucLuong), MATHANG (MaMatHang, TenMatHang, SoLuong, SoGiayPhep) và LICHTRINH (Malichtrinh, MaTau, MaThuyenVien, MaMatHang, DinhVi, CangXuatPhat, CangDen, GioKhoiHanh, GioCapBen).',
+    badge: '4 Bảng • Quản Lý Tàu',
+    iconClass: 'fa-solid fa-ship',
+    ddl: `
+CREATE TABLE TAU (
+  MaTau TEXT PRIMARY KEY,
+  TenTau TEXT NOT NULL,
+  TrongTaiToiDa REAL NOT NULL
+);
+
+CREATE TABLE THUYENVIEN (
+  MaThuyenVien TEXT PRIMARY KEY,
+  TenThuyenVien TEXT NOT NULL,
+  ChucDanh TEXT NOT NULL,
+  MucLuong REAL NOT NULL
+);
+
+CREATE TABLE MATHANG (
+  MaMatHang TEXT PRIMARY KEY,
+  TenMatHang TEXT NOT NULL,
+  SoLuong INTEGER NOT NULL,
+  SoGiayPhep TEXT NOT NULL
+);
+
+CREATE TABLE LICHTRINH (
+  Malichtrinh TEXT PRIMARY KEY,
+  MaTau TEXT NOT NULL,
+  MaThuyenVien TEXT NOT NULL,
+  MaMatHang TEXT NOT NULL,
+  DinhVi TEXT,
+  CangXuatPhat TEXT NOT NULL,
+  CangDen TEXT NOT NULL,
+  GioKhoiHanh TEXT NOT NULL,
+  GioCapBen TEXT NOT NULL,
+  FOREIGN KEY (MaTau) REFERENCES TAU(MaTau),
+  FOREIGN KEY (MaThuyenVien) REFERENCES THUYENVIEN(MaThuyenVien),
+  FOREIGN KEY (MaMatHang) REFERENCES MATHANG(MaMatHang)
+);
+    `.trim(),
+    seed: `
+INSERT INTO TAU (MaTau, TenTau, TrongTaiToiDa) VALUES
+('T01', 'Biển Đông 01', 5000),
+('T02', 'Hải Âu 02', 3500),
+('T03', 'Thái Bình Dương', 8000),
+('T04', 'Viễn Dương 05', 6500),
+('T05', 'Sóng Thần 09', 4200);
+
+INSERT INTO THUYENVIEN (MaThuyenVien, TenThuyenVien, ChucDanh, MucLuong) VALUES
+('TV01', 'Nguyễn Văn Hải', 'Thuyền trưởng', 35000000),
+('TV02', 'Trần Minh Quang', 'Thuyền phó', 26000000),
+('TV03', 'Lê Hoàng Nam', 'Máy trưởng', 28000000),
+('TV04', 'Phạm Quốc Đạt', 'Thuyền trưởng', 38000000),
+('TV05', 'Võ Thành Công', 'Thủy thủ', 16000000),
+('TV06', 'Đặng Tuấn Kiệt', 'Hoa tiêu', 22000000);
+
+INSERT INTO MATHANG (MaMatHang, TenMatHang, SoLuong, SoGiayPhep) VALUES
+('MH01', 'Gạo xuất khẩu ST25', 1200, 'GP-2025-001'),
+('MH02', 'Thép cuộn Hòa Phát', 2500, 'GP-2025-002'),
+('MH03', 'Hạt điều Bình Phước', 800, 'GP-2025-003'),
+('MH04', 'Cà phê nhân Đắk Lắk', 1500, 'GP-2025-004'),
+('MH05', 'Thủy sản đông lạnh', 950, 'GP-2025-005'),
+('MH06', 'Xi măng Hà Tiên', 3000, 'GP-2025-006');
+
+INSERT INTO LICHTRINH (Malichtrinh, MaTau, MaThuyenVien, MaMatHang, DinhVi, CangXuatPhat, CangDen, GioKhoiHanh, GioCapBen) VALUES
+('LT01', 'T01', 'TV01', 'MH01', '10.7769N-106.7009E', 'Cảng Cát Lái', 'Cảng Hải Phòng', '2025-03-01 06:00', '2025-03-03 18:00'),
+('LT02', 'T03', 'TV04', 'MH02', '16.0544N-108.2022E', 'Cảng Hải Phòng', 'Cảng Đà Nẵng', '2025-03-02 08:00', '2025-03-03 20:00'),
+('LT03', 'T02', 'TV02', 'MH03', '10.3460N-107.0843E', 'Cảng Cái Mép', 'Cảng Quy Nhơn', '2025-03-04 05:30', '2025-03-05 14:30'),
+('LT04', 'T01', 'TV01', 'MH04', '13.7829N-109.2196E', 'Cảng Cát Lái', 'Cảng Đà Nẵng', '2025-03-06 07:00', '2025-03-08 11:00'),
+('LT05', 'T04', 'TV03', 'MH05', '20.8449N-106.6881E', 'Cảng Cần Thơ', 'Cảng Hải Phòng', '2025-03-07 09:00', '2025-03-10 16:00'),
+('LT06', 'T03', 'TV04', 'MH01', '11.9000N-109.1967E', 'Cảng Cái Mép', 'Cảng Cam Ranh', '2025-03-09 06:30', '2025-03-10 15:00'),
+('LT07', 'T02', 'TV05', 'MH04', '10.7769N-106.7009E', 'Cảng Cát Lái', 'Cảng Hải Phòng', '2025-03-11 07:30', '2025-03-14 09:00');
+    `.trim(),
+    mermaidErd: `
+erDiagram
+    TAU ||--o{ LICHTRINH : "thực hiện chuyến"
+    THUYENVIEN ||--o{ LICHTRINH : "phụ trách"
+    MATHANG ||--o{ LICHTRINH : "vận chuyển"
+    TAU {
+        string MaTau PK "Mã tàu"
+        string TenTau "Tên thuyền / tàu"
+        float TrongTaiToiDa "Trọng tải tối đa (tấn)"
+    }
+    THUYENVIEN {
+        string MaThuyenVien PK "Mã thuyền viên"
+        string TenThuyenVien "Tên thuyền viên"
+        string ChucDanh "Chức danh"
+        float MucLuong "Mức lương (VNĐ)"
+    }
+    MATHANG {
+        string MaMatHang PK "Mã mặt hàng"
+        string TenMatHang "Tên mặt hàng"
+        int SoLuong "Số lượng"
+        string SoGiayPhep "Số giấy phép"
+    }
+    LICHTRINH {
+        string Malichtrinh PK "Mã lịch trình"
+        string MaTau FK "Mã tàu tham chiếu TAU"
+        string MaThuyenVien FK "Mã thuyền viên tham chiếu THUYENVIEN"
+        string MaMatHang FK "Mã mặt hàng tham chiếu MATHANG"
+        string DinhVi "Tọa độ định vị"
+        string CangXuatPhat "Cảng xuất phát"
+        string CangDen "Cảng đến"
+        datetime GioKhoiHanh "Giờ khởi hành"
+        datetime GioCapBen "Giờ cập bến"
+    }
+    `.trim(),
+    sampleQueries: [
+      {
+        title: 'Chi tiết lịch trình vận tải: Mã lịch trình, Tên tàu, Thuyền viên, Mặt hàng, Cảng đi & Cảng đến',
+        sql: `SELECT lt.Malichtrinh, t.TenTau, tv.TenThuyenVien, tv.ChucDanh, mh.TenMatHang, lt.CangXuatPhat, lt.CangDen, lt.GioKhoiHanh, lt.GioCapBen\nFROM LICHTRINH lt\nJOIN TAU t ON lt.MaTau = t.MaTau\nJOIN THUYENVIEN tv ON lt.MaThuyenVien = tv.MaThuyenVien\nJOIN MATHANG mh ON lt.MaMatHang = mh.MaMatHang\nORDER BY lt.Malichtrinh;`,
+        explanation: 'Kết nối cả 4 bảng LICHTRINH, TAU, THUYENVIEN và MATHANG để hiển thị toàn bộ thông tin chi tiết của từng chuyến tàu.',
+        difficulty: 'Cơ bản',
+      },
+      {
+        title: 'Thống kê số chuyến lịch trình và tổng khối lượng hàng vận chuyển theo từng Tàu (GROUP BY)',
+        sql: `SELECT t.MaTau, t.TenTau, t.TrongTaiToiDa, COUNT(lt.Malichtrinh) AS SoChuyenTau, COALESCE(SUM(mh.SoLuong), 0) AS TongSoLuongHang\nFROM TAU t\nLEFT JOIN LICHTRINH lt ON t.MaTau = lt.MaTau\nLEFT JOIN MATHANG mh ON lt.MaMatHang = mh.MaMatHang\nGROUP BY t.MaTau, t.TenTau, t.TrongTaiToiDa\nORDER BY SoChuyenTau DESC;`,
+        explanation: 'Sử dụng LEFT JOIN kết hợp GROUP BY để thống kê số chuyến hành trình của từng con tàu, bao gồm cả tàu chưa khởi hành chuyến nào (T05).',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Thống kê số lượng thuyền viên và mức lương trung bình theo từng Chức danh (GROUP BY)',
+        sql: `SELECT ChucDanh, COUNT(*) AS SoThuyenVien, ROUND(AVG(MucLuong), 0) AS LuongTrungBinh, MAX(MucLuong) AS LuongCaoNhat\nFROM THUYENVIEN\nGROUP BY ChucDanh\nORDER BY LuongTrungBinh DESC;`,
+        explanation: 'Gom nhóm bảng THUYENVIEN theo ChucDanh để phân tích chế độ đãi ngộ và thu nhập bình quân.',
+        difficulty: 'Cơ bản',
+      },
+      {
+        title: 'Tìm các con tàu trong bảng TAU chưa được phân công lịch trình nào trong bảng LICHTRINH',
+        sql: `SELECT t.MaTau, t.TenTau, t.TrongTaiToiDa\nFROM TAU t\nLEFT JOIN LICHTRINH lt ON t.MaTau = lt.MaTau\nWHERE lt.Malichtrinh IS NULL;`,
+        explanation: 'Dùng LEFT JOIN từ TAU sang LICHTRINH kết hợp WHERE lt.Malichtrinh IS NULL để phát hiện tàu T05 (Sóng Thần 09) đang neo đậu chưa có lịch trình.',
+        difficulty: 'Nâng cao',
+      },
+      {
+        title: 'Tìm các thuyền viên chưa tham gia chuyến tàu nào và mặt hàng chưa được vận chuyển',
+        sql: `SELECT tv.MaThuyenVien, tv.TenThuyenVien, tv.ChucDanh, tv.MucLuong\nFROM THUYENVIEN tv\nLEFT JOIN LICHTRINH lt ON tv.MaThuyenVien = lt.MaThuyenVien\nWHERE lt.Malichtrinh IS NULL;`,
+        explanation: 'Sử dụng LEFT JOIN và kiểm tra IS NULL để tìm thuyền viên TV06 (Đặng Tuấn Kiệt - Hoa tiêu) chưa tham gia lịch trình nào.',
+        difficulty: 'Nâng cao',
+      },
+    ],
+  },
+
+  CSDL_CUUHOA: {
+    id: 'CSDL_CUUHOA',
+    name: 'CSDL_CUUHOA',
+    subtitle: 'Trụ nước, Xe chữa cháy, Vụ cháy & Điều động xe (4 Bảng)',
+    description: 'Cơ sở dữ liệu quản lý phòng cháy chữa cháy (PCCC) gồm 4 bảng: TRU_NUOC (MaTru, ViTri, ApLucChuan), XE_CHUA_CHAY (MaXe, BienSo, DungTichNuoc), VU_CHAY (MaVu, DiaDiem, ThoiGianBao) và DIEU_DONG_XE (MaDieuDong, MaVu, MaXe, GioXuatPhat).',
+    badge: '4 Bảng • Cứu Hỏa PCCC',
+    iconClass: 'fa-solid fa-fire-extinguisher',
+    ddl: `
+CREATE TABLE TRU_NUOC (
+  MaTru TEXT PRIMARY KEY,
+  ViTri TEXT NOT NULL,
+  ApLucChuan REAL NOT NULL
+);
+
+CREATE TABLE XE_CHUA_CHAY (
+  MaXe TEXT PRIMARY KEY,
+  BienSo TEXT NOT NULL,
+  DungTichNuoc INTEGER NOT NULL
+);
+
+CREATE TABLE VU_CHAY (
+  MaVu TEXT PRIMARY KEY,
+  DiaDiem TEXT NOT NULL,
+  ThoiGianBao TEXT NOT NULL
+);
+
+CREATE TABLE DIEU_DONG_XE (
+  MaDieuDong TEXT PRIMARY KEY,
+  MaVu TEXT NOT NULL,
+  MaXe TEXT NOT NULL,
+  GioXuatPhat TEXT NOT NULL,
+  FOREIGN KEY (MaVu) REFERENCES VU_CHAY(MaVu),
+  FOREIGN KEY (MaXe) REFERENCES XE_CHUA_CHAY(MaXe)
+);
+    `.trim(),
+    seed: `
+INSERT INTO TRU_NUOC (MaTru, ViTri, ApLucChuan) VALUES
+('TN01', 'Ngã tư Hàng Xanh - Quận Bình Thạnh', 4.5),
+('TN02', 'Chợ Bến Thành - Quận 1', 5.0),
+('TN03', 'Khu công nghiệp Sóng Thần - Bình Dương', 6.0),
+('TN04', 'Khu đô thị Phú Mỹ Hưng - Quận 7', 4.8),
+('TN05', 'Bến xe Miền Đông mới - TP Thủ Đức', 5.5),
+('TN06', 'Chợ Lớn - Quận 5', 3.8);
+
+INSERT INTO XE_CHUA_CHAY (MaXe, BienSo, DungTichNuoc) VALUES
+('XCC01', '51A-114.01', 4000),
+('XCC02', '51A-114.02', 6000),
+('XCC03', '61A-114.05', 8000),
+('XCC04', '51A-114.08', 5000),
+('XCC05', '51A-114.12', 10000),
+('XCC06', '61A-114.15', 3500);
+
+INSERT INTO VU_CHAY (MaVu, DiaDiem, ThoiGianBao) VALUES
+('VC01', 'Kho xưởng Khu công nghiệp Sóng Thần - Bình Dương', '2025-02-10 14:15'),
+('VC02', 'Chung cư mini đường Điện Biên Phủ - Quận Bình Thạnh', '2025-02-15 09:30'),
+('VC03', 'Cửa hàng tạp hóa gần Chợ Bến Thành - Quận 1', '2025-02-20 19:45'),
+('VC04', 'Bãi phế liệu TP Thủ Đức', '2025-03-01 11:10'),
+('VC05', 'Nhà kho Quận 7', '2025-03-05 16:20');
+
+INSERT INTO DIEU_DONG_XE (MaDieuDong, MaVu, MaXe, GioXuatPhat) VALUES
+('DD01', 'VC01', 'XCC03', '2025-02-10 14:18'),
+('DD02', 'VC01', 'XCC05', '2025-02-10 14:20'),
+('DD03', 'VC01', 'XCC02', '2025-02-10 14:22'),
+('DD04', 'VC02', 'XCC01', '2025-02-15 09:33'),
+('DD05', 'VC02', 'XCC04', '2025-02-15 09:35'),
+('DD06', 'VC03', 'XCC01', '2025-02-20 19:48'),
+('DD07', 'VC04', 'XCC02', '2025-03-01 11:14'),
+('DD08', 'VC04', 'XCC05', '2025-03-01 11:15');
+    `.trim(),
+    mermaidErd: `
+erDiagram
+    VU_CHAY ||--o{ DIEU_DONG_XE : "điều động xử lý"
+    XE_CHUA_CHAY ||--o{ DIEU_DONG_XE : "được điều động"
+    TRU_NUOC {
+        string MaTru PK "Mã trụ nước"
+        string ViTri "Vị trí đặt trụ nước"
+        float ApLucChuan "Áp lực nước chuẩn (bar)"
+    }
+    XE_CHUA_CHAY {
+        string MaXe PK "Mã xe chữa cháy"
+        string BienSo "Biển số xe"
+        int DungTichNuoc "Dung tích bồn nước (lít)"
+    }
+    VU_CHAY {
+        string MaVu PK "Mã vụ cháy"
+        string DiaDiem "Địa điểm xảy ra cháy"
+        datetime ThoiGianBao "Thời gian nhận tin báo"
+    }
+    DIEU_DONG_XE {
+        string MaDieuDong PK "Mã lệnh điều động"
+        string MaVu FK "Mã vụ cháy tham chiếu VU_CHAY"
+        string MaXe FK "Mã xe tham chiếu XE_CHUA_CHAY"
+        datetime GioXuatPhat "Giờ xe xuất phát"
+    }
+    `.trim(),
+    sampleQueries: [
+      {
+        title: 'Chi tiết điều động xe chữa cháy: Mã điều động, Địa điểm cháy, Thời gian báo, Biển số xe, Dung tích nước & Giờ xuất phát',
+        sql: `SELECT dd.MaDieuDong, vc.MaVu, vc.DiaDiem, vc.ThoiGianBao, xe.MaXe, xe.BienSo, xe.DungTichNuoc, dd.GioXuatPhat\nFROM DIEU_DONG_XE dd\nJOIN VU_CHAY vc ON dd.MaVu = vc.MaVu\nJOIN XE_CHUA_CHAY xe ON dd.MaXe = xe.MaXe\nORDER BY dd.MaDieuDong;`,
+        explanation: 'Kết nối 3 bảng DIEU_DONG_XE, VU_CHAY và XE_CHUA_CHAY để theo dõi chi tiết từng lệnh điều động phương tiện ứng cứu.',
+        difficulty: 'Cơ bản',
+      },
+      {
+        title: 'Thống kê số lượng xe điều động và tổng dung tích nước huy động cho từng Vụ cháy (GROUP BY)',
+        sql: `SELECT vc.MaVu, vc.DiaDiem, COUNT(dd.MaDieuDong) AS SoXeDieuDong, COALESCE(SUM(xe.DungTichNuoc), 0) AS TongDungTichNuoc\nFROM VU_CHAY vc\nLEFT JOIN DIEU_DONG_XE dd ON vc.MaVu = dd.MaVu\nLEFT JOIN XE_CHUA_CHAY xe ON dd.MaXe = xe.MaXe\nGROUP BY vc.MaVu, vc.DiaDiem\nORDER BY TongDungTichNuoc DESC;`,
+        explanation: 'Sử dụng LEFT JOIN và GROUP BY để tính tổng số xe và tổng lượng nước (lít) huy động cho mỗi vụ cháy.',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Liệt kê các trụ nước cứu hỏa có áp lực chuẩn từ 5.0 bar trở lên',
+        sql: `SELECT MaTru, ViTri, ApLucChuan\nFROM TRU_NUOC\nWHERE ApLucChuan >= 5.0\nORDER BY ApLucChuan DESC;`,
+        explanation: 'Lọc các trụ nước áp lực cao từ bảng TRU_NUOC phục vụ tiếp nước nhanh cho xe chữa cháy.',
+        difficulty: 'Cơ bản',
+      },
+      {
+        title: 'Tìm các xe chữa cháy trong bảng XE_CHUA_CHAY chưa từng được điều động lần nào (LEFT JOIN & IS NULL)',
+        sql: `SELECT xe.MaXe, xe.BienSo, xe.DungTichNuoc\nFROM XE_CHUA_CHAY xe\nLEFT JOIN DIEU_DONG_XE dd ON xe.MaXe = dd.MaXe\nWHERE dd.MaDieuDong IS NULL;`,
+        explanation: 'Sử dụng LEFT JOIN kết hợp WHERE dd.MaDieuDong IS NULL để tìm xe dự phòng XCC06 (61A-114.15) chưa phát sinh lệnh điều động.',
+        difficulty: 'Nâng cao',
+      },
+      {
+        title: 'Tìm các vụ cháy huy động tổng dung tích nước từ 15.000 lít trở lên (GROUP BY & HAVING)',
+        sql: `SELECT vc.MaVu, vc.DiaDiem, COUNT(dd.MaXe) AS SoXe, SUM(xe.DungTichNuoc) AS TongNuoc\nFROM VU_CHAY vc\nJOIN DIEU_DONG_XE dd ON vc.MaVu = dd.MaVu\nJOIN XE_CHUA_CHAY xe ON dd.MaXe = xe.MaXe\nGROUP BY vc.MaVu, vc.DiaDiem\nHAVING SUM(xe.DungTichNuoc) >= 15000\nORDER BY TongNuoc DESC;`,
+        explanation: 'Sử dụng mệnh đề HAVING SUM(xe.DungTichNuoc) >= 15000 để lọc ra các vụ cháy lớn cần huy động lượng nước từ 15.000 lít trở lên (VC01 và VC04).',
+        difficulty: 'Nâng cao',
+      },
+    ],
+  },
 };

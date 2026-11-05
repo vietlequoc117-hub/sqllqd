@@ -50,6 +50,12 @@ function getOfflineSyntaxAnswer(
     } else if (dbConfig.id === 'CSDL_KDSACH') {
       exampleSql = `SELECT MALOAI, COUNT(*) AS SoLuot, SUM(SOLUONG) AS TongSoLuong\nFROM CTHOADON\nGROUP BY MALOAI\nHAVING SUM(SOLUONG) >= 20;`;
       exampleExplain = `Gom nhóm chi tiết hóa đơn theo **MALOAI**, đếm số lượt giao dịch (\`COUNT(*)\`) và tính tổng số lượng sách (\`SUM(SOLUONG)\`). Mệnh đề \`HAVING\` chỉ giữ lại các loại sách có tổng số lượng từ 20 cuốn trở lên.`;
+    } else if (dbConfig.id === 'CSDL_QLTAU') {
+      exampleSql = `SELECT MaTau, COUNT(*) AS SoChuyen\nFROM LICHTRINH\nGROUP BY MaTau\nHAVING COUNT(*) >= 2;`;
+      exampleExplain = `Gom nhóm lịch trình theo **MaTau**, đếm số chuyến tàu (\`COUNT(*)\`). Mệnh đề \`HAVING\` chỉ giữ lại các con tàu đã thực hiện từ 2 chuyến lịch trình trở lên.`;
+    } else if (dbConfig.id === 'CSDL_CUUHOA') {
+      exampleSql = `SELECT MaVu, COUNT(*) AS SoXeDieuDong\nFROM DIEU_DONG_XE\nGROUP BY MaVu\nHAVING COUNT(*) >= 2;`;
+      exampleExplain = `Gom nhóm lệnh điều động theo **MaVu**, đếm số xe chữa cháy tham gia (\`COUNT(*)\`). Mệnh đề \`HAVING\` chỉ giữ lại các vụ cháy huy động từ 2 xe chữa cháy trở lên.`;
     } else {
       exampleSql = `SELECT Cot_Gom_Nhom, COUNT(*) AS TongSo, AVG(Cot_So) AS TrungBinh\nFROM TenBang\nGROUP BY Cot_Gom_Nhom\nHAVING COUNT(*) >= 2;`;
       exampleExplain = `Gom nhóm dữ liệu theo cột chỉ định và áp dụng hàm gộp tính toán, sau đó dùng HAVING để lọc nhóm thỏa mãn.`;
@@ -177,6 +183,12 @@ ${formatted}
     } else if (dbConfig.id === 'CSDL_KDSACH') {
       exampleSql = `SELECT ct.SOCTU, hd.HOTEN, s.TENSACH, ls.LOAISACH, ct.SOLUONG, (ct.SOLUONG * s.DONGIA) AS THANHTIEN\nFROM CTHOADON ct\nJOIN HOADON hd ON ct.SOCTU = hd.SOCTU\nJOIN DMSACH s ON ct.MASACH = s.MASACH\nJOIN LOAISACH ls ON ct.MALOAI = ls.MALOAI;`;
       joinExplain = `Kết nối 4 bảng \`CTHOADON\`, \`HOADON\`, \`DMSACH\` và \`LOAISACH\` để hiển thị họ tên khách hàng, tên sách, loại sách và tính Thành tiền = SOLUONG * DONGIA.`;
+    } else if (dbConfig.id === 'CSDL_QLTAU') {
+      exampleSql = `SELECT lt.Malichtrinh, t.TenTau, tv.TenThuyenVien, mh.TenMatHang, lt.CangXuatPhat, lt.CangDen\nFROM LICHTRINH lt\nJOIN TAU t ON lt.MaTau = t.MaTau\nJOIN THUYENVIEN tv ON lt.MaThuyenVien = tv.MaThuyenVien\nJOIN MATHANG mh ON lt.MaMatHang = mh.MaMatHang;`;
+      joinExplain = `Kết nối 4 bảng \`LICHTRINH\`, \`TAU\`, \`THUYENVIEN\` và \`MATHANG\` để hiển thị đầy đủ tên tàu, tên thuyền viên, tên mặt hàng, cảng xuất phát và cảng đến.`;
+    } else if (dbConfig.id === 'CSDL_CUUHOA') {
+      exampleSql = `SELECT dd.MaDieuDong, vc.DiaDiem, vc.ThoiGianBao, xe.BienSo, xe.DungTichNuoc, dd.GioXuatPhat\nFROM DIEU_DONG_XE dd\nJOIN VU_CHAY vc ON dd.MaVu = vc.MaVu\nJOIN XE_CHUA_CHAY xe ON dd.MaXe = xe.MaXe;`;
+      joinExplain = `Kết nối 3 bảng \`DIEU_DONG_XE\`, \`VU_CHAY\` và \`XE_CHUA_CHAY\` qua \`MaVu\` và \`MaXe\` để hiển thị địa điểm cháy, biển số xe chữa cháy, dung tích nước và giờ xuất phát.`;
     } else {
       exampleSql = `SELECT A.Cot1, B.Cot2\nFROM BangA A\nJOIN BangB B ON A.KhoaChinh = B.KhoaNgoai;`;
       joinExplain = `Kết nối BangA với BangB dựa trên điều kiện cặp khóa chính - khóa ngoại tương ứng.`;
@@ -256,6 +268,12 @@ ${formatted}
     } else if (dbConfig.id === 'CSDL_KDSACH') {
       exampleSql = `SELECT MASACH, TENSACH, DONGIA\nFROM DMSACH\nWHERE TENSACH LIKE 'VẬT LÝ%';`;
       likeExplain = `Tìm tất cả các cuốn sách có tên bắt đầu bằng "VẬT LÝ" bằng mẫu \`LIKE 'VẬT LÝ%'\`.`;
+    } else if (dbConfig.id === 'CSDL_QLTAU') {
+      exampleSql = `SELECT MaThuyenVien, TenThuyenVien, ChucDanh, MucLuong\nFROM THUYENVIEN\nWHERE ChucDanh LIKE 'Thuyền%';`;
+      likeExplain = `Tìm tất cả thuyền viên có chức danh bắt đầu bằng "Thuyền" (Thuyền trưởng, Thuyền phó) bằng mẫu \`LIKE 'Thuyền%'\`.`;
+    } else if (dbConfig.id === 'CSDL_CUUHOA') {
+      exampleSql = `SELECT MaXe, BienSo, DungTichNuoc\nFROM XE_CHUA_CHAY\nWHERE BienSo LIKE '51A%';`;
+      likeExplain = `Tìm tất cả các xe chữa cháy mang biển số TP.HCM bắt đầu bằng "51A" bằng mẫu \`LIKE '51A%'\`.`;
     } else {
       exampleSql = `SELECT *\nFROM TenBang\nWHERE TenCot LIKE 'A%';`;
       likeExplain = `Tìm các bản ghi có giá trị cột bắt đầu bằng chữ 'A'.`;
@@ -321,6 +339,10 @@ ${formatted}
       exampleSql = `UPDATE DMHH\nSET DONGIA = DONGIA * 1.1\nWHERE MAHH = 'A001';`;
     } else if (dbConfig.id === 'CSDL_KDSACH') {
       exampleSql = `UPDATE DMSACH\nSET DONGIA = DONGIA + 2000\nWHERE MASACH = 'ACC001';`;
+    } else if (dbConfig.id === 'CSDL_QLTAU') {
+      exampleSql = `UPDATE THUYENVIEN\nSET MucLuong = MucLuong + 2000000\nWHERE ChucDanh = 'Thuyền trưởng';`;
+    } else if (dbConfig.id === 'CSDL_CUUHOA') {
+      exampleSql = `UPDATE TRU_NUOC\nSET ApLucChuan = 5.2\nWHERE MaTru = 'TN01';`;
     } else {
       exampleSql = `UPDATE TenBang\nSET Cot1 = GiaTriMoi\nWHERE DieuKien;`;
     }

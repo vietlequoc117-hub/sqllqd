@@ -109,6 +109,20 @@ const DB_DOWNLOAD_INFO: Record<
     subtitle: '4 Bảng • Kinh Doanh Sách (15 câu)',
     icon: 'fa-book-bookmark text-rose-600',
   },
+  CSDL_QLTAU: {
+    filename: 'Bai_Tap_SQL_CSDL_QLTAU.docx',
+    studentFilename: 'Bai_Tap_SQL_CSDL_QLTAU_De_Bai.docx',
+    name: 'CSDL_QLTAU',
+    subtitle: '4 Bảng • Quản Lý Tàu (15 câu)',
+    icon: 'fa-ship text-cyan-600',
+  },
+  CSDL_CUUHOA: {
+    filename: 'Bai_Tap_SQL_CSDL_CUUHOA.docx',
+    studentFilename: 'Bai_Tap_SQL_CSDL_CUUHOA_De_Bai.docx',
+    name: 'CSDL_CUUHOA',
+    subtitle: '4 Bảng • Cứu Hỏa PCCC (15 câu)',
+    icon: 'fa-fire-extinguisher text-red-600',
+  },
 };
 
 export const ExerciseViewer: React.FC<ExerciseViewerProps> = ({

@@ -64,6 +64,14 @@ export const DB_DOCX_FILES: Record<DatabaseId, { filename: string; title: string
     filename: 'Bai_Tap_SQL_CSDL_KDSACH.docx',
     title: 'Bài tập SQL - CSDL_KDSACH (15 câu)',
   },
+  CSDL_QLTAU: {
+    filename: 'Bai_Tap_SQL_CSDL_QLTAU.docx',
+    title: 'Bài tập SQL - CSDL_QLTAU (15 câu)',
+  },
+  CSDL_CUUHOA: {
+    filename: 'Bai_Tap_SQL_CSDL_CUUHOA.docx',
+    title: 'Bài tập SQL - CSDL_CUUHOA (15 câu)',
+  },
 };
 
 async function generateAll() {

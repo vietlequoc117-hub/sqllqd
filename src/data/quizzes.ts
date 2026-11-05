@@ -2653,4 +2653,469 @@ export const QUIZZES_BY_DATABASE: Record<DatabaseId, QuizQuestion[]> = {
       relatedSql: `SELECT hd.SOCTU, hd.HOTEN, SUM(ct.SOLUONG * s.DONGIA) AS TongTriGia\nFROM HOADON hd\nJOIN CTHOADON ct ON hd.SOCTU = ct.SOCTU\nJOIN DMSACH s ON ct.MASACH = s.MASACH\nGROUP BY hd.SOCTU, hd.HOTEN\nORDER BY TongTriGia DESC\nLIMIT 1;`,
     },
   ],
+
+  // ==========================================
+  // 15. CSDL_QLTAU (4 Bảng - Quản Lý Tàu)
+  // ==========================================
+  CSDL_QLTAU: [
+    // --- 3 CÂU NHẬN BIẾT ---
+    {
+      id: 'TAU-Q01',
+      databaseId: 'CSDL_QLTAU',
+      level: 'Nhận biết',
+      order: 1,
+      question: 'Trong CSDL_QLTAU, bảng LICHTRINH chứa những trường Khóa ngoại (Foreign Key) nào để liên kết với 3 bảng còn lại?',
+      options: [
+        { key: 'A', text: 'Ba trường: MaTau, MaThuyenVien và MaMatHang.' },
+        { key: 'B', text: 'Chỉ duy nhất trường Malichtrinh.' },
+        { key: 'C', text: 'Hai trường: CangXuatPhat và CangDen.' },
+        { key: 'D', text: 'Hai trường: GioKhoiHanh và GioCapBen.' },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Trong bảng LICHTRINH, Malichtrinh là khóa chính; còn MaTau tham chiếu đến bảng TAU, MaThuyenVien tham chiếu đến bảng THUYENVIEN, và MaMatHang tham chiếu đến bảng MATHANG.',
+      relatedSql: `SELECT Malichtrinh, MaTau, MaThuyenVien, MaMatHang, CangXuatPhat, CangDen\nFROM LICHTRINH;`,
+    },
+    {
+      id: 'TAU-Q02',
+      databaseId: 'CSDL_QLTAU',
+      level: 'Nhận biết',
+      order: 2,
+      question: 'Câu lệnh SQL nào hiển thị danh sách tất cả các con tàu gồm MaTau, TenTau và TrongTaiToiDa từ bảng TAU, sắp xếp theo trọng tải tối đa giảm dần?',
+      options: [
+        { key: 'A', text: 'SELECT MaTau, TenTau, TrongTaiToiDa FROM TAU ORDER BY TrongTaiToiDa DESC;' },
+        { key: 'B', text: 'SELECT * FROM TAU SORT BY TrongTaiToiDa DESC;' },
+        { key: 'C', text: 'SELECT ALL FROM TAU GROUP BY TrongTaiToiDa;' },
+        { key: 'D', text: 'GET MaTau, TenTau FROM TAU ORDER BY TrongTaiToiDa ASC;' },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Mệnh đề ORDER BY TrongTaiToiDa DESC sắp xếp các con tàu theo trọng tải từ lớn nhất (8000 tấn - Thái Bình Dương) xuống nhỏ nhất (3500 tấn - Hải Âu 02).',
+      relatedSql: `SELECT MaTau, TenTau, TrongTaiToiDa\nFROM TAU\nORDER BY TrongTaiToiDa DESC;`,
+    },
+    {
+      id: 'TAU-Q03',
+      databaseId: 'CSDL_QLTAU',
+      level: 'Nhận biết',
+      order: 3,
+      question: 'Để lọc danh sách các thuyền viên giữ chức danh \'Thuyền trưởng\' trong bảng THUYENVIEN, câu lệnh nào sau đây là đúng?',
+      sqlSnippet: `SELECT MaThuyenVien, TenThuyenVien, ChucDanh, MucLuong\nFROM THUYENVIEN\nWHERE ChucDanh = 'Thuyền trưởng';`,
+      options: [
+        { key: 'A', text: `SELECT * FROM THUYENVIEN WHERE ChucDanh = 'Thuyền trưởng';` },
+        { key: 'B', text: `SELECT * FROM THUYENVIEN HAVING ChucDanh = 'Thuyền trưởng';` },
+        { key: 'C', text: `SELECT * FROM THUYENVIEN GROUP BY 'Thuyền trưởng';` },
+        { key: 'D', text: `SELECT * FROM THUYENVIEN WHERE TenThuyenVien = 'Thuyền trưởng';` },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Mệnh đề WHERE ChucDanh = \'Thuyền trưởng\' lọc các dòng trong bảng THUYENVIEN có chức danh là Thuyền trưởng (TV01 - Nguyễn Văn Hải và TV04 - Phạm Quốc Đạt).',
+      relatedSql: `SELECT MaThuyenVien, TenThuyenVien, ChucDanh, MucLuong\nFROM THUYENVIEN\nWHERE ChucDanh = 'Thuyền trưởng';`,
+    },
+
+    // --- 3 CÂU THÔNG HIỂU ---
+    {
+      id: 'TAU-Q04',
+      databaseId: 'CSDL_QLTAU',
+      level: 'Thông hiểu',
+      order: 4,
+      question: 'Để hiển thị các lịch trình xuất phát từ \'Cảng Cát Lái\' và cập bến tại \'Cảng Hải Phòng\', điều kiện WHERE nào viết đúng?',
+      options: [
+        { key: 'A', text: `WHERE CangXuatPhat = 'Cảng Cát Lái' AND CangDen = 'Cảng Hải Phòng'` },
+        { key: 'B', text: `WHERE CangXuatPhat = 'Cảng Cát Lái' OR CangDen = 'Cảng Hải Phòng'` },
+        { key: 'C', text: `WHERE CangXuatPhat LIKE 'Cảng Hải Phòng'` },
+        { key: 'D', text: `WHERE DinhVi = 'Cảng Cát Lái - Cảng Hải Phòng'` },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Toán tử AND yêu cầu thỏa mãn đồng thời cả hai điều kiện: cảng khởi hành là Cảng Cát Lái và cảng đích là Cảng Hải Phòng (gồm LT01 và LT07).',
+      relatedSql: `SELECT Malichtrinh, MaTau, MaThuyenVien, MaMatHang, CangXuatPhat, CangDen, GioKhoiHanh, GioCapBen\nFROM LICHTRINH\nWHERE CangXuatPhat = 'Cảng Cát Lái' AND CangDen = 'Cảng Hải Phòng';`,
+    },
+    {
+      id: 'TAU-Q05',
+      databaseId: 'CSDL_QLTAU',
+      level: 'Thông hiểu',
+      order: 5,
+      question: 'Để hiển thị Mã lịch trình (Malichtrinh), Tên tàu (TenTau), Tên thuyền viên (TenThuyenVien) và Tên mặt hàng (TenMatHang), cần thực hiện phép kết nối (JOIN) như thế nào?',
+      options: [
+        {
+          key: 'A',
+          text: 'Kết nối bảng LICHTRINH với cả 3 bảng TAU (qua MaTau), THUYENVIEN (qua MaThuyenVien) và MATHANG (qua MaMatHang).',
+        },
+        {
+          key: 'B',
+          text: 'Chỉ cần kết nối bảng TAU với bảng MATHANG.',
+        },
+        {
+          key: 'C',
+          text: 'Chỉ cần truy vấn trên bảng LICHTRINH.',
+        },
+        {
+          key: 'D',
+          text: 'Kết nối bảng THUYENVIEN với bảng MATHANG qua trường SoGiayPhep.',
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Bảng LICHTRINH đóng vai trò trung tâm lưu các mã khóa ngoại MaTau, MaThuyenVien, MaMatHang. Do đó cần JOIN LICHTRINH với cả 3 bảng danh mục.',
+      relatedSql: `SELECT lt.Malichtrinh, t.TenTau, tv.TenThuyenVien, mh.TenMatHang, lt.CangXuatPhat, lt.CangDen\nFROM LICHTRINH lt\nJOIN TAU t ON lt.MaTau = t.MaTau\nJOIN THUYENVIEN tv ON lt.MaThuyenVien = tv.MaThuyenVien\nJOIN MATHANG mh ON lt.MaMatHang = mh.MaMatHang;`,
+    },
+    {
+      id: 'TAU-Q06',
+      databaseId: 'CSDL_QLTAU',
+      level: 'Thông hiểu',
+      order: 6,
+      question: 'Câu lệnh nào thống kê số lượng chuyến lịch trình xuất phát từ mỗi cảng (CangXuatPhat), sắp xếp theo số chuyến giảm dần?',
+      options: [
+        {
+          key: 'A',
+          text: `SELECT CangXuatPhat, COUNT(*) AS SoChuyen\nFROM LICHTRINH\nGROUP BY CangXuatPhat\nORDER BY SoChuyen DESC;`,
+        },
+        {
+          key: 'B',
+          text: `SELECT CangXuatPhat, SUM(Malichtrinh) FROM LICHTRINH;`,
+        },
+        {
+          key: 'C',
+          text: `SELECT DISTINCT CangXuatPhat, COUNT(*) FROM LICHTRINH WHERE COUNT(*) > 0;`,
+        },
+        {
+          key: 'D',
+          text: `SELECT CangXuatPhat FROM LICHTRINH ORDER BY COUNT(*) DESC;`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Sử dụng GROUP BY CangXuatPhat kết hợp hàm COUNT(*) để đếm số lịch trình xuất phát từ từng cảng và ORDER BY SoChuyen DESC.',
+      relatedSql: `SELECT CangXuatPhat, COUNT(*) AS SoChuyen\nFROM LICHTRINH\nGROUP BY CangXuatPhat\nORDER BY SoChuyen DESC;`,
+    },
+
+    // --- 4 CÂU VẬN DỤNG ---
+    {
+      id: 'TAU-Q07',
+      databaseId: 'CSDL_QLTAU',
+      level: 'Vận dụng',
+      order: 7,
+      question: 'Câu lệnh nào tìm danh sách các con tàu đã thực hiện từ 2 chuyến lịch trình trở lên (hiển thị MaTau, TenTau, SoChuyen)?',
+      options: [
+        {
+          key: 'A',
+          text: `SELECT t.MaTau, t.TenTau, COUNT(lt.Malichtrinh) AS SoChuyen\nFROM TAU t\nJOIN LICHTRINH lt ON t.MaTau = lt.MaTau\nGROUP BY t.MaTau, t.TenTau\nHAVING COUNT(lt.Malichtrinh) >= 2;`,
+        },
+        {
+          key: 'B',
+          text: `SELECT t.MaTau, t.TenTau, COUNT(lt.Malichtrinh) FROM TAU t JOIN LICHTRINH lt ON t.MaTau = lt.MaTau WHERE COUNT(lt.Malichtrinh) >= 2 GROUP BY t.MaTau;`,
+        },
+        {
+          key: 'C',
+          text: `SELECT MaTau, TenTau FROM TAU WHERE TrongTaiToiDa >= 2;`,
+        },
+        {
+          key: 'D',
+          text: `SELECT MaTau, COUNT(*) FROM LICHTRINH HAVING COUNT(*) >= 2;`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Sau khi gom nhóm GROUP BY theo từng con tàu, điều kiện lọc trên hàm đếm COUNT(lt.Malichtrinh) >= 2 bắt buộc phải đặt trong mệnh đề HAVING.',
+      relatedSql: `SELECT t.MaTau, t.TenTau, COUNT(lt.Malichtrinh) AS SoChuyen\nFROM TAU t\nJOIN LICHTRINH lt ON t.MaTau = lt.MaTau\nGROUP BY t.MaTau, t.TenTau\nHAVING COUNT(lt.Malichtrinh) >= 2;`,
+    },
+    {
+      id: 'TAU-Q08',
+      databaseId: 'CSDL_QLTAU',
+      level: 'Vận dụng',
+      order: 8,
+      question: 'Trong bảng TAU, con tàu nào hiện chưa được phân công bất kỳ chuyến lịch trình nào trong bảng LICHTRINH, và dùng câu lệnh nào để tìm?',
+      options: [
+        {
+          key: 'A',
+          text: `Tàu T05 (Sóng Thần 09) - dùng LEFT JOIN từ TAU sang LICHTRINH kết hợp WHERE lt.Malichtrinh IS NULL`,
+        },
+        {
+          key: 'B',
+          text: `Tàu T01 (Biển Đông 01) - dùng INNER JOIN`,
+        },
+        {
+          key: 'C',
+          text: `Tàu T03 (Thái Bình Dương) - dùng WHERE lt.Malichtrinh = NULL`,
+        },
+        {
+          key: 'D',
+          text: `Tất cả 5 con tàu đều đã có lịch trình`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Tàu T05 (Sóng Thần 09 - trọng tải 4200 tấn) chưa xuất hiện trong bảng LICHTRINH. Phép LEFT JOIN kết hợp WHERE lt.Malichtrinh IS NULL sẽ lọc chính xác con tàu này.',
+      relatedSql: `SELECT t.MaTau, t.TenTau, t.TrongTaiToiDa\nFROM TAU t\nLEFT JOIN LICHTRINH lt ON t.MaTau = lt.MaTau\nWHERE lt.Malichtrinh IS NULL;`,
+    },
+    {
+      id: 'TAU-Q09',
+      databaseId: 'CSDL_QLTAU',
+      level: 'Vận dụng',
+      order: 9,
+      question: 'Câu lệnh nào tìm các thuyền viên có mức lương (MucLuong) cao hơn mức lương trung bình của toàn bộ thuyền viên trong bảng THUYENVIEN?',
+      options: [
+        {
+          key: 'A',
+          text: `SELECT MaThuyenVien, TenThuyenVien, ChucDanh, MucLuong\nFROM THUYENVIEN\nWHERE MucLuong > (SELECT AVG(MucLuong) FROM THUYENVIEN)\nORDER BY MucLuong DESC;`,
+        },
+        {
+          key: 'B',
+          text: `SELECT MaThuyenVien, TenThuyenVien, MucLuong FROM THUYENVIEN WHERE MucLuong > AVG(MucLuong);`,
+        },
+        {
+          key: 'C',
+          text: `SELECT MaThuyenVien, TenThuyenVien FROM THUYENVIEN HAVING MucLuong > AVG(MucLuong);`,
+        },
+        {
+          key: 'D',
+          text: `SELECT MaThuyenVien, MAX(MucLuong) FROM THUYENVIEN;`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Sử dụng truy vấn con (SELECT AVG(MucLuong) FROM THUYENVIEN) trong mệnh đề WHERE để tính mức lương trung bình chung rồi lọc các thuyền viên có lương cao hơn mức đó.',
+      relatedSql: `SELECT MaThuyenVien, TenThuyenVien, ChucDanh, MucLuong\nFROM THUYENVIEN\nWHERE MucLuong > (\n  SELECT AVG(MucLuong)\n  FROM THUYENVIEN\n)\nORDER BY MucLuong DESC;`,
+    },
+    {
+      id: 'TAU-Q10',
+      databaseId: 'CSDL_QLTAU',
+      level: 'Vận dụng',
+      order: 10,
+      question: 'Trong bảng MATHANG, mặt hàng nào chưa từng được vận chuyển trong bất kỳ chuyến lịch trình nào của bảng LICHTRINH?',
+      options: [
+        {
+          key: 'A',
+          text: `MH06 (Xi măng Hà Tiên, GP-2025-006) - tìm bằng LEFT JOIN từ MATHANG sang LICHTRINH kết hợp WHERE lt.Malichtrinh IS NULL`,
+        },
+        {
+          key: 'B',
+          text: `MH01 (Gạo xuất khẩu ST25)`,
+        },
+        {
+          key: 'C',
+          text: `MH04 (Cà phê nhân Đắk Lắk)`,
+        },
+        {
+          key: 'D',
+          text: `Tất cả 6 mặt hàng đều đã được vận chuyển`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Mặt hàng MH06 (Xi măng Hà Tiên) chưa có dòng lịch trình nào trong bảng LICHTRINH. Dùng LEFT JOIN kết hợp WHERE lt.Malichtrinh IS NULL để tìm.',
+      relatedSql: `SELECT mh.MaMatHang, mh.TenMatHang, mh.SoLuong, mh.SoGiayPhep\nFROM MATHANG mh\nLEFT JOIN LICHTRINH lt ON mh.MaMatHang = lt.MaMatHang\nWHERE lt.Malichtrinh IS NULL;`,
+    },
+  ],
+
+  // ==========================================
+  // 16. CSDL_CUUHOA (4 Bảng - Cứu Hỏa PCCC)
+  // ==========================================
+  CSDL_CUUHOA: [
+    // --- 3 CÂU NHẬN BIẾT ---
+    {
+      id: 'CH-Q01',
+      databaseId: 'CSDL_CUUHOA',
+      level: 'Nhận biết',
+      order: 1,
+      question: 'Trong CSDL_CUUHOA, bảng DIEU_DONG_XE có khóa chính và các khóa ngoại nào?',
+      options: [
+        { key: 'A', text: 'Khóa chính là MaDieuDong; hai khóa ngoại là MaVu (tham chiếu VU_CHAY) và MaXe (tham chiếu XE_CHUA_CHAY).' },
+        { key: 'B', text: 'Khóa chính là MaVu; khóa ngoại là GioXuatPhat.' },
+        { key: 'C', text: 'Khóa chính là MaXe; khóa ngoại là MaTru.' },
+        { key: 'D', text: 'Khóa chính là GioXuatPhat.' },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Trong bảng DIEU_DONG_XE(MaDieuDong, MaVu, MaXe, GioXuatPhat), MaDieuDong định danh duy nhất mỗi lệnh điều động, MaVu liên kết đến VU_CHAY và MaXe liên kết đến XE_CHUA_CHAY.',
+      relatedSql: `SELECT *\nFROM DIEU_DONG_XE;`,
+    },
+    {
+      id: 'CH-Q02',
+      databaseId: 'CSDL_CUUHOA',
+      level: 'Nhận biết',
+      order: 2,
+      question: 'Câu lệnh SQL nào hiển thị danh sách tất cả các trụ nước gồm MaTru, ViTri và ApLucChuan từ bảng TRU_NUOC, sắp xếp theo ApLucChuan giảm dần?',
+      options: [
+        { key: 'A', text: 'SELECT MaTru, ViTri, ApLucChuan FROM TRU_NUOC ORDER BY ApLucChuan DESC;' },
+        { key: 'B', text: 'SELECT * FROM TRU_NUOC SORT BY ApLucChuan DESC;' },
+        { key: 'C', text: 'SELECT ALL FROM TRU_NUOC GROUP BY ApLucChuan;' },
+        { key: 'D', text: 'GET MaTru, ViTri FROM TRU_NUOC ORDER BY ApLucChuan ASC;' },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Mệnh đề ORDER BY ApLucChuan DESC sắp xếp các trụ nước theo áp lực chuẩn từ cao nhất (6.0 bar - TN03) xuống thấp nhất (3.8 bar - TN06).',
+      relatedSql: `SELECT MaTru, ViTri, ApLucChuan\nFROM TRU_NUOC\nORDER BY ApLucChuan DESC;`,
+    },
+    {
+      id: 'CH-Q03',
+      databaseId: 'CSDL_CUUHOA',
+      level: 'Nhận biết',
+      order: 3,
+      question: 'Theo dữ liệu trong bảng XE_CHUA_CHAY, xe chữa cháy nào có dung tích bồn nước (DungTichNuoc) lớn nhất (10.000 lít)?',
+      sqlSnippet: `SELECT MaXe, BienSo, DungTichNuoc\nFROM XE_CHUA_CHAY\nORDER BY DungTichNuoc DESC\nLIMIT 1;`,
+      options: [
+        { key: 'A', text: 'XCC01 - Biển số 51A-114.01 (4.000 lít)' },
+        { key: 'B', text: 'XCC03 - Biển số 61A-114.05 (8.000 lít)' },
+        { key: 'C', text: 'XCC05 - Biển số 51A-114.12 (10.000 lít)' },
+        { key: 'D', text: 'XCC06 - Biển số 61A-114.15 (3.500 lít)' },
+      ],
+      correctAnswer: 'C',
+      explanation: 'Trong bảng XE_CHUA_CHAY, xe XCC05 (biển số 51A-114.12) có dung tích nước lớn nhất là 10.000 lít.',
+      relatedSql: `SELECT MaXe, BienSo, DungTichNuoc\nFROM XE_CHUA_CHAY\nORDER BY DungTichNuoc DESC\nLIMIT 1;`,
+    },
+
+    // --- 3 CÂU THÔNG HIỂU ---
+    {
+      id: 'CH-Q04',
+      databaseId: 'CSDL_CUUHOA',
+      level: 'Thông hiểu',
+      order: 4,
+      question: 'Để lọc danh sách các xe chữa cháy mang biển số thuộc TP.HCM (bắt đầu bằng \'51A\') và có dung tích nước từ 5.000 lít trở lên, mệnh đề WHERE nào viết đúng?',
+      options: [
+        { key: 'A', text: `WHERE BienSo LIKE '51A%' AND DungTichNuoc >= 5000` },
+        { key: 'B', text: `WHERE BienSo = '51A' OR DungTichNuoc >= 5000` },
+        { key: 'C', text: `WHERE BienSo LIKE '%51A' AND DungTichNuoc > 5000` },
+        { key: 'D', text: `WHERE MaXe LIKE '51A%'` },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Mẫu LIKE \'51A%\' kiểm tra biển số bắt đầu bằng "51A", kết hợp toán tử AND với điều kiện DungTichNuoc >= 5000 (gồm XCC02, XCC04, XCC05).',
+      relatedSql: `SELECT MaXe, BienSo, DungTichNuoc\nFROM XE_CHUA_CHAY\nWHERE BienSo LIKE '51A%' AND DungTichNuoc >= 5000;`,
+    },
+    {
+      id: 'CH-Q05',
+      databaseId: 'CSDL_CUUHOA',
+      level: 'Thông hiểu',
+      order: 5,
+      question: 'Để hiển thị Mã điều động (MaDieuDong), Địa điểm cháy (DiaDiem), Biển số xe (BienSo), Dung tích nước (DungTichNuoc) và Giờ xuất phát (GioXuatPhat), cần kết nối những bảng nào?',
+      options: [
+        { key: 'A', text: 'Kết nối 3 bảng: DIEU_DONG_XE, VU_CHAY (qua MaVu) và XE_CHUA_CHAY (qua MaXe).' },
+        { key: 'B', text: 'Chỉ cần kết nối bảng DIEU_DONG_XE và TRU_NUOC.' },
+        { key: 'C', text: 'Chỉ cần bảng VU_CHAY và XE_CHUA_CHAY.' },
+        { key: 'D', text: 'Chỉ cần truy vấn trên bảng DIEU_DONG_XE.' },
+      ],
+      correctAnswer: 'A',
+      explanation: 'DiaDiem nằm ở bảng VU_CHAY, BienSo và DungTichNuoc nằm ở bảng XE_CHUA_CHAY, còn MaDieuDong và GioXuatPhat nằm ở bảng DIEU_DONG_XE.',
+      relatedSql: `SELECT dd.MaDieuDong, vc.DiaDiem, xe.BienSo, xe.DungTichNuoc, dd.GioXuatPhat\nFROM DIEU_DONG_XE dd\nJOIN VU_CHAY vc ON dd.MaVu = vc.MaVu\nJOIN XE_CHUA_CHAY xe ON dd.MaXe = xe.MaXe;`,
+    },
+    {
+      id: 'CH-Q06',
+      databaseId: 'CSDL_CUUHOA',
+      level: 'Thông hiểu',
+      order: 6,
+      question: 'Quan sát câu lệnh SQL:\nSELECT COUNT(*) AS SoXe\nFROM DIEU_DONG_XE\nWHERE MaVu = \'VC01\';\nCó bao nhiêu lượt xe chữa cháy được điều động tới vụ cháy \'VC01\'?',
+      sqlSnippet: `SELECT COUNT(*) AS SoXe\nFROM DIEU_DONG_XE\nWHERE MaVu = 'VC01';`,
+      options: [
+        { key: 'A', text: '1 xe' },
+        { key: 'B', text: '2 xe' },
+        { key: 'C', text: '3 xe (XCC03, XCC05 và XCC02)' },
+        { key: 'D', text: '4 xe' },
+      ],
+      correctAnswer: 'C',
+      explanation: 'Trong bảng DIEU_DONG_XE, vụ cháy VC01 có 3 lệnh điều động là DD01 (XCC03), DD02 (XCC05) và DD03 (XCC02).',
+      relatedSql: `SELECT MaVu, COUNT(*) AS SoXe\nFROM DIEU_DONG_XE\nWHERE MaVu = 'VC01'\nGROUP BY MaVu;`,
+    },
+
+    // --- 4 CÂU VẬN DỤNG ---
+    {
+      id: 'CH-Q07',
+      databaseId: 'CSDL_CUUHOA',
+      level: 'Vận dụng',
+      order: 7,
+      question: 'Câu lệnh nào thống kê số lượng xe được điều động cho từng vụ cháy (MaVu, DiaDiem), chỉ hiển thị những vụ cháy huy động từ 2 xe trở lên?',
+      options: [
+        {
+          key: 'A',
+          text: `SELECT vc.MaVu, vc.DiaDiem, COUNT(dd.MaDieuDong) AS SoXe\nFROM VU_CHAY vc\nJOIN DIEU_DONG_XE dd ON vc.MaVu = dd.MaVu\nGROUP BY vc.MaVu, vc.DiaDiem\nHAVING COUNT(dd.MaDieuDong) >= 2;`,
+        },
+        {
+          key: 'B',
+          text: `SELECT vc.MaVu, vc.DiaDiem, COUNT(dd.MaDieuDong) FROM VU_CHAY vc JOIN DIEU_DONG_XE dd ON vc.MaVu = dd.MaVu WHERE COUNT(dd.MaDieuDong) >= 2 GROUP BY vc.MaVu;`,
+        },
+        {
+          key: 'C',
+          text: `SELECT MaVu, COUNT(*) FROM DIEU_DONG_XE WHERE MaXe >= 2;`,
+        },
+        {
+          key: 'D',
+          text: `SELECT vc.DiaDiem, SUM(dd.MaXe) FROM VU_CHAY vc HAVING COUNT(*) >= 2;`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Sau khi gom nhóm GROUP BY theo từng vụ cháy, điều kiện lọc trên hàm đếm COUNT(dd.MaDieuDong) >= 2 bắt buộc phải đặt trong mệnh đề HAVING.',
+      relatedSql: `SELECT vc.MaVu, vc.DiaDiem, COUNT(dd.MaDieuDong) AS SoXe\nFROM VU_CHAY vc\nJOIN DIEU_DONG_XE dd ON vc.MaVu = dd.MaVu\nGROUP BY vc.MaVu, vc.DiaDiem\nHAVING COUNT(dd.MaDieuDong) >= 2;`,
+    },
+    {
+      id: 'CH-Q08',
+      databaseId: 'CSDL_CUUHOA',
+      level: 'Vận dụng',
+      order: 8,
+      question: 'Trong bảng XE_CHUA_CHAY, chiếc xe nào hiện chưa từng được điều động trong bảng DIEU_DONG_XE, và dùng câu lệnh nào để tìm?',
+      options: [
+        {
+          key: 'A',
+          text: `Xe XCC06 (biển số 61A-114.15, 3500 lít) - dùng LEFT JOIN từ XE_CHUA_CHAY sang DIEU_DONG_XE kết hợp WHERE dd.MaDieuDong IS NULL`,
+        },
+        {
+          key: 'B',
+          text: `Xe XCC01 (51A-114.01) - dùng INNER JOIN`,
+        },
+        {
+          key: 'C',
+          text: `Xe XCC04 (51A-114.08) - dùng WHERE dd.MaDieuDong = NULL`,
+        },
+        {
+          key: 'D',
+          text: `Tất cả 6 xe đều đã được điều động`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Xe XCC06 (61A-114.15) chưa xuất hiện trong bảng DIEU_DONG_XE. Dùng LEFT JOIN kết hợp WHERE dd.MaDieuDong IS NULL sẽ lọc chính xác xe dự phòng này.',
+      relatedSql: `SELECT xe.MaXe, xe.BienSo, xe.DungTichNuoc\nFROM XE_CHUA_CHAY xe\nLEFT JOIN DIEU_DONG_XE dd ON xe.MaXe = dd.MaXe\nWHERE dd.MaDieuDong IS NULL;`,
+    },
+    {
+      id: 'CH-Q09',
+      databaseId: 'CSDL_CUUHOA',
+      level: 'Vận dụng',
+      order: 9,
+      question: 'Trong bảng VU_CHAY, vụ cháy nào chưa có lệnh điều động xe trong bảng DIEU_DONG_XE?',
+      options: [
+        {
+          key: 'A',
+          text: `VC05 (Nhà kho Quận 7) - tìm bằng LEFT JOIN từ VU_CHAY sang DIEU_DONG_XE kết hợp WHERE dd.MaDieuDong IS NULL`,
+        },
+        {
+          key: 'B',
+          text: `VC01 (Kho xưởng KCN Sóng Thần)`,
+        },
+        {
+          key: 'C',
+          text: `VC03 (Cửa hàng tạp hóa gần Chợ Bến Thành)`,
+        },
+        {
+          key: 'D',
+          text: `Cả 5 vụ cháy đều có xe điều động`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Vụ cháy VC05 (Nhà kho Quận 7) chưa có bản ghi nào trong bảng DIEU_DONG_XE.',
+      relatedSql: `SELECT vc.MaVu, vc.DiaDiem, vc.ThoiGianBao\nFROM VU_CHAY vc\nLEFT JOIN DIEU_DONG_XE dd ON vc.MaVu = dd.MaVu\nWHERE dd.MaDieuDong IS NULL;`,
+    },
+    {
+      id: 'CH-Q10',
+      databaseId: 'CSDL_CUUHOA',
+      level: 'Vận dụng',
+      order: 10,
+      question: 'Câu lệnh nào tìm ra Vụ cháy (MaVu, DiaDiem) huy động tổng dung tích nước của các xe chữa cháy (SUM(xe.DungTichNuoc)) lớn nhất?',
+      options: [
+        {
+          key: 'A',
+          text: `SELECT vc.MaVu, vc.DiaDiem, SUM(xe.DungTichNuoc) AS TongDungTichNuoc\nFROM VU_CHAY vc\nJOIN DIEU_DONG_XE dd ON vc.MaVu = dd.MaVu\nJOIN XE_CHUA_CHAY xe ON dd.MaXe = xe.MaXe\nGROUP BY vc.MaVu, vc.DiaDiem\nORDER BY TongDungTichNuoc DESC\nLIMIT 1;`,
+        },
+        {
+          key: 'B',
+          text: `SELECT MaXe, MAX(DungTichNuoc) FROM XE_CHUA_CHAY LIMIT 1;`,
+        },
+        {
+          key: 'C',
+          text: `SELECT MaVu, COUNT(*) FROM DIEU_DONG_XE ORDER BY MaVu DESC LIMIT 1;`,
+        },
+        {
+          key: 'D',
+          text: `SELECT MaTru, MAX(ApLucChuan) FROM TRU_NUOC;`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Kết nối VU_CHAY, DIEU_DONG_XE và XE_CHUA_CHAY, gom nhóm theo vụ cháy, tính tổng dung tích nước SUM(xe.DungTichNuoc), sắp xếp giảm dần và lấy dòng đầu tiên với LIMIT 1 (VC01: 24.000 lít).',
+      relatedSql: `SELECT vc.MaVu, vc.DiaDiem, SUM(xe.DungTichNuoc) AS TongDungTichNuoc\nFROM VU_CHAY vc\nJOIN DIEU_DONG_XE dd ON vc.MaVu = dd.MaVu\nJOIN XE_CHUA_CHAY xe ON dd.MaXe = xe.MaXe\nGROUP BY vc.MaVu, vc.DiaDiem\nORDER BY TongDungTichNuoc DESC\nLIMIT 1;`,
+    },
+  ],
 };

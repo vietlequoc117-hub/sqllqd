@@ -115,6 +115,18 @@ export const GeminiPanel: React.FC<GeminiPanelProps> = ({
       'Tìm các đầu sách trong bảng DMSACH chưa từng xuất hiện trong bảng CTHOADON',
       'Tìm các chứng từ trong bảng HOADON chưa có chi tiết sách trong bảng CTHOADON',
     ],
+    CSDL_QLTAU: [
+      'Hiển thị chi tiết lịch trình gồm Mã lịch trình, Tên tàu, Tên thuyền viên, Tên mặt hàng, Cảng xuất phát và Cảng đến',
+      'Thống kê số chuyến lịch trình và tổng khối lượng mặt hàng vận chuyển theo từng Tàu',
+      'Tìm các con tàu trong bảng TAU chưa được phân công lịch trình nào trong bảng LICHTRINH',
+      'Tìm các thuyền viên có mức lương cao hơn mức lương trung bình của toàn bộ thuyền viên',
+    ],
+    CSDL_CUUHOA: [
+      'Hiển thị chi tiết điều động xe chữa cháy gồm Mã điều động, Địa điểm cháy, Biển số xe, Dung tích nước và Giờ xuất phát',
+      'Thống kê số lượng xe điều động và tổng dung tích nước huy động cho từng Vụ cháy',
+      'Tìm các xe chữa cháy trong bảng XE_CHUA_CHAY chưa từng được điều động lần nào',
+      'Tìm các trụ nước trong bảng TRU_NUOC có áp lực chuẩn từ 5.0 bar trở lên',
+    ],
   };
 
   const handleGenerate = (e: React.FormEvent) => {
