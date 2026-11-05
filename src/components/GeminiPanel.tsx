@@ -85,6 +85,36 @@ export const GeminiPanel: React.FC<GeminiPanelProps> = ({
       'Tính tổng số lượng đã bán của từng loại sản phẩm',
       'Liệt kê danh sách khách hàng chưa mua hàng lần nào',
     ],
+    CSDL_QLDIEN: [
+      'Hiển thị chi tiết tiêu thụ điện kèm Tên khách, Loại sử dụng và tính Thành tiền = SOKW * DONGIA',
+      'Cập nhật cột THANHTIEN = SOKW * DONGIA cho toàn bộ bảng CHITIET',
+      'Thống kê tổng số KW và tổng tiền điện theo từng Loại sử dụng (KINH DOANH, SINH HOẠT, SẢN XUẤT)',
+      'Tìm khách hàng ở khu vực PHÚ CƯỜNG chưa phát sinh chi tiết sử dụng điện nào',
+    ],
+    CSDL_QLLUONG: [
+      'Hiển thị danh sách nhân viên kèm Tên đơn vị công tác, Hệ số lương và Ngày công',
+      'Thống kê số lượng nhân viên và hệ số lương trung bình theo từng Đơn vị',
+      'Tìm các nhân viên bộ phận Kế toán (MANV bắt đầu bằng KT) có NGAYCONG >= 20',
+      'Tìm các nhân viên có hệ số lương cao hơn mức trung bình toàn công ty',
+    ],
+    CSDL_VANTAI: [
+      'Hiển thị chi tiết vận tải gồm Số nhật trình, Ngày, Tên xe, Tên lái xe, Tên tuyến, Số vé và Thành tiền',
+      'Thống kê tổng số vé bán ra và tổng doanh thu theo từng Tuyến đường',
+      'Tìm các chuyến xe chở vượt quá số chỗ ngồi quy định (SOVE > SOCHO)',
+      'Tìm các xe trong bảng DMXE chưa thực hiện bất kỳ chuyến nhật trình nào',
+    ],
+    CSDL_QLKHO: [
+      'Hiển thị chi tiết nhập xuất kho gồm Số HĐ, Ngày, Loại HĐ, Tên kho, Tên hàng, Số lượng và Thành tiền',
+      'Thống kê tổng số lượng và tổng trị giá tiền hàng theo từng Kho',
+      'Thống kê tổng trị giá theo từng Loại hóa đơn: Nhập (N) và Xuất (X)',
+      'Tìm các mặt hàng trong bảng DMHH chưa từng phát sinh giao dịch nhập xuất nào',
+    ],
+    CSDL_KDSACH: [
+      'Hiển thị chi tiết hóa đơn gồm Số chứng từ, Họ tên, Tên sách, Loại sách, Số lượng, Đơn giá và Thành tiền',
+      'Thống kê tổng số lượng sách và tổng thành tiền theo từng Loại sách',
+      'Tìm các đầu sách trong bảng DMSACH chưa từng xuất hiện trong bảng CTHOADON',
+      'Tìm các chứng từ trong bảng HOADON chưa có chi tiết sách trong bảng CTHOADON',
+    ],
   };
 
   const handleGenerate = (e: React.FormEvent) => {

@@ -1548,4 +1548,1109 @@ export const QUIZZES_BY_DATABASE: Record<DatabaseId, QuizQuestion[]> = {
       relatedSql: `INSERT INTO MUON_TRA (MaPhieu, MaDG, MaSach, NgayMuon, NgayTra, TrangThai)\nVALUES ('PM09', 'DG06', 'S07', '2024-03-25', NULL, 'Đang mượn');`,
     },
   ],
+
+  // ==========================================
+  // 10. CSDL_QLDIEN (3 Bảng - Quản Lý Điện)
+  // ==========================================
+  CSDL_QLDIEN: [
+    // --- 3 CÂU NHẬN BIẾT ---
+    {
+      id: 'QLD-Q01',
+      databaseId: 'CSDL_QLDIEN',
+      level: 'Nhận biết',
+      order: 1,
+      question: 'Trong CSDL_QLDIEN, bảng CHITIET có khóa chính được xác định như thế nào?',
+      options: [
+        { key: 'A', text: 'Chỉ duy nhất trường MASD là khóa chính.' },
+        { key: 'B', text: 'Chỉ duy nhất trường MAKH là khóa chính.' },
+        { key: 'C', text: 'Khóa chính ghép gồm hai trường (MASD, MAKH).' },
+        { key: 'D', text: 'Trường SOKW là khóa chính.' },
+      ],
+      correctAnswer: 'C',
+      explanation: 'Trong bảng CHITIET, một khách hàng có thể đăng ký nhiều loại hình sử dụng điện (KD, SH, SX) và một loại hình sử dụng có nhiều khách hàng, nên khóa chính là cặp thuộc tính (MASD, MAKH).',
+      relatedSql: `SELECT *\nFROM CHITIET;`,
+    },
+    {
+      id: 'QLD-Q02',
+      databaseId: 'CSDL_QLDIEN',
+      level: 'Nhận biết',
+      order: 2,
+      question: 'Câu lệnh SQL nào hiển thị toàn bộ danh sách các hình thức sử dụng điện và đơn giá từ bảng SUDUNG?',
+      options: [
+        { key: 'A', text: 'SELECT * FROM SUDUNG;' },
+        { key: 'B', text: 'SELECT ALL FROM SUDUNG;' },
+        { key: 'C', text: 'SHOW TABLE SUDUNG;' },
+        { key: 'D', text: 'GET MASD, LOAISD, DONGIA FROM SUDUNG;' },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Cú pháp SELECT * FROM SUDUNG; lấy toàn bộ các cột (MASD, LOAISD, DONGIA) và tất cả các dòng trong bảng SUDUNG.',
+      relatedSql: `SELECT *\nFROM SUDUNG;`,
+    },
+    {
+      id: 'QLD-Q03',
+      databaseId: 'CSDL_QLDIEN',
+      level: 'Nhận biết',
+      order: 3,
+      question: 'Theo dữ liệu bảng SUDUNG, loại sử dụng điện có mã MASD = \'KD\' (KINH DOANH) có đơn giá (DONGIA) là bao nhiêu?',
+      sqlSnippet: `SELECT MASD, LOAISD, DONGIA\nFROM SUDUNG\nWHERE MASD = 'KD';`,
+      options: [
+        { key: 'A', text: '100' },
+        { key: 'B', text: '500' },
+        { key: 'C', text: '750' },
+        { key: 'D', text: '1000' },
+      ],
+      correctAnswer: 'C',
+      explanation: 'Theo dữ liệu mẫu trong bảng SUDUNG: KD (KINH DOANH) có đơn giá 750, SH (SINH HOẠT) có đơn giá 500, và SX (SẢN XUẤT) có đơn giá 100.',
+      relatedSql: `SELECT MASD, LOAISD, DONGIA\nFROM SUDUNG\nWHERE MASD = 'KD';`,
+    },
+
+    // --- 3 CÂU THÔNG HIỂU ---
+    {
+      id: 'QLD-Q04',
+      databaseId: 'CSDL_QLDIEN',
+      level: 'Thông hiểu',
+      order: 4,
+      question: 'Để lọc danh sách các khách hàng có địa chỉ ở khu vực "PHÚ CƯỜNG" trong bảng KHACHHANG, mệnh đề WHERE nào sau đây viết đúng chuẩn SQL?',
+      options: [
+        { key: 'A', text: `WHERE DIACHI = 'PHÚ CƯỜNG'` },
+        { key: 'B', text: `WHERE DIACHI LIKE '%PHÚ CƯỜNG%'` },
+        { key: 'C', text: `WHERE DIACHI CONTAINS 'PHÚ CƯỜNG'` },
+        { key: 'D', text: `WHERE DIACHI IN 'PHÚ CƯỜNG'` },
+      ],
+      correctAnswer: 'B',
+      explanation: 'Toán tử LIKE kết hợp ký tự đại diện % ở hai đầu giúp tìm tất cả các chuỗi địa chỉ có chứa cụm từ "PHÚ CƯỜNG" (như 12 YERSIN PHÚ CƯỜNG, 04 BẠCH ĐẰNG PHÚ CƯỜNG, 12 CMT8 PHÚ CƯỜNG).',
+      relatedSql: `SELECT MAKH, TENKHACH, DIACHI\nFROM KHACHHANG\nWHERE DIACHI LIKE '%PHÚ CƯỜNG%';`,
+    },
+    {
+      id: 'QLD-Q05',
+      databaseId: 'CSDL_QLDIEN',
+      level: 'Thông hiểu',
+      order: 5,
+      question: 'Quan sát câu lệnh SQL sau:\nSELECT SUM(SOKW) AS TongKW\nFROM CHITIET\nWHERE MAKH = \'KH01\';\nKết quả TongKW của khách hàng KH01 (THANH) là bao nhiêu?',
+      sqlSnippet: `SELECT SUM(SOKW) AS TongKW\nFROM CHITIET\nWHERE MAKH = 'KH01';`,
+      options: [
+        { key: 'A', text: '100 KW' },
+        { key: 'B', text: '250 KW' },
+        { key: 'C', text: '400 KW (100 KD + 150 SH + 150 SX)' },
+        { key: 'D', text: '500 KW' },
+      ],
+      correctAnswer: 'C',
+      explanation: 'Khách hàng KH01 có 3 dòng trong bảng CHITIET: KD (100 KW), SH (150 KW) và SX (150 KW). Tổng số KW tiêu thụ là 100 + 150 + 150 = 400 KW.',
+      relatedSql: `SELECT MAKH, SUM(SOKW) AS TongKW\nFROM CHITIET\nWHERE MAKH = 'KH01'\nGROUP BY MAKH;`,
+    },
+    {
+      id: 'QLD-Q06',
+      databaseId: 'CSDL_QLDIEN',
+      level: 'Thông hiểu',
+      order: 6,
+      question: 'Để hiển thị Mã khách hàng, Tên khách hàng, Loại sử dụng, Số KW và tính cột Thành tiền = SOKW * DONGIA, cần kết nối những bảng nào?',
+      options: [
+        { key: 'A', text: 'Chỉ cần bảng CHITIET và KHACHHANG.' },
+        { key: 'B', text: 'Chỉ cần bảng CHITIET và SUDUNG.' },
+        { key: 'C', text: 'Kết nối cả 3 bảng: CHITIET, KHACHHANG và SUDUNG qua các khóa ngoại tương ứng.' },
+        { key: 'D', text: 'Chỉ cần truy vấn trên bảng CHITIET.' },
+      ],
+      correctAnswer: 'C',
+      explanation: 'TENKHACH nằm ở bảng KHACHHANG, LOAISD và DONGIA nằm ở bảng SUDUNG, còn SOKW nằm ở bảng CHITIET. Do đó phải JOIN cả 3 bảng.',
+      relatedSql: `SELECT ct.MAKH, kh.TENKHACH, sd.LOAISD, ct.SOKW, sd.DONGIA, (ct.SOKW * sd.DONGIA) AS THANHTIEN\nFROM CHITIET ct\nJOIN KHACHHANG kh ON ct.MAKH = kh.MAKH\nJOIN SUDUNG sd ON ct.MASD = sd.MASD;`,
+    },
+
+    // --- 4 CÂU VẬN DỤNG ---
+    {
+      id: 'QLD-Q07',
+      databaseId: 'CSDL_QLDIEN',
+      level: 'Vận dụng',
+      order: 7,
+      question: 'Trong bảng CHITIET, cột THANHTIEN ban đầu đang để trống (NULL). Câu lệnh UPDATE nào cập nhật đúng cột THANHTIEN = SOKW * DONGIA cho tất cả các dòng?',
+      options: [
+        {
+          key: 'A',
+          text: `UPDATE CHITIET\nSET THANHTIEN = SOKW * (\n  SELECT DONGIA\n  FROM SUDUNG\n  WHERE SUDUNG.MASD = CHITIET.MASD\n);`,
+        },
+        {
+          key: 'B',
+          text: `UPDATE CHITIET SET THANHTIEN = SOKW * DONGIA;`,
+        },
+        {
+          key: 'C',
+          text: `INSERT INTO CHITIET (THANHTIEN) SELECT SOKW * DONGIA FROM SUDUNG;`,
+        },
+        {
+          key: 'D',
+          text: `ALTER TABLE CHITIET SET THANHTIEN = SOKW * 500;`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Vì cột DONGIA nằm ở bảng SUDUNG, câu lệnh UPDATE trên bảng CHITIET dùng truy vấn con tương quan (Correlated Subquery) để tra đúng DONGIA theo MASD của từng dòng.',
+      relatedSql: `UPDATE CHITIET\nSET THANHTIEN = SOKW * (\n  SELECT DONGIA\n  FROM SUDUNG\n  WHERE SUDUNG.MASD = CHITIET.MASD\n);`,
+    },
+    {
+      id: 'QLD-Q08',
+      databaseId: 'CSDL_QLDIEN',
+      level: 'Vận dụng',
+      order: 8,
+      question: 'Câu lệnh nào thống kê tổng số KW tiêu thụ theo từng loại hình sử dụng (MASD, LOAISD), chỉ lấy những loại hình có tổng số KW lớn hơn 650?',
+      options: [
+        {
+          key: 'A',
+          text: `SELECT sd.MASD, sd.LOAISD, SUM(ct.SOKW) AS TongKW\nFROM SUDUNG sd\nJOIN CHITIET ct ON sd.MASD = ct.MASD\nGROUP BY sd.MASD, sd.LOAISD\nHAVING SUM(ct.SOKW) > 650;`,
+        },
+        {
+          key: 'B',
+          text: `SELECT sd.MASD, sd.LOAISD, SUM(ct.SOKW) AS TongKW\nFROM SUDUNG sd\nJOIN CHITIET ct ON sd.MASD = ct.MASD\nWHERE SUM(ct.SOKW) > 650\nGROUP BY sd.MASD;`,
+        },
+        {
+          key: 'C',
+          text: `SELECT MASD, SUM(SOKW) FROM CHITIET WHERE SOKW > 650 GROUP BY MASD;`,
+        },
+        {
+          key: 'D',
+          text: `SELECT sd.LOAISD, COUNT(ct.SOKW) FROM SUDUNG sd HAVING SUM(ct.SOKW) > 650;`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Để lọc điều kiện trên hàm tổng hợp SUM(ct.SOKW) > 650 sau khi đã gom nhóm GROUP BY, bắt buộc phải sử dụng mệnh đề HAVING.',
+      relatedSql: `SELECT sd.MASD, sd.LOAISD, SUM(ct.SOKW) AS TongKW\nFROM SUDUNG sd\nJOIN CHITIET ct ON sd.MASD = ct.MASD\nGROUP BY sd.MASD, sd.LOAISD\nHAVING SUM(ct.SOKW) > 650;`,
+    },
+    {
+      id: 'QLD-Q09',
+      databaseId: 'CSDL_QLDIEN',
+      level: 'Vận dụng',
+      order: 9,
+      question: 'Khách hàng nào trong bảng KHACHHANG hiện chưa có bất kỳ bản ghi tiêu thụ điện nào trong bảng CHITIET, và dùng câu lệnh nào để tìm?',
+      options: [
+        {
+          key: 'A',
+          text: `KH06 (VÂN) - dùng LEFT JOIN từ KHACHHANG sang CHITIET kết hợp WHERE ct.MASD IS NULL`,
+        },
+        {
+          key: 'B',
+          text: `KH03 (HẢO) - dùng INNER JOIN kết hợp WHERE ct.SOKW = 0`,
+        },
+        {
+          key: 'C',
+          text: `KH04 (TIẾN) - dùng WHERE ct.MASD = NULL`,
+        },
+        {
+          key: 'D',
+          text: `Không có khách hàng nào chưa sử dụng điện`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Khách hàng KH06 (VÂN - 12 CMT8 PHÚ CƯỜNG) chưa xuất hiện trong bảng CHITIET. Dùng LEFT JOIN kết hợp WHERE ct.MASD IS NULL sẽ lọc chính xác khách hàng này.',
+      relatedSql: `SELECT kh.MAKH, kh.TENKHACH, kh.DIACHI\nFROM KHACHHANG kh\nLEFT JOIN CHITIET ct ON kh.MAKH = ct.MAKH\nWHERE ct.MASD IS NULL;`,
+    },
+    {
+      id: 'QLD-Q10',
+      databaseId: 'CSDL_QLDIEN',
+      level: 'Vận dụng',
+      order: 10,
+      question: 'Câu lệnh nào tìm ra khách hàng có tổng số tiền điện phải trả (SUM(ct.SOKW * sd.DONGIA)) cao nhất?',
+      options: [
+        {
+          key: 'A',
+          text: `SELECT kh.MAKH, kh.TENKHACH, SUM(ct.SOKW * sd.DONGIA) AS TongTien\nFROM KHACHHANG kh\nJOIN CHITIET ct ON kh.MAKH = ct.MAKH\nJOIN SUDUNG sd ON ct.MASD = sd.MASD\nGROUP BY kh.MAKH, kh.TENKHACH\nORDER BY TongTien DESC\nLIMIT 1;`,
+        },
+        {
+          key: 'B',
+          text: `SELECT MAKH, MAX(SOKW) FROM CHITIET LIMIT 1;`,
+        },
+        {
+          key: 'C',
+          text: `SELECT kh.TENKHACH, ct.SOKW * sd.DONGIA FROM KHACHHANG kh, CHITIET ct, SUDUNG sd ORDER BY DONGIA DESC LIMIT 1;`,
+        },
+        {
+          key: 'D',
+          text: `SELECT MAKH, SUM(THANHTIEN) FROM KHACHHANG GROUP BY MAKH;`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Kết nối 3 bảng, gom nhóm theo từng khách hàng (GROUP BY kh.MAKH, kh.TENKHACH), tính tổng tiền SUM(ct.SOKW * sd.DONGIA), sắp xếp giảm dần (DESC) và lấy dòng đầu tiên (LIMIT 1).',
+      relatedSql: `SELECT kh.MAKH, kh.TENKHACH, SUM(ct.SOKW * sd.DONGIA) AS TongTien\nFROM KHACHHANG kh\nJOIN CHITIET ct ON kh.MAKH = ct.MAKH\nJOIN SUDUNG sd ON ct.MASD = sd.MASD\nGROUP BY kh.MAKH, kh.TENKHACH\nORDER BY TongTien DESC\nLIMIT 1;`,
+    },
+  ],
+
+  // ==========================================
+  // 11. CSDL_QLLUONG (2 Bảng - Quản Lý Lương)
+  // ==========================================
+  CSDL_QLLUONG: [
+    // --- 3 CÂU NHẬN BIẾT ---
+    {
+      id: 'QLL-Q01',
+      databaseId: 'CSDL_QLLUONG',
+      level: 'Nhận biết',
+      order: 1,
+      question: 'Trong CSDL_QLLUONG, trường nào đóng vai trò là Khóa ngoại (Foreign Key) trong bảng BANGLUONG để liên kết với bảng DMDV?',
+      options: [
+        { key: 'A', text: 'MANV' },
+        { key: 'B', text: 'DIACHI' },
+        { key: 'C', text: 'MADV' },
+        { key: 'D', text: 'HSLUONG' },
+      ],
+      correctAnswer: 'C',
+      explanation: 'Trường MADV trong bảng BANGLUONG là khóa ngoại tham chiếu đến khóa chính MADV của bảng DMDV nhằm xác định đơn vị công tác của mỗi nhân viên.',
+      relatedSql: `SELECT bl.MANV, bl.HOTEN, bl.MADV, dv.TENDV\nFROM BANGLUONG bl\nJOIN DMDV dv ON bl.MADV = dv.MADV;`,
+    },
+    {
+      id: 'QLD-QLL-02',
+      databaseId: 'CSDL_QLLUONG',
+      level: 'Nhận biết',
+      order: 2,
+      question: 'Câu lệnh SQL nào hiển thị toàn bộ danh mục các đơn vị gồm MADV, TENDV và DIACHI từ bảng DMDV?',
+      options: [
+        { key: 'A', text: 'SELECT * FROM DMDV;' },
+        { key: 'B', text: 'SELECT ALL FROM DMDV;' },
+        { key: 'C', text: 'GET * FROM DMDV;' },
+        { key: 'D', text: 'SHOW DMDV;' },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Cú pháp SELECT * FROM DMDV; lấy toàn bộ các cột và các bản ghi hiện có trong bảng DMDV.',
+      relatedSql: `SELECT *\nFROM DMDV;`,
+    },
+    {
+      id: 'QLL-Q03',
+      databaseId: 'CSDL_QLLUONG',
+      level: 'Nhận biết',
+      order: 3,
+      question: 'Theo dữ liệu trong bảng BANGLUONG, nhân viên nào có hệ số lương (HSLUONG) cao nhất (5.3)?',
+      sqlSnippet: `SELECT MANV, HOTEN, HSLUONG, NGAYCONG\nFROM BANGLUONG\nORDER BY HSLUONG DESC\nLIMIT 1;`,
+      options: [
+        { key: 'A', text: 'BV01 - TRẦN THANH HẢI (4.5)' },
+        { key: 'B', text: 'GD01 - HỒ BÍCH NGA (5.3)' },
+        { key: 'C', text: 'KT02 - NGUYỄN QUỐC TUẤN (4.0)' },
+        { key: 'D', text: 'NV02 - TẠ VĂN MINH (4.5)' },
+      ],
+      correctAnswer: 'B',
+      explanation: 'Dựa vào bảng BANGLUONG, nhân viên GD01 (HỒ BÍCH NGA) thuộc đơn vị 02 có hệ số lương cao nhất là 5.3.',
+      relatedSql: `SELECT MANV, HOTEN, HSLUONG, NGAYCONG\nFROM BANGLUONG\nORDER BY HSLUONG DESC\nLIMIT 1;`,
+    },
+
+    // --- 3 CÂU THÔNG HIỂU ---
+    {
+      id: 'QLL-Q04',
+      databaseId: 'CSDL_QLLUONG',
+      level: 'Thông hiểu',
+      order: 4,
+      question: 'Để lọc danh sách các nhân viên có mã nhân viên (MANV) bắt đầu bằng chữ "KT" (bộ phận Kế toán), điều kiện WHERE nào viết đúng chuẩn SQL?',
+      options: [
+        { key: 'A', text: `WHERE MANV = 'KT'` },
+        { key: 'B', text: `WHERE MANV LIKE 'KT%'` },
+        { key: 'C', text: `WHERE MANV LIKE '%KT'` },
+        { key: 'D', text: `WHERE MANV STARTS WITH 'KT'` },
+      ],
+      correctAnswer: 'B',
+      explanation: 'Mẫu LIKE \'KT%\' tìm tất cả chuỗi MANV bắt đầu bằng "KT" (gồm KT01, KT02, KT05, KT06).',
+      relatedSql: `SELECT MANV, HOTEN, DIACHI, MADV, HSLUONG, NGAYCONG\nFROM BANGLUONG\nWHERE MANV LIKE 'KT%';`,
+    },
+    {
+      id: 'QLL-Q05',
+      databaseId: 'CSDL_QLLUONG',
+      level: 'Thông hiểu',
+      order: 5,
+      question: 'Quan sát câu lệnh SQL:\nSELECT COUNT(*) AS SoNV\nFROM BANGLUONG\nWHERE DIACHI = \'TÂN UYÊN\';\nKết quả SoNV trả về là bao nhiêu nhân viên?',
+      sqlSnippet: `SELECT COUNT(*) AS SoNV\nFROM BANGLUONG\nWHERE DIACHI = 'TÂN UYÊN';`,
+      options: [
+        { key: 'A', text: '2 nhân viên' },
+        { key: 'B', text: '3 nhân viên (NV01, NV02, NV03)' },
+        { key: 'C', text: '4 nhân viên' },
+        { key: 'D', text: '5 nhân viên' },
+      ],
+      correctAnswer: 'B',
+      explanation: 'Trong bảng BANGLUONG có 3 nhân viên có địa chỉ cư trú tại TÂN UYÊN là NV01 (NGUYỄN KHẮC DINH), NV02 (TẠ VĂN MINH) và NV03 (BÙI THANH MAI).',
+      relatedSql: `SELECT MANV, HOTEN, DIACHI\nFROM BANGLUONG\nWHERE DIACHI = 'TÂN UYÊN';`,
+    },
+    {
+      id: 'QLL-Q06',
+      databaseId: 'CSDL_QLLUONG',
+      level: 'Thông hiểu',
+      order: 6,
+      question: 'Khi thực hiện JOIN hai bảng BANGLUONG bl và DMDV dv, vì cả 2 bảng đều có cột tên là DIACHI (địa chỉ nhân viên và địa chỉ đơn vị), ta phải viết mệnh đề SELECT như thế nào để không bị lỗi trùng tên cột (ambiguous column name)?',
+      options: [
+        { key: 'A', text: 'Viết rõ tên bảng/bí danh đứng trước tên cột: bl.DIACHI AS DiaChi_NV, dv.DIACHI AS DiaChi_DV' },
+        { key: 'B', text: 'Chỉ cần viết SELECT DIACHI, DIACHI FROM BANGLUONG JOIN DMDV' },
+        { key: 'C', text: 'Xóa cột DIACHI ở một trong hai bảng trước khi SELECT' },
+        { key: 'D', text: 'Dùng từ khóa DISTINCT DIACHI' },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Khi hai bảng trong câu lệnh JOIN có cột trùng tên (MADV, DIACHI), bắt buộc phải chỉ định tiền tố tên bảng hoặc bí danh (bl.DIACHI, dv.DIACHI) để SQLite phân biệt rõ.',
+      relatedSql: `SELECT bl.MANV, bl.HOTEN, bl.DIACHI AS DiaChi_NV, dv.TENDV, dv.DIACHI AS DiaChi_DV\nFROM BANGLUONG bl\nJOIN DMDV dv ON bl.MADV = dv.MADV;`,
+    },
+
+    // --- 4 CÂU VẬN DỤNG ---
+    {
+      id: 'QLL-Q07',
+      databaseId: 'CSDL_QLLUONG',
+      level: 'Vận dụng',
+      order: 7,
+      question: 'Câu lệnh nào thống kê số lượng nhân viên của từng đơn vị (hiển thị MADV, TENDV, SoNV), chỉ lấy các đơn vị có từ 2 nhân viên trở lên?',
+      options: [
+        {
+          key: 'A',
+          text: `SELECT dv.MADV, dv.TENDV, COUNT(bl.MANV) AS SoNV\nFROM DMDV dv\nJOIN BANGLUONG bl ON dv.MADV = bl.MADV\nGROUP BY dv.MADV, dv.TENDV\nHAVING COUNT(bl.MANV) >= 2;`,
+        },
+        {
+          key: 'B',
+          text: `SELECT dv.MADV, dv.TENDV, COUNT(bl.MANV) AS SoNV\nFROM DMDV dv\nJOIN BANGLUONG bl ON dv.MADV = bl.MADV\nWHERE COUNT(bl.MANV) >= 2\nGROUP BY dv.MADV;`,
+        },
+        {
+          key: 'C',
+          text: `SELECT MADV, COUNT(*) FROM BANGLUONG WHERE MANV >= 2 GROUP BY MADV;`,
+        },
+        {
+          key: 'D',
+          text: `SELECT dv.TENDV, SUM(bl.MANV) FROM DMDV dv HAVING COUNT(*) >= 2;`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Điều kiện lọc trên hàm gộp COUNT(bl.MANV) >= 2 sau khi gom nhóm GROUP BY theo đơn vị bắt buộc phải đặt trong mệnh đề HAVING.',
+      relatedSql: `SELECT dv.MADV, dv.TENDV, COUNT(bl.MANV) AS SoNV\nFROM DMDV dv\nJOIN BANGLUONG bl ON dv.MADV = bl.MADV\nGROUP BY dv.MADV, dv.TENDV\nHAVING COUNT(bl.MANV) >= 2;`,
+    },
+    {
+      id: 'QLL-Q08',
+      databaseId: 'CSDL_QLLUONG',
+      level: 'Vận dụng',
+      order: 8,
+      question: 'Giả sử cần tăng thêm 0.2 vào hệ số lương (HSLUONG) cho tất cả nhân viên có số ngày công (NGAYCONG) từ 27 ngày trở lên, câu lệnh UPDATE nào đúng?',
+      options: [
+        {
+          key: 'A',
+          text: `UPDATE BANGLUONG\nSET HSLUONG = HSLUONG + 0.2\nWHERE NGAYCONG >= 27;`,
+        },
+        {
+          key: 'B',
+          text: `UPDATE BANGLUONG\nSET HSLUONG = 0.2\nWHERE NGAYCONG >= 27;`,
+        },
+        {
+          key: 'C',
+          text: `ALTER TABLE BANGLUONG ADD HSLUONG = HSLUONG + 0.2 WHERE NGAYCONG >= 27;`,
+        },
+        {
+          key: 'D',
+          text: `INSERT INTO BANGLUONG (HSLUONG) VALUES (HSLUONG + 0.2) WHERE NGAYCONG >= 27;`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Câu lệnh UPDATE BANGLUONG SET HSLUONG = HSLUONG + 0.2 WHERE NGAYCONG >= 27; cộng thêm 0.2 vào hệ số lương hiện tại của những nhân viên đạt từ 27 ngày công trở lên.',
+      relatedSql: `UPDATE BANGLUONG\nSET HSLUONG = ROUND(HSLUONG + 0.2, 2)\nWHERE NGAYCONG >= 27;`,
+    },
+    {
+      id: 'QLL-Q09',
+      databaseId: 'CSDL_QLLUONG',
+      level: 'Vận dụng',
+      order: 9,
+      question: 'Câu lệnh nào tìm các nhân viên có hệ số lương (HSLUONG) cao hơn hệ số lương trung bình của toàn bộ nhân viên trong công ty?',
+      options: [
+        {
+          key: 'A',
+          text: `SELECT MANV, HOTEN, MADV, HSLUONG\nFROM BANGLUONG\nWHERE HSLUONG > (SELECT AVG(HSLUONG) FROM BANGLUONG);`,
+        },
+        {
+          key: 'B',
+          text: `SELECT MANV, HOTEN, HSLUONG FROM BANGLUONG WHERE HSLUONG > AVG(HSLUONG);`,
+        },
+        {
+          key: 'C',
+          text: `SELECT MANV, HOTEN FROM BANGLUONG HAVING HSLUONG > AVG(HSLUONG);`,
+        },
+        {
+          key: 'D',
+          text: `SELECT MANV, MAX(HSLUONG) FROM BANGLUONG;`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Vì không thể đặt trực tiếp hàm gộp AVG(HSLUONG) vào mệnh đề WHERE, ta sử dụng câu truy vấn con (SELECT AVG(HSLUONG) FROM BANGLUONG) để tính mức trung bình chung rồi so sánh.',
+      relatedSql: `SELECT MANV, HOTEN, MADV, HSLUONG\nFROM BANGLUONG\nWHERE HSLUONG > (\n  SELECT AVG(HSLUONG)\n  FROM BANGLUONG\n)\nORDER BY HSLUONG DESC;`,
+    },
+    {
+      id: 'QLL-Q10',
+      databaseId: 'CSDL_QLLUONG',
+      level: 'Vận dụng',
+      order: 10,
+      question: 'Đơn vị nào có tổng số ngày công (SUM(NGAYCONG)) của các nhân viên cao nhất, và dùng câu lệnh nào để truy vấn?',
+      options: [
+        {
+          key: 'A',
+          text: `Đơn vị 01 (CỬA HÀNG SỐ 01 - 70 ngày công) bằng câu lệnh JOIN, GROUP BY đơn vị, ORDER BY SUM(bl.NGAYCONG) DESC LIMIT 1`,
+        },
+        {
+          key: 'B',
+          text: `Đơn vị 03 (CÔNG TY ABC) bằng câu lệnh WHERE MAX(NGAYCONG)`,
+        },
+        {
+          key: 'C',
+          text: `Đơn vị 04 (XÍ NGHIỆP 204) bằng câu lệnh ORDER BY HSLUONG ASC LIMIT 1`,
+        },
+        {
+          key: 'D',
+          text: `Đơn vị 05 (XÍ NGHIỆP GỐM) bằng câu lệnh GROUP BY MANV`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Đơn vị 01 (CỬA HÀNG SỐ 01) có 3 nhân viên: KT01 (17) + NV01 (26) + NV02 (27) = 70 ngày công, cao nhất trong tất cả các đơn vị.',
+      relatedSql: `SELECT dv.MADV, dv.TENDV, SUM(bl.NGAYCONG) AS TongNgayCong\nFROM DMDV dv\nJOIN BANGLUONG bl ON dv.MADV = bl.MADV\nGROUP BY dv.MADV, dv.TENDV\nORDER BY TongNgayCong DESC\nLIMIT 1;`,
+    },
+  ],
+
+  // ==========================================
+  // 12. CSDL_VANTAI (4 Bảng - Vận Tải Hành Khách)
+  // ==========================================
+  CSDL_VANTAI: [
+    // --- 3 CÂU NHẬN BIẾT ---
+    {
+      id: 'VT-Q01',
+      databaseId: 'CSDL_VANTAI',
+      level: 'Nhận biết',
+      order: 1,
+      question: 'Trong CSDL_VANTAI, bảng CHITIET có khóa chính được xác định như thế nào?',
+      options: [
+        { key: 'A', text: 'Chỉ duy nhất trường SONT là khóa chính.' },
+        { key: 'B', text: 'Chỉ duy nhất trường MATUYEN là khóa chính.' },
+        { key: 'C', text: 'Khóa chính ghép gồm cặp hai trường (SONT, MATUYEN).' },
+        { key: 'D', text: 'Trường SOVE là khóa chính.' },
+      ],
+      correctAnswer: 'C',
+      explanation: 'Trong bảng CHITIET, một nhật trình (SONT) có thể đi qua nhiều tuyến đường (MATUYEN) và một tuyến đường xuất hiện trong nhiều nhật trình, nên khóa chính là cặp (SONT, MATUYEN).',
+      relatedSql: `SELECT *\nFROM CHITIET;`,
+    },
+    {
+      id: 'VT-Q02',
+      databaseId: 'CSDL_VANTAI',
+      level: 'Nhận biết',
+      order: 2,
+      question: 'Câu lệnh SQL nào hiển thị danh sách các tuyến đường gồm MATUYEN, TENTUYEN, SOKM và GIAVE từ bảng TUYENDUONG, sắp xếp theo cự ly (SOKM) giảm dần?',
+      options: [
+        { key: 'A', text: 'SELECT * FROM TUYENDUONG ORDER BY SOKM DESC;' },
+        { key: 'B', text: 'SELECT * FROM TUYENDUONG SORT BY SOKM DESC;' },
+        { key: 'C', text: 'SELECT ALL FROM TUYENDUONG GROUP BY SOKM;' },
+        { key: 'D', text: 'GET * FROM TUYENDUONG ORDER BY SOKM ASC;' },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Mệnh đề ORDER BY SOKM DESC sắp xếp các tuyến đường theo số km từ xa nhất (80 km - BDƯƠNG - BÌNH LONG) đến gần nhất (30 km - BDƯƠNG - TPHCM).',
+      relatedSql: `SELECT MATUYEN, TENTUYEN, SOKM, GIAVE\nFROM TUYENDUONG\nORDER BY SOKM DESC;`,
+    },
+    {
+      id: 'VT-Q03',
+      databaseId: 'CSDL_VANTAI',
+      level: 'Nhận biết',
+      order: 3,
+      question: 'Theo dữ liệu trong bảng DMXE, xe có mã MAXE = \'X002\' (biển số 613459) do lái xe nào phụ trách và có bao nhiêu chỗ ngồi (SOCHO)?',
+      sqlSnippet: `SELECT MAXE, TENXE, TENLAIXE, SOCHO\nFROM DMXE\nWHERE MAXE = 'X002';`,
+      options: [
+        { key: 'A', text: 'Lái xe BÌNH - 50 chỗ' },
+        { key: 'B', text: 'Lái xe NAM - 45 chỗ' },
+        { key: 'C', text: 'Lái xe HÀ - 50 chỗ' },
+        { key: 'D', text: 'Lái xe LINH - 30 chỗ' },
+      ],
+      correctAnswer: 'B',
+      explanation: 'Theo dữ liệu bảng DMXE: X001 (BÌNH, 50 chỗ), X002 (NAM, 45 chỗ), X003 (HÀ, 50 chỗ), X004 (LINH, 30 chỗ).',
+      relatedSql: `SELECT MAXE, TENXE, TENLAIXE, SOCHO\nFROM DMXE\nWHERE MAXE = 'X002';`,
+    },
+
+    // --- 3 CÂU THÔNG HIỂU ---
+    {
+      id: 'VT-Q04',
+      databaseId: 'CSDL_VANTAI',
+      level: 'Thông hiểu',
+      order: 4,
+      question: 'Để hiển thị Số nhật trình (SONT), Ngày chạy (NGAY), Biển số xe (TENXE) và Tên lái xe (TENLAIXE), ta cần kết nối hai bảng nào?',
+      options: [
+        { key: 'A', text: 'Bảng NHATTRINH và bảng DMXE qua trường khóa MAXE.' },
+        { key: 'B', text: 'Bảng NHATTRINH và bảng TUYENDUONG qua trường MATUYEN.' },
+        { key: 'C', text: 'Bảng DMXE và bảng CHITIET qua trường SONT.' },
+        { key: 'D', text: 'Bảng CHITIET và bảng TUYENDUONG qua trường MATUYEN.' },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Bảng NHATTRINH lưu SONT, NGAY, MAXE; bảng DMXE lưu MAXE, TENXE, TENLAIXE, SOCHO. Hai bảng kết nối trực tiếp qua khóa MAXE.',
+      relatedSql: `SELECT nt.SONT, nt.NGAY, xe.MAXE, xe.TENXE, xe.TENLAIXE, xe.SOCHO\nFROM NHATTRINH nt\nJOIN DMXE xe ON nt.MAXE = xe.MAXE;`,
+    },
+    {
+      id: 'VT-Q05',
+      databaseId: 'CSDL_VANTAI',
+      level: 'Thông hiểu',
+      order: 5,
+      question: 'Quan sát câu lệnh SQL:\nSELECT SUM(SOVE) AS TongVe\nFROM CHITIET\nWHERE SONT = \'002\';\nTổng số vé bán ra của nhật trình \'002\' là bao nhiêu vé?',
+      sqlSnippet: `SELECT SUM(SOVE) AS TongVe\nFROM CHITIET\nWHERE SONT = '002';`,
+      options: [
+        { key: 'A', text: '95 vé' },
+        { key: 'B', text: '97 vé' },
+        { key: 'C', text: '125 vé (45 vé BD02 + 40 vé BD03 + 40 vé BD04)' },
+        { key: 'D', text: '150 vé' },
+      ],
+      correctAnswer: 'C',
+      explanation: 'Trong bảng CHITIET, nhật trình 002 gồm 3 dòng: BD02 (45 vé), BD03 (40 vé) và BD04 (40 vé). Tổng cộng: 45 + 40 + 40 = 125 vé.',
+      relatedSql: `SELECT SONT, SUM(SOVE) AS TongVe\nFROM CHITIET\nWHERE SONT = '002'\nGROUP BY SONT;`,
+    },
+    {
+      id: 'VT-Q06',
+      databaseId: 'CSDL_VANTAI',
+      level: 'Thông hiểu',
+      order: 6,
+      question: 'Để tính Thành tiền bán vé (THANHTIEN = SOVE * GIAVE) cho từng dòng trong bảng CHITIET kèm theo Tên tuyến đường (TENTUYEN), cần kết nối bảng CHITIET với bảng nào?',
+      options: [
+        { key: 'A', text: 'Kết nối bảng CHITIET với bảng TUYENDUONG qua trường MATUYEN.' },
+        { key: 'B', text: 'Kết nối bảng CHITIET với bảng DMXE qua trường MAXE.' },
+        { key: 'C', text: 'Kết nối bảng CHITIET với bảng NHATTRINH qua trường SONT.' },
+        { key: 'D', text: 'Không cần kết nối bảng nào cả.' },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Cột SOVE nằm ở bảng CHITIET còn cột TENTUYEN và GIAVE nằm ở bảng TUYENDUONG, nên cần JOIN hai bảng này qua khóa MATUYEN.',
+      relatedSql: `SELECT ct.SONT, ct.MATUYEN, td.TENTUYEN, ct.SOVE, td.GIAVE, (ct.SOVE * td.GIAVE) AS THANHTIEN\nFROM CHITIET ct\nJOIN TUYENDUONG td ON ct.MATUYEN = td.MATUYEN;`,
+    },
+
+    // --- 4 CÂU VẬN DỤNG ---
+    {
+      id: 'VT-Q07',
+      databaseId: 'CSDL_VANTAI',
+      level: 'Vận dụng',
+      order: 7,
+      question: 'Câu lệnh nào phát hiện chuyến xe bán số vé vượt quá số chỗ ngồi thiết kế (ct.SOVE > xe.SOCHO)?',
+      options: [
+        {
+          key: 'A',
+          text: `SELECT ct.SONT, nt.NGAY, xe.TENXE, xe.TENLAIXE, ct.MATUYEN, ct.SOVE, xe.SOCHO\nFROM CHITIET ct\nJOIN NHATTRINH nt ON ct.SONT = nt.SONT\nJOIN DMXE xe ON nt.MAXE = xe.MAXE\nWHERE ct.SOVE > xe.SOCHO;`,
+        },
+        {
+          key: 'B',
+          text: `SELECT SONT, SOVE FROM CHITIET WHERE SOVE > 50;`,
+        },
+        {
+          key: 'C',
+          text: `SELECT MAXE, TENXE, SOCHO FROM DMXE WHERE SOCHO < 45;`,
+        },
+        {
+          key: 'D',
+          text: `SELECT ct.SONT, xe.SOCHO FROM CHITIET ct, DMXE xe WHERE ct.SONT = xe.MAXE;`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Kết nối CHITIET -> NHATTRINH -> DMXE để đối chiếu số vé bán (ct.SOVE) với số ghế của chiếc xe thực hiện nhật trình đó (xe.SOCHO), phát hiện nhật trình 003 tuyến BD01 (52 vé > 45 chỗ của xe X002).',
+      relatedSql: `SELECT ct.SONT, nt.NGAY, xe.TENXE, xe.TENLAIXE, ct.MATUYEN, ct.SOVE, xe.SOCHO\nFROM CHITIET ct\nJOIN NHATTRINH nt ON ct.SONT = nt.SONT\nJOIN DMXE xe ON nt.MAXE = xe.MAXE\nWHERE ct.SOVE > xe.SOCHO;`,
+    },
+    {
+      id: 'VT-Q08',
+      databaseId: 'CSDL_VANTAI',
+      level: 'Vận dụng',
+      order: 8,
+      question: 'Câu lệnh nào thống kê tổng doanh thu (SUM(ct.SOVE * td.GIAVE)) theo từng Tuyến đường, chỉ lấy các tuyến có tổng doanh thu từ 500.000 VNĐ trở lên?',
+      options: [
+        {
+          key: 'A',
+          text: `SELECT td.MATUYEN, td.TENTUYEN, SUM(ct.SOVE * td.GIAVE) AS DoanhThu\nFROM TUYENDUONG td\nJOIN CHITIET ct ON td.MATUYEN = ct.MATUYEN\nGROUP BY td.MATUYEN, td.TENTUYEN\nHAVING SUM(ct.SOVE * td.GIAVE) >= 500000;`,
+        },
+        {
+          key: 'B',
+          text: `SELECT td.MATUYEN, SUM(ct.SOVE * td.GIAVE) FROM TUYENDUONG td JOIN CHITIET ct ON td.MATUYEN = ct.MATUYEN WHERE SUM(ct.SOVE * td.GIAVE) >= 500000 GROUP BY td.MATUYEN;`,
+        },
+        {
+          key: 'C',
+          text: `SELECT MATUYEN, GIAVE FROM TUYENDUONG WHERE GIAVE >= 500000;`,
+        },
+        {
+          key: 'D',
+          text: `SELECT MATUYEN, SUM(SOVE) FROM CHITIET HAVING SUM(SOVE) >= 500000;`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Sau khi gom nhóm GROUP BY theo tuyến đường, điều kiện lọc trên hàm tổng hợp SUM(ct.SOVE * td.GIAVE) >= 500000 phải đặt trong mệnh đề HAVING.',
+      relatedSql: `SELECT td.MATUYEN, td.TENTUYEN, SUM(ct.SOVE * td.GIAVE) AS DoanhThu\nFROM TUYENDUONG td\nJOIN CHITIET ct ON td.MATUYEN = ct.MATUYEN\nGROUP BY td.MATUYEN, td.TENTUYEN\nHAVING SUM(ct.SOVE * td.GIAVE) >= 500000;`,
+    },
+    {
+      id: 'VT-Q09',
+      databaseId: 'CSDL_VANTAI',
+      level: 'Vận dụng',
+      order: 9,
+      question: 'Trong bảng DMXE, chiếc xe nào hiện chưa từng tham gia bất kỳ chuyến nhật trình nào trong bảng NHATTRINH, và câu lệnh nào dùng để tìm?',
+      options: [
+        {
+          key: 'A',
+          text: `Xe X004 (biển số 616107, lái xe LINH) - dùng LEFT JOIN từ DMXE sang NHATTRINH kết hợp WHERE nt.SONT IS NULL`,
+        },
+        {
+          key: 'B',
+          text: `Xe X003 (lái xe HÀ) - dùng INNER JOIN kết hợp WHERE nt.SONT = 0`,
+        },
+        {
+          key: 'C',
+          text: `Xe X001 (lái xe BÌNH) - dùng WHERE nt.MAXE = NULL`,
+        },
+        {
+          key: 'D',
+          text: `Tất cả các xe đều đã có nhật trình chạy`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Xe X004 (616107 - lái xe LINH - 30 chỗ) chưa xuất hiện trong bảng NHATTRINH. Dùng LEFT JOIN từ DMXE sang NHATTRINH kết hợp WHERE nt.SONT IS NULL sẽ tìm ra chiếc xe này.',
+      relatedSql: `SELECT xe.MAXE, xe.TENXE, xe.TENLAIXE, xe.SOCHO\nFROM DMXE xe\nLEFT JOIN NHATTRINH nt ON xe.MAXE = nt.MAXE\nWHERE nt.SONT IS NULL;`,
+    },
+    {
+      id: 'VT-Q10',
+      databaseId: 'CSDL_VANTAI',
+      level: 'Vận dụng',
+      order: 10,
+      question: 'Trong bảng NHATTRINH có 5 nhật trình (001 đến 005), nhưng những nhật trình nào chưa có dữ liệu chi tiết vé bán trong bảng CHITIET?',
+      options: [
+        {
+          key: 'A',
+          text: `Nhật trình 004 và 005 - tìm bằng LEFT JOIN từ NHATTRINH sang CHITIET kết hợp WHERE ct.MATUYEN IS NULL`,
+        },
+        {
+          key: 'B',
+          text: `Nhật trình 001 và 002`,
+        },
+        {
+          key: 'C',
+          text: `Chỉ nhật trình 003`,
+        },
+        {
+          key: 'D',
+          text: `Tất cả 5 nhật trình đều đã có trong bảng CHITIET`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Trong bảng CHITIET mới chỉ có dữ liệu của SONT 001, 002 và 003. Hai nhật trình 004 (15/05/2005 - X002) và 005 (20/05/2005 - X003) chưa có bản ghi nào trong CHITIET.',
+      relatedSql: `SELECT nt.SONT, nt.NGAY, nt.MAXE\nFROM NHATTRINH nt\nLEFT JOIN CHITIET ct ON nt.SONT = ct.SONT\nWHERE ct.MATUYEN IS NULL;`,
+    },
+  ],
+
+  // ==========================================
+  // 13. CSDL_QLKHO (4 Bảng - Quản Lý Kho)
+  // ==========================================
+  CSDL_QLKHO: [
+    // --- 3 CÂU NHẬN BIẾT ---
+    {
+      id: 'KHO-Q01',
+      databaseId: 'CSDL_QLKHO',
+      level: 'Nhận biết',
+      order: 1,
+      question: 'Trong CSDL_QLKHO, bảng CTNX (Chi tiết nhập xuất) có khóa chính được xác định như thế nào?',
+      options: [
+        { key: 'A', text: 'Chỉ duy nhất trường SOHD là khóa chính.' },
+        { key: 'B', text: 'Cặp hai trường (SOHD, MAHH) là khóa chính.' },
+        { key: 'C', text: 'Bộ ba trường (SOHD, MAHH, MAKHO) tạo thành khóa chính ghép.' },
+        { key: 'D', text: 'Trường SOLUONG là khóa chính.' },
+      ],
+      correctAnswer: 'C',
+      explanation: 'Trong bảng CTNX, cùng một số hóa đơn (SOHD = 0003) và cùng một mã hàng hóa (MAHH = B001) có thể nhập/xuất tại nhiều kho khác nhau (K02 và K03), nên khóa chính ghép gồm cả 3 trường (SOHD, MAHH, MAKHO).',
+      relatedSql: `SELECT *\nFROM CTNX;`,
+    },
+    {
+      id: 'KHO-Q02',
+      databaseId: 'CSDL_QLKHO',
+      level: 'Nhận biết',
+      order: 2,
+      question: 'Trong bảng NXKHO, trường LOAIHD nhận hai giá trị \'N\' và \'X\' mang ý nghĩa gì, và dùng câu lệnh nào để lọc các hóa đơn Nhập kho?',
+      options: [
+        { key: 'A', text: '\'N\' là Nhập kho, \'X\' là Xuất kho - dùng SELECT * FROM NXKHO WHERE LOAIHD = \'N\';' },
+        { key: 'B', text: '\'N\' là Ngoại tỉnh, \'X\' là Xí nghiệp - dùng SELECT * FROM NXKHO;' },
+        { key: 'C', text: 'Dùng SELECT * FROM NXKHO WHERE LOAIHD = N;' },
+        { key: 'D', text: 'Dùng GET * FROM NXKHO WHERE LOAIHD LIKE \'N\';' },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Giá trị \'N\' ký hiệu cho hóa đơn Nhập kho (0001, 0003, 0005) và \'X\' ký hiệu cho hóa đơn Xuất kho (0002, 0004).',
+      relatedSql: `SELECT SOHD, NGAY, LOAIHD\nFROM NXKHO\nWHERE LOAIHD = 'N';`,
+    },
+    {
+      id: 'KHO-Q03',
+      databaseId: 'CSDL_QLKHO',
+      level: 'Nhận biết',
+      order: 3,
+      question: 'Theo dữ liệu bảng DMHH, mặt hàng có đơn giá (DONGIA) cao nhất là mặt hàng nào?',
+      sqlSnippet: `SELECT MAHH, TENHH, DONGIA\nFROM DMHH\nORDER BY DONGIA DESC\nLIMIT 1;`,
+      options: [
+        { key: 'A', text: 'A001 - Ấm điện Trung Quốc (100.000)' },
+        { key: 'B', text: 'MS01 - Máy sấy tóc Vĩnh Hòa (125.000)' },
+        { key: 'C', text: 'QD01 - Quạt điện Bình Minh (200.000)' },
+        { key: 'D', text: 'QD02 - Quạt điện Hà Nội (220.000)' },
+      ],
+      correctAnswer: 'D',
+      explanation: 'Trong bảng DMHH, mặt hàng QD02 (Quạt điện Hà Nội) có đơn giá cao nhất là 220.000.',
+      relatedSql: `SELECT MAHH, TENHH, DONGIA\nFROM DMHH\nORDER BY DONGIA DESC\nLIMIT 1;`,
+    },
+
+    // --- 3 CÂU THÔNG HIỂU ---
+    {
+      id: 'KHO-Q04',
+      databaseId: 'CSDL_QLKHO',
+      level: 'Thông hiểu',
+      order: 4,
+      question: 'Để lọc tất cả các mặt hàng thuộc nhóm "Bóng đèn" hoặc "Quạt điện" trong bảng DMHH, mệnh đề WHERE nào sau đây sử dụng toán tử LIKE đúng?',
+      options: [
+        { key: 'A', text: `WHERE TENHH LIKE 'Bóng đèn%' OR TENHH LIKE 'Quạt điện%'` },
+        { key: 'B', text: `WHERE TENHH = 'Bóng đèn' AND TENHH = 'Quạt điện'` },
+        { key: 'C', text: `WHERE TENHH IN ('Bóng đèn%', 'Quạt điện%')` },
+        { key: 'D', text: `WHERE MAHH = 'B%' OR MAHH = 'QD%'` },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Toán tử LIKE \'Bóng đèn%\' kết hợp OR TENHH LIKE \'Quạt điện%\' lọc tất cả mặt hàng có tên bắt đầu bằng "Bóng đèn" hoặc "Quạt điện".',
+      relatedSql: `SELECT MAHH, TENHH, DONGIA\nFROM DMHH\nWHERE TENHH LIKE 'Bóng đèn%' OR TENHH LIKE 'Quạt điện%';`,
+    },
+    {
+      id: 'KHO-Q05',
+      databaseId: 'CSDL_QLKHO',
+      level: 'Thông hiểu',
+      order: 5,
+      question: 'Quan sát câu lệnh SQL:\nSELECT SUM(SOLUONG) AS TongSL\nFROM CTNX\nWHERE SOHD = \'0003\';\nTổng số lượng hàng hóa trong hóa đơn \'0003\' là bao nhiêu?',
+      sqlSnippet: `SELECT SUM(SOLUONG) AS TongSL\nFROM CTNX\nWHERE SOHD = '0003';`,
+      options: [
+        { key: 'A', text: '2.500' },
+        { key: 'B', text: '6.500' },
+        { key: 'C', text: '6.750 (2500 + 4000 + 50 + 200)' },
+        { key: 'D', text: '7.000' },
+      ],
+      correctAnswer: 'C',
+      explanation: 'Hóa đơn 0003 có 4 dòng trong bảng CTNX: B001 tại K02 (2500), B001 tại K03 (4000), LN01 tại K04 (50) và QD01 tại K02 (200). Tổng cộng = 6750.',
+      relatedSql: `SELECT SOHD, SUM(SOLUONG) AS TongSL\nFROM CTNX\nWHERE SOHD = '0003'\nGROUP BY SOHD;`,
+    },
+    {
+      id: 'KHO-Q06',
+      databaseId: 'CSDL_QLKHO',
+      level: 'Thông hiểu',
+      order: 6,
+      question: 'Để hiển thị Số hóa đơn (SOHD), Tên kho (TENKHO), Tên hàng hóa (TENHH), Số lượng (SOLUONG) và tính Thành tiền = SOLUONG * DONGIA, cần kết nối những bảng nào?',
+      options: [
+        { key: 'A', text: 'Kết nối 3 bảng: CTNX, DMKHO và DMHH qua các khóa MAKHO và MAHH.' },
+        { key: 'B', text: 'Chỉ cần bảng CTNX và DMKHO.' },
+        { key: 'C', text: 'Chỉ cần bảng NXKHO và DMHH.' },
+        { key: 'D', text: 'Chỉ cần truy vấn trên bảng CTNX.' },
+      ],
+      correctAnswer: 'A',
+      explanation: 'SOHD và SOLUONG nằm ở CTNX, TENKHO nằm ở DMKHO, còn TENHH và DONGIA nằm ở DMHH. Do đó cần JOIN 3 bảng này.',
+      relatedSql: `SELECT ct.SOHD, k.TENKHO, hh.TENHH, ct.SOLUONG, hh.DONGIA, (ct.SOLUONG * hh.DONGIA) AS THANHTIEN\nFROM CTNX ct\nJOIN DMKHO k ON ct.MAKHO = k.MAKHO\nJOIN DMHH hh ON ct.MAHH = hh.MAHH;`,
+    },
+
+    // --- 4 CÂU VẬN DỤNG ---
+    {
+      id: 'KHO-Q07',
+      databaseId: 'CSDL_QLKHO',
+      level: 'Vận dụng',
+      order: 7,
+      question: 'Câu lệnh nào thống kê tổng số lượng hàng hóa lưu chuyển theo từng Kho (MAKHO, TENKHO), chỉ lấy các kho có tổng số lượng từ 1.000 đơn vị trở lên?',
+      options: [
+        {
+          key: 'A',
+          text: `SELECT k.MAKHO, k.TENKHO, SUM(ct.SOLUONG) AS TongSL\nFROM DMKHO k\nJOIN CTNX ct ON k.MAKHO = ct.MAKHO\nGROUP BY k.MAKHO, k.TENKHO\nHAVING SUM(ct.SOLUONG) >= 1000;`,
+        },
+        {
+          key: 'B',
+          text: `SELECT k.MAKHO, k.TENKHO, SUM(ct.SOLUONG) FROM DMKHO k JOIN CTNX ct ON k.MAKHO = ct.MAKHO WHERE SUM(ct.SOLUONG) >= 1000 GROUP BY k.MAKHO;`,
+        },
+        {
+          key: 'C',
+          text: `SELECT MAKHO, SOLUONG FROM CTNX WHERE SOLUONG >= 1000;`,
+        },
+        {
+          key: 'D',
+          text: `SELECT k.TENKHO, COUNT(*) FROM DMKHO k HAVING SUM(SOLUONG) >= 1000;`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Sau khi gom nhóm GROUP BY theo kho, điều kiện lọc trên hàm tổng hợp SUM(ct.SOLUONG) >= 1000 phải đặt trong mệnh đề HAVING (kết quả là K02 - Long Bình và K03 - Phú Xuân).',
+      relatedSql: `SELECT k.MAKHO, k.TENKHO, SUM(ct.SOLUONG) AS TongSL\nFROM DMKHO k\nJOIN CTNX ct ON k.MAKHO = ct.MAKHO\nGROUP BY k.MAKHO, k.TENKHO\nHAVING SUM(ct.SOLUONG) >= 1000;`,
+    },
+    {
+      id: 'KHO-Q08',
+      databaseId: 'CSDL_QLKHO',
+      level: 'Vận dụng',
+      order: 8,
+      question: 'Những mặt hàng nào trong bảng DMHH chưa từng phát sinh bất kỳ giao dịch nhập/xuất nào trong bảng CTNX, và câu lệnh nào dùng để tìm?',
+      options: [
+        {
+          key: 'A',
+          text: `3 mặt hàng B002, LN02, MS01 - tìm bằng LEFT JOIN từ DMHH sang CTNX kết hợp WHERE ct.SOHD IS NULL`,
+        },
+        {
+          key: 'B',
+          text: `Mặt hàng A001 và B001 - dùng INNER JOIN`,
+        },
+        {
+          key: 'C',
+          text: `Mặt hàng QD01 và QD02 - dùng WHERE ct.SOLUONG = 0`,
+        },
+        {
+          key: 'D',
+          text: `Tất cả 8 mặt hàng trong DMHH đều đã có giao dịch`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Trong 8 mặt hàng của DMHH, chỉ có A001, B001, LN01, QD01, QD02 xuất hiện trong CTNX. Ba mặt hàng B002 (Bóng đèn Điện Quang), LN02 (Lò nướng Hồng Ký), MS01 (Máy sấy tóc Vĩnh Hòa) chưa có giao dịch nào.',
+      relatedSql: `SELECT hh.MAHH, hh.TENHH, hh.DONGIA\nFROM DMHH hh\nLEFT JOIN CTNX ct ON hh.MAHH = ct.MAHH\nWHERE ct.SOHD IS NULL;`,
+    },
+    {
+      id: 'KHO-Q09',
+      databaseId: 'CSDL_QLKHO',
+      level: 'Vận dụng',
+      order: 9,
+      question: 'Trong bảng NXKHO có 5 hóa đơn (0001 đến 0005), những hóa đơn nào chưa có dữ liệu chi tiết trong bảng CTNX?',
+      options: [
+        {
+          key: 'A',
+          text: `Hóa đơn 0004 và 0005 - tìm bằng LEFT JOIN từ NXKHO sang CTNX kết hợp WHERE ct.MAHH IS NULL`,
+        },
+        {
+          key: 'B',
+          text: `Hóa đơn 0001 và 0002`,
+        },
+        {
+          key: 'C',
+          text: `Chỉ hóa đơn 0003`,
+        },
+        {
+          key: 'D',
+          text: `Cả 5 hóa đơn đều đã có chi tiết trong CTNX`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Bảng CTNX mới lưu chi tiết của các hóa đơn 0001, 0002 và 0003. Hai hóa đơn 0004 (03/12/2005 - X) và 0005 (16/07/2005 - N) chưa có dòng chi tiết nào.',
+      relatedSql: `SELECT nx.SOHD, nx.NGAY, nx.LOAIHD\nFROM NXKHO nx\nLEFT JOIN CTNX ct ON nx.SOHD = ct.SOHD\nWHERE ct.MAHH IS NULL;`,
+    },
+    {
+      id: 'KHO-Q10',
+      databaseId: 'CSDL_QLKHO',
+      level: 'Vận dụng',
+      order: 10,
+      question: 'Câu lệnh nào thống kê tổng trị giá tiền hàng (SUM(ct.SOLUONG * hh.DONGIA)) của từng hóa đơn, sắp xếp từ cao xuống thấp?',
+      options: [
+        {
+          key: 'A',
+          text: `SELECT nx.SOHD, nx.NGAY, nx.LOAIHD, SUM(ct.SOLUONG * hh.DONGIA) AS TongTriGia\nFROM NXKHO nx\nJOIN CTNX ct ON nx.SOHD = ct.SOHD\nJOIN DMHH hh ON ct.MAHH = hh.MAHH\nGROUP BY nx.SOHD, nx.NGAY, nx.LOAIHD\nORDER BY TongTriGia DESC;`,
+        },
+        {
+          key: 'B',
+          text: `SELECT SOHD, MAX(SOLUONG) FROM CTNX GROUP BY SOHD;`,
+        },
+        {
+          key: 'C',
+          text: `SELECT SOHD, SUM(DONGIA) FROM DMHH ORDER BY DONGIA DESC;`,
+        },
+        {
+          key: 'D',
+          text: `SELECT nx.SOHD, ct.SOLUONG * hh.DONGIA FROM NXKHO nx, CTNX ct, DMHH hh;`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Kết nối NXKHO, CTNX và DMHH, gom nhóm theo từng hóa đơn (GROUP BY nx.SOHD, nx.NGAY, nx.LOAIHD) và tính tổng trị giá SUM(ct.SOLUONG * hh.DONGIA).',
+      relatedSql: `SELECT nx.SOHD, nx.NGAY, nx.LOAIHD, SUM(ct.SOLUONG * hh.DONGIA) AS TongTriGia\nFROM NXKHO nx\nJOIN CTNX ct ON nx.SOHD = ct.SOHD\nJOIN DMHH hh ON ct.MAHH = hh.MAHH\nGROUP BY nx.SOHD, nx.NGAY, nx.LOAIHD\nORDER BY TongTriGia DESC;`,
+    },
+  ],
+
+  // ==========================================
+  // 14. CSDL_KDSACH (4 Bảng - Kinh Doanh Sách)
+  // ==========================================
+  CSDL_KDSACH: [
+    // --- 3 CÂU NHẬN BIẾT ---
+    {
+      id: 'KDS-Q01',
+      databaseId: 'CSDL_KDSACH',
+      level: 'Nhận biết',
+      order: 1,
+      question: 'Trong CSDL_KDSACH, bảng CTHOADON có khóa chính được xác định như thế nào?',
+      options: [
+        { key: 'A', text: 'Chỉ duy nhất trường SOCTU là khóa chính.' },
+        { key: 'B', text: 'Chỉ duy nhất trường MASACH là khóa chính.' },
+        { key: 'C', text: 'Khóa chính ghép gồm bộ ba trường (SOCTU, MASACH, MALOAI).' },
+        { key: 'D', text: 'Trường SOLUONG là khóa chính.' },
+      ],
+      correctAnswer: 'C',
+      explanation: 'Theo cấu trúc bảng CTHOADON, bộ ba thuộc tính (SOCTU, MASACH, MALOAI) cùng tạo nên khóa chính ghép để định danh duy nhất mỗi dòng chi tiết chứng từ sách.',
+      relatedSql: `SELECT *\nFROM CTHOADON;`,
+    },
+    {
+      id: 'KDS-Q02',
+      databaseId: 'CSDL_KDSACH',
+      level: 'Nhận biết',
+      order: 2,
+      question: 'Câu lệnh SQL nào hiển thị toàn bộ danh sách các loại sách gồm MALOAI và LOAISACH từ bảng LOAISACH?',
+      options: [
+        { key: 'A', text: 'SELECT * FROM LOAISACH;' },
+        { key: 'B', text: 'SELECT ALL FROM LOAISACH;' },
+        { key: 'C', text: 'SHOW TABLE LOAISACH;' },
+        { key: 'D', text: 'GET MALOAI, LOAISACH FROM LOAISACH;' },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Cú pháp SELECT * FROM LOAISACH; hiển thị tất cả 5 loại sách: HH03 (HÓA HỌC), SH05 (SINH HỌC), TH01 (TIN HỌC), VH02 (VĂN HỌC), VL04 (VẬT LÝ).',
+      relatedSql: `SELECT *\nFROM LOAISACH;`,
+    },
+    {
+      id: 'KDS-Q03',
+      databaseId: 'CSDL_KDSACH',
+      level: 'Nhận biết',
+      order: 3,
+      question: 'Theo dữ liệu bảng DMSACH, cuốn sách nào có đơn giá (DONGIA) cao nhất (36.000)?',
+      sqlSnippet: `SELECT MASACH, TENSACH, DONGIA\nFROM DMSACH\nORDER BY DONGIA DESC\nLIMIT 1;`,
+      options: [
+        { key: 'A', text: 'ACC001 - LẬP TRÌNH ACCESS CƠ BẢN (25.000)' },
+        { key: 'B', text: 'SHC003 - SINH HỌC CAO CẤP (32.000)' },
+        { key: 'C', text: 'WRD002 - LÀM QUEN VỚI MSWORD 2002 (36.000)' },
+        { key: 'D', text: 'VLC002 - VẬT LÝ CAO CẤP (23.000)' },
+      ],
+      correctAnswer: 'C',
+      explanation: 'Trong bảng DMSACH, cuốn WRD002 (LÀM QUEN VỚI MSWORD 2002) có đơn giá cao nhất là 36.000.',
+      relatedSql: `SELECT MASACH, TENSACH, DONGIA\nFROM DMSACH\nORDER BY DONGIA DESC\nLIMIT 1;`,
+    },
+
+    // --- 3 CÂU THÔNG HIỂU ---
+    {
+      id: 'KDS-Q04',
+      databaseId: 'CSDL_KDSACH',
+      level: 'Thông hiểu',
+      order: 4,
+      question: 'Để lọc danh sách các hóa đơn trong bảng HOADON của khách hàng ở khu vực "BÌNH DƯƠNG", mệnh đề WHERE nào sau đây là đúng?',
+      options: [
+        { key: 'A', text: `WHERE DIACHI = 'BÌNH DƯƠNG'` },
+        { key: 'B', text: `WHERE HOTEN = 'BÌNH DƯƠNG'` },
+        { key: 'C', text: `WHERE LOAICTU = 'BÌNH DƯƠNG'` },
+        { key: 'D', text: `WHERE SOCTU LIKE 'BÌNH DƯƠNG'` },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Trường DIACHI trong bảng HOADON lưu địa chỉ khách hàng. Điều kiện WHERE DIACHI = \'BÌNH DƯƠNG\' lọc ra 4 chứng từ: 002, 003, 005 và 007.',
+      relatedSql: `SELECT SOCTU, LOAICTU, NGAYCTU, HOTEN, DIACHI\nFROM HOADON\nWHERE DIACHI = 'BÌNH DƯƠNG';`,
+    },
+    {
+      id: 'KDS-Q05',
+      databaseId: 'CSDL_KDSACH',
+      level: 'Thông hiểu',
+      order: 5,
+      question: 'Quan sát câu lệnh SQL:\nSELECT SUM(SOLUONG) AS TongSL\nFROM CTHOADON\nWHERE SOCTU = \'001\';\nTổng số lượng sách trong chứng từ \'001\' là bao nhiêu cuốn?',
+      sqlSnippet: `SELECT SUM(SOLUONG) AS TongSL\nFROM CTHOADON\nWHERE SOCTU = '001';`,
+      options: [
+        { key: 'A', text: '8 cuốn' },
+        { key: 'B', text: '20 cuốn' },
+        { key: 'C', text: '23 cuốn (5 cuốn ACC001 + 15 cuốn SHC003 + 3 cuốn WRD002)' },
+        { key: 'D', text: '35 cuốn' },
+      ],
+      correctAnswer: 'C',
+      explanation: 'Trong bảng CTHOADON, chứng từ 001 gồm 3 dòng: ACC001 (5), SHC003 (15) và WRD002 (3). Tổng số lượng = 5 + 15 + 3 = 23 cuốn.',
+      relatedSql: `SELECT SOCTU, SUM(SOLUONG) AS TongSL\nFROM CTHOADON\nWHERE SOCTU = '001'\nGROUP BY SOCTU;`,
+    },
+    {
+      id: 'KDS-Q06',
+      databaseId: 'CSDL_KDSACH',
+      level: 'Thông hiểu',
+      order: 6,
+      question: 'Để hiển thị Số chứng từ (SOCTU), Tên sách (TENSACH), Tên loại sách (LOAISACH), Số lượng (SOLUONG) và tính Thành tiền = SOLUONG * DONGIA, cần kết nối những bảng nào?',
+      options: [
+        { key: 'A', text: 'Kết nối 3 bảng: CTHOADON, DMSACH và LOAISACH qua MASACH và MALOAI.' },
+        { key: 'B', text: 'Chỉ cần bảng CTHOADON và HOADON.' },
+        { key: 'C', text: 'Chỉ cần bảng DMSACH và LOAISACH.' },
+        { key: 'D', text: 'Chỉ cần truy vấn trên bảng CTHOADON.' },
+      ],
+      correctAnswer: 'A',
+      explanation: 'SOCTU và SOLUONG nằm ở CTHOADON, TENSACH và DONGIA nằm ở DMSACH, còn tên LOAISACH nằm ở bảng LOAISACH.',
+      relatedSql: `SELECT ct.SOCTU, s.TENSACH, ls.LOAISACH, ct.SOLUONG, s.DONGIA, (ct.SOLUONG * s.DONGIA) AS THANHTIEN\nFROM CTHOADON ct\nJOIN DMSACH s ON ct.MASACH = s.MASACH\nJOIN LOAISACH ls ON ct.MALOAI = ls.MALOAI;`,
+    },
+
+    // --- 4 CÂU VẬN DỤNG ---
+    {
+      id: 'KDS-Q07',
+      databaseId: 'CSDL_KDSACH',
+      level: 'Vận dụng',
+      order: 7,
+      question: 'Câu lệnh nào thống kê tổng số lượng sách theo từng Loại sách (MALOAI, LOAISACH), chỉ lấy các loại sách có tổng số lượng từ 20 cuốn trở lên?',
+      options: [
+        {
+          key: 'A',
+          text: `SELECT ls.MALOAI, ls.LOAISACH, SUM(ct.SOLUONG) AS TongSL\nFROM LOAISACH ls\nJOIN CTHOADON ct ON ls.MALOAI = ct.MALOAI\nGROUP BY ls.MALOAI, ls.LOAISACH\nHAVING SUM(ct.SOLUONG) >= 20;`,
+        },
+        {
+          key: 'B',
+          text: `SELECT ls.MALOAI, ls.LOAISACH, SUM(ct.SOLUONG) FROM LOAISACH ls JOIN CTHOADON ct ON ls.MALOAI = ct.MALOAI WHERE SUM(ct.SOLUONG) >= 20 GROUP BY ls.MALOAI;`,
+        },
+        {
+          key: 'C',
+          text: `SELECT MALOAI, SOLUONG FROM CTHOADON WHERE SOLUONG >= 20;`,
+        },
+        {
+          key: 'D',
+          text: `SELECT ls.LOAISACH, COUNT(*) FROM LOAISACH ls HAVING SUM(SOLUONG) >= 20;`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Sau khi gom nhóm GROUP BY theo loại sách, điều kiện lọc trên hàm gộp SUM(ct.SOLUONG) >= 20 phải đặt trong mệnh đề HAVING (kết quả gồm TH01 - TIN HỌC: 72 cuốn và VL04 - VẬT LÝ: 20 cuốn).',
+      relatedSql: `SELECT ls.MALOAI, ls.LOAISACH, SUM(ct.SOLUONG) AS TongSL\nFROM LOAISACH ls\nJOIN CTHOADON ct ON ls.MALOAI = ct.MALOAI\nGROUP BY ls.MALOAI, ls.LOAISACH\nHAVING SUM(ct.SOLUONG) >= 20;`,
+    },
+    {
+      id: 'KDS-Q08',
+      databaseId: 'CSDL_KDSACH',
+      level: 'Vận dụng',
+      order: 8,
+      question: 'Những cuốn sách nào trong bảng DMSACH hiện chưa từng xuất hiện trong bảng CTHOADON, và dùng câu lệnh nào để tìm?',
+      options: [
+        {
+          key: 'A',
+          text: `2 cuốn HHP004 (HÓA HỌC CĂN BẢN) và VLC002 (VẬT LÝ CAO CẤP) - dùng LEFT JOIN từ DMSACH sang CTHOADON kết hợp WHERE ct.SOCTU IS NULL`,
+        },
+        {
+          key: 'B',
+          text: `Cuốn ACC001 và EXC003 - dùng INNER JOIN`,
+        },
+        {
+          key: 'C',
+          text: `Cuốn WRD002 - dùng WHERE ct.SOLUONG = 0`,
+        },
+        {
+          key: 'D',
+          text: `Tất cả 7 cuốn sách trong DMSACH đều đã có trong CTHOADON`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Trong 7 đầu sách của DMSACH, có 2 đầu sách chưa phát sinh dòng chi tiết nào trong CTHOADON là HHP004 và VLC002.',
+      relatedSql: `SELECT s.MASACH, s.TENSACH, s.DONGIA\nFROM DMSACH s\nLEFT JOIN CTHOADON ct ON s.MASACH = ct.MASACH\nWHERE ct.SOCTU IS NULL;`,
+    },
+    {
+      id: 'KDS-Q09',
+      databaseId: 'CSDL_KDSACH',
+      level: 'Vận dụng',
+      order: 9,
+      question: 'Trong bảng HOADON có 7 chứng từ (001 đến 007), những chứng từ nào chưa có dữ liệu chi tiết sách trong bảng CTHOADON?',
+      options: [
+        {
+          key: 'A',
+          text: `Chứng từ 004 (CAO VĂN ẤN) và 006 (TRIỂN CHIÊU) - tìm bằng LEFT JOIN từ HOADON sang CTHOADON kết hợp WHERE ct.MASACH IS NULL`,
+        },
+        {
+          key: 'B',
+          text: `Chứng từ 001 và 002`,
+        },
+        {
+          key: 'C',
+          text: `Chứng từ 003 và 005`,
+        },
+        {
+          key: 'D',
+          text: `Cả 7 chứng từ đều đã có chi tiết trong CTHOADON`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Bảng CTHOADON mới chỉ có dữ liệu của các số chứng từ 001, 002, 003, 005 và 007. Hai chứng từ 004 và 006 chưa có bản ghi nào trong CTHOADON.',
+      relatedSql: `SELECT hd.SOCTU, hd.LOAICTU, hd.NGAYCTU, hd.HOTEN, hd.DIACHI\nFROM HOADON hd\nLEFT JOIN CTHOADON ct ON hd.SOCTU = ct.SOCTU\nWHERE ct.MASACH IS NULL;`,
+    },
+    {
+      id: 'KDS-Q10',
+      databaseId: 'CSDL_KDSACH',
+      level: 'Vận dụng',
+      order: 10,
+      question: 'Câu lệnh nào tìm ra Số chứng từ (SOCTU, HOTEN) có tổng trị giá hóa đơn (SUM(ct.SOLUONG * s.DONGIA)) cao nhất?',
+      options: [
+        {
+          key: 'A',
+          text: `SELECT hd.SOCTU, hd.HOTEN, SUM(ct.SOLUONG * s.DONGIA) AS TongTriGia\nFROM HOADON hd\nJOIN CTHOADON ct ON hd.SOCTU = ct.SOCTU\nJOIN DMSACH s ON ct.MASACH = s.MASACH\nGROUP BY hd.SOCTU, hd.HOTEN\nORDER BY TongTriGia DESC\nLIMIT 1;`,
+        },
+        {
+          key: 'B',
+          text: `SELECT SOCTU, MAX(SOLUONG) FROM CTHOADON LIMIT 1;`,
+        },
+        {
+          key: 'C',
+          text: `SELECT SOCTU, HOTEN FROM HOADON ORDER BY SOCTU DESC LIMIT 1;`,
+        },
+        {
+          key: 'D',
+          text: `SELECT MASACH, MAX(DONGIA) FROM DMSACH;`,
+        },
+      ],
+      correctAnswer: 'A',
+      explanation: 'Kết nối HOADON, CTHOADON và DMSACH, gom nhóm theo từng chứng từ, tính tổng tiền SUM(ct.SOLUONG * s.DONGIA), sắp xếp giảm dần (DESC) và lấy dòng đầu tiên (LIMIT 1 - chứng từ 005 của LÊ VĂN NUÔI với tổng trị giá 1.150.000).',
+      relatedSql: `SELECT hd.SOCTU, hd.HOTEN, SUM(ct.SOLUONG * s.DONGIA) AS TongTriGia\nFROM HOADON hd\nJOIN CTHOADON ct ON hd.SOCTU = ct.SOCTU\nJOIN DMSACH s ON ct.MASACH = s.MASACH\nGROUP BY hd.SOCTU, hd.HOTEN\nORDER BY TongTriGia DESC\nLIMIT 1;`,
+    },
+  ],
 };

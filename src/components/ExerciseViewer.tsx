@@ -74,6 +74,41 @@ const DB_DOWNLOAD_INFO: Record<
     subtitle: '4 Bảng • Quản Lý Thư Viện (15 câu)',
     icon: 'fa-book-atlas text-indigo-600',
   },
+  CSDL_QLDIEN: {
+    filename: 'Bai_Tap_SQL_CSDL_QLDIEN.docx',
+    studentFilename: 'Bai_Tap_SQL_CSDL_QLDIEN_De_Bai.docx',
+    name: 'CSDL_QLDIEN',
+    subtitle: '3 Bảng • Quản Lý Điện (15 câu)',
+    icon: 'fa-bolt text-amber-500',
+  },
+  CSDL_QLLUONG: {
+    filename: 'Bai_Tap_SQL_CSDL_QLLUONG.docx',
+    studentFilename: 'Bai_Tap_SQL_CSDL_QLLUONG_De_Bai.docx',
+    name: 'CSDL_QLLUONG',
+    subtitle: '2 Bảng • Quản Lý Lương (15 câu)',
+    icon: 'fa-money-check-dollar text-emerald-600',
+  },
+  CSDL_VANTAI: {
+    filename: 'Bai_Tap_SQL_CSDL_VANTAI.docx',
+    studentFilename: 'Bai_Tap_SQL_CSDL_VANTAI_De_Bai.docx',
+    name: 'CSDL_VANTAI',
+    subtitle: '4 Bảng • Vận Tải (15 câu)',
+    icon: 'fa-bus text-sky-600',
+  },
+  CSDL_QLKHO: {
+    filename: 'Bai_Tap_SQL_CSDL_QLKHO.docx',
+    studentFilename: 'Bai_Tap_SQL_CSDL_QLKHO_De_Bai.docx',
+    name: 'CSDL_QLKHO',
+    subtitle: '4 Bảng • Quản Lý Kho (15 câu)',
+    icon: 'fa-warehouse text-indigo-600',
+  },
+  CSDL_KDSACH: {
+    filename: 'Bai_Tap_SQL_CSDL_KDSACH.docx',
+    studentFilename: 'Bai_Tap_SQL_CSDL_KDSACH_De_Bai.docx',
+    name: 'CSDL_KDSACH',
+    subtitle: '4 Bảng • Kinh Doanh Sách (15 câu)',
+    icon: 'fa-book-bookmark text-rose-600',
+  },
 };
 
 export const ExerciseViewer: React.FC<ExerciseViewerProps> = ({

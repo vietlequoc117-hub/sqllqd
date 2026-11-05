@@ -905,4 +905,610 @@ erDiagram
       },
     ],
   },
+
+  CSDL_QLDIEN: {
+    id: 'CSDL_QLDIEN',
+    name: 'CSDL_QLDIEN',
+    subtitle: 'Khách hàng, Sử dụng & Chi tiết tiêu thụ điện (3 Bảng)',
+    description: 'Cơ sở dữ liệu quản lý tiêu thụ điện gồm 3 bảng quan hệ: KHACHHANG (MAKH, TENKHACH, DIACHI), SUDUNG (MASD, LOAISD, DONGIA) và CHITIET (MASD, MAKH, SOKW, THANHTIEN).',
+    badge: '3 Bảng • Quản Lý Điện',
+    iconClass: 'fa-solid fa-bolt',
+    ddl: `
+CREATE TABLE KHACHHANG (
+  MAKH TEXT(4) PRIMARY KEY,
+  TENKHACH TEXT(10) NOT NULL,
+  DIACHI TEXT(40)
+);
+
+CREATE TABLE SUDUNG (
+  MASD TEXT(2) PRIMARY KEY,
+  LOAISD TEXT(15) NOT NULL,
+  DONGIA INTEGER NOT NULL
+);
+
+CREATE TABLE CHITIET (
+  MASD TEXT(2) NOT NULL,
+  MAKH TEXT(4) NOT NULL,
+  SOKW INTEGER NOT NULL,
+  THANHTIEN REAL,
+  PRIMARY KEY (MASD, MAKH),
+  FOREIGN KEY (MASD) REFERENCES SUDUNG(MASD),
+  FOREIGN KEY (MAKH) REFERENCES KHACHHANG(MAKH)
+);
+    `.trim(),
+    seed: `
+INSERT INTO KHACHHANG (MAKH, TENKHACH, DIACHI) VALUES
+('KH01', 'THANH', '12 YERSIN PHÚ CƯỜNG'),
+('KH02', 'BÌNH', '04 BẠCH ĐẰNG PHÚ CƯỜNG'),
+('KH03', 'HẢO', '12 DT743 PHÚ HÒA'),
+('KH04', 'TIẾN', '04 ĐẠI LỘ BÌNH DƯƠNG'),
+('KH05', 'HÒA', '03 DT743 PHÚ HÒA'),
+('KH06', 'VÂN', '12 CMT8 PHÚ CƯỜNG');
+
+INSERT INTO SUDUNG (MASD, LOAISD, DONGIA) VALUES
+('KD', 'KINH DOANH', 750),
+('SH', 'SINH HOẠT', 500),
+('SX', 'SẢN XUẤT', 100);
+
+INSERT INTO CHITIET (MASD, MAKH, SOKW, THANHTIEN) VALUES
+('KD', 'KH01', 100, NULL),
+('KD', 'KH02', 200, NULL),
+('KD', 'KH04', 50, NULL),
+('KD', 'KH05', 300, NULL),
+('SH', 'KH01', 150, NULL),
+('SH', 'KH02', 50, NULL),
+('SH', 'KH03', 350, NULL),
+('SH', 'KH04', 400, NULL),
+('SH', 'KH05', 200, NULL),
+('SX', 'KH01', 150, NULL),
+('SX', 'KH02', 220, NULL),
+('SX', 'KH03', 300, NULL);
+    `.trim(),
+    mermaidErd: `
+erDiagram
+    KHACHHANG ||--o{ CHITIET : "tiêu thụ"
+    SUDUNG ||--o{ CHITIET : "áp dụng đơn giá"
+    KHACHHANG {
+        string MAKH PK "Mã khách hàng (T,4)"
+        string TENKHACH "Tên khách hàng (T,10)"
+        string DIACHI "Địa chỉ (T,40)"
+    }
+    SUDUNG {
+        string MASD PK "Mã sử dụng (T,2)"
+        string LOAISD "Loại sử dụng (T,15)"
+        int DONGIA "Đơn giá điện (N,Int)"
+    }
+    CHITIET {
+        string MASD PK,FK "Mã sử dụng (T,2)"
+        string MAKH PK,FK "Mã khách hàng (T,4)"
+        int SOKW "Số KW tiêu thụ (N,Int)"
+        double THANHTIEN "Thành tiền (N,Double)"
+    }
+    `.trim(),
+    sampleQueries: [
+      {
+        title: 'Chi tiết tiêu thụ điện kèm Tên khách, Loại sử dụng và tính Thành tiền (SOKW * DONGIA)',
+        sql: `SELECT ct.MAKH, kh.TENKHACH, sd.LOAISD, ct.SOKW, sd.DONGIA, (ct.SOKW * sd.DONGIA) AS THANHTIEN\nFROM CHITIET ct\nJOIN KHACHHANG kh ON ct.MAKH = kh.MAKH\nJOIN SUDUNG sd ON ct.MASD = sd.MASD\nORDER BY ct.MAKH, ct.MASD;`,
+        explanation: 'Kết nối 3 bảng KHACHHANG, SUDUNG, CHITIET và tính biểu thức Thành tiền = SOKW * DONGIA.',
+        difficulty: 'Cơ bản',
+      },
+      {
+        title: 'Cập nhật cột THANHTIEN = SOKW * DONGIA cho toàn bộ bảng CHITIET (UPDATE)',
+        sql: `UPDATE CHITIET\nSET THANHTIEN = SOKW * (\n  SELECT DONGIA\n  FROM SUDUNG\n  WHERE SUDUNG.MASD = CHITIET.MASD\n);`,
+        explanation: 'Sử dụng lệnh UPDATE kết hợp truy vấn con (Subquery) lấy DONGIA từ bảng SUDUNG để điền giá trị cho cột THANHTIEN.',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Thống kê tổng số KW và tổng tiền điện theo từng Loại sử dụng (GROUP BY)',
+        sql: `SELECT sd.MASD, sd.LOAISD, SUM(ct.SOKW) AS TongSoKW, SUM(ct.SOKW * sd.DONGIA) AS TongThanhTien\nFROM SUDUNG sd\nJOIN CHITIET ct ON sd.MASD = ct.MASD\nGROUP BY sd.MASD, sd.LOAISD\nORDER BY TongThanhTien DESC;`,
+        explanation: 'Gom nhóm theo loại hình sử dụng điện (KINH DOANH, SINH HOẠT, SẢN XUẤT) để tính tổng sản lượng KW và doanh thu.',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Tìm khách hàng ở phường "PHÚ CƯỜNG" có sử dụng điện (LIKE)',
+        sql: `SELECT MAKH, TENKHACH, DIACHI\nFROM KHACHHANG\nWHERE DIACHI LIKE '%PHÚ CƯỜNG%';`,
+        explanation: 'Sử dụng toán tử LIKE với ký tự đại diện % để lọc các khách hàng có địa chỉ tại Phú Cường.',
+        difficulty: 'Cơ bản',
+      },
+      {
+        title: 'Tìm khách hàng chưa phát sinh chi tiết sử dụng điện nào (LEFT JOIN & IS NULL)',
+        sql: `SELECT kh.MAKH, kh.TENKHACH, kh.DIACHI\nFROM KHACHHANG kh\nLEFT JOIN CHITIET ct ON kh.MAKH = ct.MAKH\nWHERE ct.MASD IS NULL;`,
+        explanation: 'Dùng LEFT JOIN và kiểm tra ct.MASD IS NULL để tìm ra khách hàng KH06 (VÂN) chưa có dữ liệu trong bảng CHITIET.',
+        difficulty: 'Nâng cao',
+      },
+    ],
+  },
+
+  CSDL_QLLUONG: {
+    id: 'CSDL_QLLUONG',
+    name: 'CSDL_QLLUONG',
+    subtitle: 'Danh mục đơn vị & Bảng lương nhân viên (2 Bảng)',
+    description: 'Cơ sở dữ liệu quản lý tiền lương gồm 2 bảng quan hệ: DMDV (MADV, TENDV, DIACHI) và BANGLUONG (MANV, HOTEN, DIACHI, MADV, HSLUONG, NGAYCONG).',
+    badge: '2 Bảng • Quản Lý Lương',
+    iconClass: 'fa-solid fa-money-check-dollar',
+    ddl: `
+CREATE TABLE DMDV (
+  MADV TEXT(2) PRIMARY KEY,
+  TENDV TEXT(15) NOT NULL,
+  DIACHI TEXT(40)
+);
+
+CREATE TABLE BANGLUONG (
+  MANV TEXT(4) PRIMARY KEY,
+  HOTEN TEXT(20) NOT NULL,
+  DIACHI TEXT(30),
+  MADV TEXT(2) NOT NULL,
+  HSLUONG REAL NOT NULL,
+  NGAYCONG INTEGER NOT NULL,
+  FOREIGN KEY (MADV) REFERENCES DMDV(MADV)
+);
+    `.trim(),
+    seed: `
+INSERT INTO DMDV (MADV, TENDV, DIACHI) VALUES
+('01', 'CỬA HÀNG SỐ 01', '50 HÙNG VƯƠNG'),
+('02', 'CỬA HÀNG SỐ 02', '15 CMT8'),
+('03', 'CÔNG TY ABC', '40 ĐOÀN TRẦN NGHIỆP'),
+('04', 'XÍ NGHIỆP 204', 'ĐỒNG AN - THUẬN AN'),
+('05', 'XÍ NGHIỆP GỐM', 'MINH TÂM - TXTDM');
+
+INSERT INTO BANGLUONG (MANV, HOTEN, DIACHI, MADV, HSLUONG, NGAYCONG) VALUES
+('BV01', 'TRẦN THANH HẢI', 'THỊ XÃ THỦ DẦU MỘT', '04', 4.5, 27),
+('GD01', 'HỒ BÍCH NGA', 'THỊ XÃ THỦ DẦU MỘT', '02', 5.3, 27),
+('KT01', 'NGUYỄN PHƯƠNG ANH', 'THUẬN AN', '01', 3.5, 17),
+('KT02', 'NGUYỄN QUỐC TUẤN', 'THUẬN AN', '02', 4.0, 30),
+('KT05', 'ĐÀO TIẾN', 'PHÚ GIÁO', '05', 4.2, 25),
+('KT06', 'VŨ MÃO', 'PHÚ GIÁO', '05', 3.8, 20),
+('NV01', 'NGUYỄN KHẮC DINH', 'TÂN UYÊN', '01', 3.5, 26),
+('NV02', 'TẠ VĂN MINH', 'TÂN UYÊN', '01', 4.5, 27),
+('NV03', 'BÙI THANH MAI', 'TÂN UYÊN', '03', 3.6, 24);
+    `.trim(),
+    mermaidErd: `
+erDiagram
+    DMDV ||--o{ BANGLUONG : "quản lý nhân viên"
+    DMDV {
+        string MADV PK "Mã đơn vị (T,2)"
+        string TENDV "Tên đơn vị (T,15)"
+        string DIACHI "Địa chỉ đơn vị (T,40)"
+    }
+    BANGLUONG {
+        string MANV PK "Mã nhân viên (T,4)"
+        string HOTEN "Họ và tên (T,20)"
+        string DIACHI "Địa chỉ cư trú (T,30)"
+        string MADV FK "Mã đơn vị tham chiếu DMDV (T,2)"
+        double HSLUONG "Hệ số lương (N,double)"
+        byte NGAYCONG "Số ngày công (N,byte)"
+    }
+    `.trim(),
+    sampleQueries: [
+      {
+        title: 'Danh sách nhân viên kèm Tên đơn vị công tác, Hệ số lương và Ngày công (JOIN)',
+        sql: `SELECT bl.MANV, bl.HOTEN, bl.DIACHI, dv.TENDV, bl.HSLUONG, bl.NGAYCONG\nFROM BANGLUONG bl\nJOIN DMDV dv ON bl.MADV = dv.MADV\nORDER BY bl.MADV, bl.MANV;`,
+        explanation: 'Kết nối bảng BANGLUONG và DMDV qua khóa ngoại MADV để hiển thị tên đơn vị công tác của từng nhân viên.',
+        difficulty: 'Cơ bản',
+      },
+      {
+        title: 'Tính Lương thực lĩnh = HSLUONG * 1800000 * NGAYCONG / 26 cho từng nhân viên',
+        sql: `SELECT bl.MANV, bl.HOTEN, dv.TENDV, bl.HSLUONG, bl.NGAYCONG, ROUND(bl.HSLUONG * 1800000 * bl.NGAYCONG / 26, 0) AS LUONG_THUC_LINH\nFROM BANGLUONG bl\nJOIN DMDV dv ON bl.MADV = dv.MADV\nORDER BY LUONG_THUC_LINH DESC;`,
+        explanation: 'Sử dụng biểu thức số học tính tiền lương dựa trên Hệ số lương và Ngày công, kết hợp hàm ROUND làm tròn.',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Thống kê số lượng nhân viên và hệ số lương trung bình theo từng Đơn vị (GROUP BY)',
+        sql: `SELECT dv.MADV, dv.TENDV, COUNT(bl.MANV) AS SoNhanVien, ROUND(AVG(bl.HSLUONG), 2) AS HSLuong_TB, SUM(bl.NGAYCONG) AS TongNgayCong\nFROM DMDV dv\nLEFT JOIN BANGLUONG bl ON dv.MADV = bl.MADV\nGROUP BY dv.MADV, dv.TENDV\nORDER BY SoNhanVien DESC;`,
+        explanation: 'Gom nhóm theo từng đơn vị để đếm quân số, tính hệ số lương trung bình và tổng ngày công.',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Tìm các nhân viên thuộc nhóm Kế toán (MANV bắt đầu bằng "KT") có NGAYCONG >= 20',
+        sql: `SELECT MANV, HOTEN, DIACHI, MADV, HSLUONG, NGAYCONG\nFROM BANGLUONG\nWHERE MANV LIKE 'KT%' AND NGAYCONG >= 20;`,
+        explanation: 'Sử dụng toán tử LIKE \'KT%\' để lọc nhân viên có mã bắt đầu bằng KT và kết hợp điều kiện NGAYCONG >= 20.',
+        difficulty: 'Cơ bản',
+      },
+      {
+        title: 'Tìm nhân viên có hệ số lương (HSLUONG) cao nhất trong mỗi Đơn vị (Subquery)',
+        sql: `SELECT bl.MADV, dv.TENDV, bl.MANV, bl.HOTEN, bl.HSLUONG, bl.NGAYCONG\nFROM BANGLUONG bl\nJOIN DMDV dv ON bl.MADV = dv.MADV\nWHERE bl.HSLUONG = (\n  SELECT MAX(sub.HSLUONG)\n  FROM BANGLUONG sub\n  WHERE sub.MADV = bl.MADV\n)\nORDER BY bl.MADV;`,
+        explanation: 'Sử dụng truy vấn con tương quan (Correlated Subquery) tìm người có hệ số lương cao nhất tại từng đơn vị.',
+        difficulty: 'Nâng cao',
+      },
+    ],
+  },
+
+  CSDL_VANTAI: {
+    id: 'CSDL_VANTAI',
+    name: 'CSDL_VANTAI',
+    subtitle: 'Tuyến đường, Danh mục xe, Nhật trình & Chi tiết vận tải (4 Bảng)',
+    description: 'Cơ sở dữ liệu quản lý vận tải hành khách gồm 4 bảng quan hệ: TUYENDUONG (MATUYEN, TENTUYEN, SOKM, GIAVE), DMXE (MAXE, TENXE, TENLAIXE, SOCHO), NHATTRINH (SONT, NGAY, MAXE) và CHITIET (SONT, MATUYEN, SOVE).',
+    badge: '4 Bảng • Vận Tải',
+    iconClass: 'fa-solid fa-bus',
+    ddl: `
+CREATE TABLE TUYENDUONG (
+  MATUYEN TEXT(4) PRIMARY KEY,
+  TENTUYEN TEXT(40) NOT NULL,
+  SOKM INTEGER NOT NULL,
+  GIAVE INTEGER NOT NULL
+);
+
+CREATE TABLE DMXE (
+  MAXE TEXT(4) PRIMARY KEY,
+  TENXE TEXT(10) NOT NULL,
+  TENLAIXE TEXT(10) NOT NULL,
+  SOCHO INTEGER NOT NULL
+);
+
+CREATE TABLE NHATTRINH (
+  SONT TEXT(3) PRIMARY KEY,
+  NGAY TEXT NOT NULL,
+  MAXE TEXT(4) NOT NULL,
+  FOREIGN KEY (MAXE) REFERENCES DMXE(MAXE)
+);
+
+CREATE TABLE CHITIET (
+  SONT TEXT(3) NOT NULL,
+  MATUYEN TEXT(4) NOT NULL,
+  SOVE INTEGER NOT NULL,
+  PRIMARY KEY (SONT, MATUYEN),
+  FOREIGN KEY (SONT) REFERENCES NHATTRINH(SONT),
+  FOREIGN KEY (MATUYEN) REFERENCES TUYENDUONG(MATUYEN)
+);
+    `.trim(),
+    seed: `
+INSERT INTO TUYENDUONG (MATUYEN, TENTUYEN, SOKM, GIAVE) VALUES
+('BD01', 'BDƯƠNG - TPHCM', 30, 5000),
+('BD02', 'BDƯƠNG - ĐỒNG NAI', 40, 6000),
+('BD03', 'BDƯƠNG - LONG AN', 70, 10000),
+('BD04', 'BDƯƠNG - BÌNH LONG', 80, 12000);
+
+INSERT INTO DMXE (MAXE, TENXE, TENLAIXE, SOCHO) VALUES
+('X001', '614980', 'BÌNH', 50),
+('X002', '613459', 'NAM', 45),
+('X003', '617820', 'HÀ', 50),
+('X004', '616107', 'LINH', 30);
+
+INSERT INTO NHATTRINH (SONT, NGAY, MAXE) VALUES
+('001', '10/05/2005', 'X001'),
+('002', '10/05/2005', 'X001'),
+('003', '12/06/2005', 'X002'),
+('004', '15/05/2005', 'X002'),
+('005', '20/05/2005', 'X003');
+
+INSERT INTO CHITIET (SONT, MATUYEN, SOVE) VALUES
+('001', 'BD01', 45),
+('001', 'BD02', 50),
+('002', 'BD02', 45),
+('002', 'BD03', 40),
+('002', 'BD04', 40),
+('003', 'BD01', 52),
+('003', 'BD03', 45);
+    `.trim(),
+    mermaidErd: `
+erDiagram
+    DMXE ||--o{ NHATTRINH : "thực hiện chuyến"
+    NHATTRINH ||--o{ CHITIET : "chi tiết nhật trình"
+    TUYENDUONG ||--o{ CHITIET : "thuộc tuyến đường"
+    TUYENDUONG {
+        string MATUYEN PK "Mã tuyến đường (T,4)"
+        string TENTUYEN "Tên tuyến đường (T,40)"
+        byte SOKM "Số km (N,byte)"
+        int GIAVE "Giá vé VNĐ (N,int)"
+    }
+    DMXE {
+        string MAXE PK "Mã xe (T,4)"
+        string TENXE "Biển số / Tên xe (T,10)"
+        string TENLAIXE "Tên lái xe (T,10)"
+        byte SOCHO "Số chỗ ngồi (N,byte)"
+    }
+    NHATTRINH {
+        string SONT PK "Số nhật trình (T,3)"
+        date NGAY "Ngày chạy (D,Short date)"
+        string MAXE FK "Mã xe tham chiếu DMXE (T,4)"
+    }
+    CHITIET {
+        string SONT PK,FK "Số nhật trình (T,3)"
+        string MATUYEN PK,FK "Mã tuyến đường (T,4)"
+        byte SOVE "Số vé bán được (N,byte)"
+    }
+    `.trim(),
+    sampleQueries: [
+      {
+        title: 'Chi tiết vận tải: Số nhật trình, Ngày, Tên xe, Tên lái xe, Tên tuyến, Số vé và Thành tiền (SOVE * GIAVE)',
+        sql: `SELECT ct.SONT, nt.NGAY, xe.TENXE, xe.TENLAIXE, td.TENTUYEN, ct.SOVE, td.GIAVE, (ct.SOVE * td.GIAVE) AS THANHTIEN\nFROM CHITIET ct\nJOIN NHATTRINH nt ON ct.SONT = nt.SONT\nJOIN DMXE xe ON nt.MAXE = xe.MAXE\nJOIN TUYENDUONG td ON ct.MATUYEN = td.MATUYEN\nORDER BY ct.SONT, ct.MATUYEN;`,
+        explanation: 'Kết nối cả 4 bảng TUYENDUONG, DMXE, NHATTRINH, CHITIET để tổng hợp chi tiết từng chuyến xe và tính doanh thu bán vé.',
+        difficulty: 'Cơ bản',
+      },
+      {
+        title: 'Thống kê tổng số vé bán ra và tổng doanh thu theo từng Tuyến đường (GROUP BY)',
+        sql: `SELECT td.MATUYEN, td.TENTUYEN, SUM(ct.SOVE) AS TongSoVe, SUM(ct.SOVE * td.GIAVE) AS TongDoanhThu\nFROM TUYENDUONG td\nJOIN CHITIET ct ON td.MATUYEN = ct.MATUYEN\nGROUP BY td.MATUYEN, td.TENTUYEN\nORDER BY TongDoanhThu DESC;`,
+        explanation: 'Gom nhóm theo từng tuyến đường để tính tổng lượng hành khách (SOVE) và tổng doanh thu (SOVE * GIAVE).',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Tìm các chuyến xe chở vượt quá số chỗ ngồi quy định (SOVE > SOCHO)',
+        sql: `SELECT ct.SONT, nt.NGAY, xe.MAXE, xe.TENXE, xe.TENLAIXE, td.TENTUYEN, ct.SOVE, xe.SOCHO\nFROM CHITIET ct\nJOIN NHATTRINH nt ON ct.SONT = nt.SONT\nJOIN DMXE xe ON nt.MAXE = xe.MAXE\nJOIN TUYENDUONG td ON ct.MATUYEN = td.MATUYEN\nWHERE ct.SOVE > xe.SOCHO;`,
+        explanation: 'Đối chiếu số vé bán ra (ct.SOVE) với số ghế thiết kế (xe.SOCHO) để phát hiện chuyến xe chở quá tải (SONT 003 của xe X002: 52 vé > 45 chỗ).',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Thống kê tổng số chuyến nhật trình của từng Xe (kể cả xe chưa chạy chuyến nào - LEFT JOIN)',
+        sql: `SELECT xe.MAXE, xe.TENXE, xe.TENLAIXE, xe.SOCHO, COUNT(nt.SONT) AS SoChuyenNhatTrinh\nFROM DMXE xe\nLEFT JOIN NHATTRINH nt ON xe.MAXE = nt.MAXE\nGROUP BY xe.MAXE, xe.TENXE, xe.TENLAIXE, xe.SOCHO\nORDER BY SoChuyenNhatTrinh DESC;`,
+        explanation: 'Sử dụng LEFT JOIN từ DMXE sang NHATTRINH để thống kê số nhật trình của tất cả các xe, phát hiện xe X004 (lái xe LINH) có 0 chuyến.',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Tìm các nhật trình chưa được cập nhật chi tiết vé bán trong bảng CHITIET (LEFT JOIN & IS NULL)',
+        sql: `SELECT nt.SONT, nt.NGAY, nt.MAXE, xe.TENXE, xe.TENLAIXE\nFROM NHATTRINH nt\nJOIN DMXE xe ON nt.MAXE = xe.MAXE\nLEFT JOIN CHITIET ct ON nt.SONT = ct.SONT\nWHERE ct.MATUYEN IS NULL;`,
+        explanation: 'Dùng LEFT JOIN sang CHITIET kết hợp WHERE ct.MATUYEN IS NULL để tìm ra nhật trình 004 và 005 chưa có dữ liệu chi tiết vé.',
+        difficulty: 'Nâng cao',
+      },
+    ],
+  },
+
+  CSDL_QLKHO: {
+    id: 'CSDL_QLKHO',
+    name: 'CSDL_QLKHO',
+    subtitle: 'Nhập xuất kho, Danh mục kho, Hàng hóa & Chi tiết nhập xuất (4 Bảng)',
+    description: 'Cơ sở dữ liệu quản lý nhập xuất kho gồm 4 bảng quan hệ: NXKHO (SOHD, NGAY, LOAIHD), DMKHO (MAKHO, TENKHO, DIACHI), DMHH (MAHH, TENHH, DONGIA) và CTNX (SOHD, MAHH, MAKHO, SOLUONG).',
+    badge: '4 Bảng • Quản Lý Kho',
+    iconClass: 'fa-solid fa-warehouse',
+    ddl: `
+CREATE TABLE NXKHO (
+  SOHD TEXT(4) PRIMARY KEY,
+  NGAY TEXT NOT NULL,
+  LOAIHD TEXT(1) NOT NULL CHECK(LOAIHD IN ('N', 'X'))
+);
+
+CREATE TABLE DMKHO (
+  MAKHO TEXT(3) PRIMARY KEY,
+  TENKHO TEXT(20) NOT NULL,
+  DIACHI TEXT(30)
+);
+
+CREATE TABLE DMHH (
+  MAHH TEXT(4) PRIMARY KEY,
+  TENHH TEXT(25) NOT NULL,
+  DONGIA REAL NOT NULL
+);
+
+CREATE TABLE CTNX (
+  SOHD TEXT(4) NOT NULL,
+  MAHH TEXT(4) NOT NULL,
+  MAKHO TEXT(3) NOT NULL,
+  SOLUONG INTEGER NOT NULL,
+  PRIMARY KEY (SOHD, MAHH, MAKHO),
+  FOREIGN KEY (SOHD) REFERENCES NXKHO(SOHD),
+  FOREIGN KEY (MAHH) REFERENCES DMHH(MAHH),
+  FOREIGN KEY (MAKHO) REFERENCES DMKHO(MAKHO)
+);
+    `.trim(),
+    seed: `
+INSERT INTO NXKHO (SOHD, NGAY, LOAIHD) VALUES
+('0001', '13/02/2005', 'N'),
+('0002', '13/05/2005', 'X'),
+('0003', '02/12/2005', 'N'),
+('0004', '03/12/2005', 'X'),
+('0005', '16/07/2005', 'N');
+
+INSERT INTO DMKHO (MAKHO, TENKHO, DIACHI) VALUES
+('K01', 'Công ty', 'Trụ sở Công ty'),
+('K02', 'Long Bình', 'Long Bình - Đồng Nai'),
+('K03', 'Phú Xuân', 'Phú Xuân - Nhà Bè'),
+('K04', 'Thủ Đức', 'Chợ Nhỏ - Thủ Đức');
+
+INSERT INTO DMHH (MAHH, TENHH, DONGIA) VALUES
+('A001', 'Ấm điện Trung Quốc', 100000),
+('B001', 'Bóng đèn Rạng Đông', 6000),
+('B002', 'Bóng đèn Điện Quang', 8000),
+('LN01', 'Lò nướng Thái Long', 120000),
+('LN02', 'Lò nướng Hồng Ký', 110000),
+('MS01', 'Máy sấy tóc Vĩnh Hòa', 125000),
+('QD01', 'Quạt điện Bình Minh', 200000),
+('QD02', 'Quạt điện Hà Nội', 220000);
+
+INSERT INTO CTNX (SOHD, MAHH, MAKHO, SOLUONG) VALUES
+('0001', 'A001', 'K02', 500),
+('0001', 'QD01', 'K03', 500),
+('0002', 'A001', 'K01', 200),
+('0002', 'QD01', 'K02', 300),
+('0002', 'QD02', 'K03', 200),
+('0003', 'B001', 'K02', 2500),
+('0003', 'B001', 'K03', 4000),
+('0003', 'LN01', 'K04', 50),
+('0003', 'QD01', 'K02', 200);
+    `.trim(),
+    mermaidErd: `
+erDiagram
+    NXKHO ||--o{ CTNX : "chứng từ nhập xuất"
+    DMHH ||--o{ CTNX : "mặt hàng"
+    DMKHO ||--o{ CTNX : "lưu trữ tại kho"
+    NXKHO {
+        string SOHD PK "Số hóa đơn (T,4)"
+        date NGAY "Ngày lập (D,Short date)"
+        string LOAIHD "Loại HĐ: N-Nhập / X-Xuất (T,1)"
+    }
+    DMKHO {
+        string MAKHO PK "Mã kho (T,3)"
+        string TENKHO "Tên kho (T,20)"
+        string DIACHI "Địa chỉ kho (T,30)"
+    }
+    DMHH {
+        string MAHH PK "Mã hàng hóa (T,4)"
+        string TENHH "Tên hàng hóa (T,25)"
+        float DONGIA "Đơn giá (N,Single)"
+    }
+    CTNX {
+        string SOHD PK,FK "Số hóa đơn (T,4)"
+        string MAHH PK,FK "Mã hàng hóa (T,4)"
+        string MAKHO PK,FK "Mã kho (T,3)"
+        int SOLUONG "Số lượng (N,Integer)"
+    }
+    `.trim(),
+    sampleQueries: [
+      {
+        title: 'Chi tiết nhập xuất kho: Số HĐ, Ngày, Loại HĐ, Tên kho, Tên hàng, Số lượng & Thành tiền',
+        sql: `SELECT ct.SOHD, nx.NGAY, nx.LOAIHD, k.TENKHO, hh.TENHH, ct.SOLUONG, hh.DONGIA, (ct.SOLUONG * hh.DONGIA) AS THANHTIEN\nFROM CTNX ct\nJOIN NXKHO nx ON ct.SOHD = nx.SOHD\nJOIN DMKHO k ON ct.MAKHO = k.MAKHO\nJOIN DMHH hh ON ct.MAHH = hh.MAHH\nORDER BY ct.SOHD, ct.MAKHO;`,
+        explanation: 'Kết nối cả 4 bảng CTNX, NXKHO, DMKHO và DMHH để hiển thị đầy đủ thông tin chứng từ và tính cột Thành tiền = SOLUONG * DONGIA.',
+        difficulty: 'Cơ bản',
+      },
+      {
+        title: 'Thống kê tổng số lượng và tổng trị giá hàng hóa theo từng Kho (GROUP BY)',
+        sql: `SELECT k.MAKHO, k.TENKHO, k.DIACHI, SUM(ct.SOLUONG) AS TongSoLuong, SUM(ct.SOLUONG * hh.DONGIA) AS TongTriGia\nFROM DMKHO k\nJOIN CTNX ct ON k.MAKHO = ct.MAKHO\nJOIN DMHH hh ON ct.MAHH = hh.MAHH\nGROUP BY k.MAKHO, k.TENKHO, k.DIACHI\nORDER BY TongTriGia DESC;`,
+        explanation: 'Gom nhóm theo từng kho hàng để tính tổng khối lượng hàng lưu chuyển và tổng giá trị tiền hàng.',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Thống kê tổng trị giá theo từng Loại hóa đơn: Nhập (N) và Xuất (X)',
+        sql: `SELECT nx.LOAIHD, COUNT(DISTINCT nx.SOHD) AS SoHoaDon, SUM(ct.SOLUONG) AS TongSoLuong, SUM(ct.SOLUONG * hh.DONGIA) AS TongTriGia\nFROM NXKHO nx\nJOIN CTNX ct ON nx.SOHD = ct.SOHD\nJOIN DMHH hh ON ct.MAHH = hh.MAHH\nGROUP BY nx.LOAIHD;`,
+        explanation: 'Phân loại theo LOAIHD (\'N\' - Nhập kho, \'X\' - Xuất kho) để so sánh tổng lượng hàng nhập và xuất.',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Tìm các mặt hàng trong bảng DMHH chưa từng phát sinh giao dịch nhập xuất nào (LEFT JOIN & IS NULL)',
+        sql: `SELECT hh.MAHH, hh.TENHH, hh.DONGIA\nFROM DMHH hh\nLEFT JOIN CTNX ct ON hh.MAHH = ct.MAHH\nWHERE ct.SOHD IS NULL;`,
+        explanation: 'Sử dụng LEFT JOIN từ DMHH sang CTNX kết hợp WHERE ct.SOHD IS NULL để phát hiện các mặt hàng tồn danh mục chưa từng nhập/xuất (B002, LN02, MS01).',
+        difficulty: 'Nâng cao',
+      },
+      {
+        title: 'Tìm các hóa đơn trong bảng NXKHO chưa có chi tiết hàng hóa trong bảng CTNX',
+        sql: `SELECT nx.SOHD, nx.NGAY, nx.LOAIHD\nFROM NXKHO nx\nLEFT JOIN CTNX ct ON nx.SOHD = ct.SOHD\nWHERE ct.MAHH IS NULL;`,
+        explanation: 'Phát hiện 2 hóa đơn 0004 và 0005 trong bảng NXKHO chưa được nhập chi tiết mặt hàng vào bảng CTNX.',
+        difficulty: 'Nâng cao',
+      },
+    ],
+  },
+
+  CSDL_KDSACH: {
+    id: 'CSDL_KDSACH',
+    name: 'CSDL_KDSACH',
+    subtitle: 'Loại sách, Danh mục sách, Hóa đơn & Chi tiết hóa đơn (4 Bảng)',
+    description: 'Cơ sở dữ liệu kinh doanh sách gồm 4 bảng quan hệ: LOAISACH (MALOAI, LOAISACH), DMSACH (MASACH, TENSACH, DONGIA), HOADON (SOCTU, LOAICTU, NGAYCTU, HOTEN, DIACHI) và CTHOADON (SOCTU, MASACH, MALOAI, SOLUONG).',
+    badge: '4 Bảng • Kinh Doanh Sách',
+    iconClass: 'fa-solid fa-book-bookmark',
+    ddl: `
+CREATE TABLE LOAISACH (
+  MALOAI TEXT(4) PRIMARY KEY,
+  LOAISACH TEXT(20) NOT NULL
+);
+
+CREATE TABLE DMSACH (
+  MASACH TEXT(6) PRIMARY KEY,
+  TENSACH TEXT(30) NOT NULL,
+  DONGIA REAL NOT NULL
+);
+
+CREATE TABLE HOADON (
+  SOCTU TEXT(3) PRIMARY KEY,
+  LOAICTU TEXT(1) NOT NULL CHECK(LOAICTU IN ('N', 'X')),
+  NGAYCTU TEXT NOT NULL,
+  HOTEN TEXT(30) NOT NULL,
+  DIACHI TEXT(15)
+);
+
+CREATE TABLE CTHOADON (
+  SOCTU TEXT(3) NOT NULL,
+  MASACH TEXT(6) NOT NULL,
+  MALOAI TEXT(4) NOT NULL,
+  SOLUONG INTEGER NOT NULL,
+  PRIMARY KEY (SOCTU, MASACH, MALOAI),
+  FOREIGN KEY (SOCTU) REFERENCES HOADON(SOCTU),
+  FOREIGN KEY (MASACH) REFERENCES DMSACH(MASACH),
+  FOREIGN KEY (MALOAI) REFERENCES LOAISACH(MALOAI)
+);
+    `.trim(),
+    seed: `
+INSERT INTO LOAISACH (MALOAI, LOAISACH) VALUES
+('HH03', 'HÓA HỌC'),
+('SH05', 'SINH HỌC'),
+('TH01', 'TIN HỌC'),
+('VH02', 'VĂN HỌC'),
+('VL04', 'VẬT LÝ');
+
+INSERT INTO DMSACH (MASACH, TENSACH, DONGIA) VALUES
+('ACC001', 'LẬP TRÌNH ACCESS CƠ BẢN', 25000),
+('EXC003', 'TỰ HỌC EXCEL 2002', 18500),
+('HHP004', 'HÓA HỌC CĂN BẢN', 12500),
+('SHC003', 'SINH HỌC CAO CẤP', 32000),
+('VLC002', 'VẬT LÝ CAO CẤP', 23000),
+('VLP001', 'VẬT LÝ CĂN BẢN', 17000),
+('WRD002', 'LÀM QUEN VỚI MSWORD 2002', 36000);
+
+INSERT INTO HOADON (SOCTU, LOAICTU, NGAYCTU, HOTEN, DIACHI) VALUES
+('001', 'N', '06/07/2006', 'HUỲNH VĂN LŨY', 'SÀIGÒN'),
+('002', 'X', '05/08/2005', 'PHAN PHONG', 'BÌNH DƯƠNG'),
+('003', 'N', '01/01/2006', 'HÀ NAM ANH', 'BÌNH DƯƠNG'),
+('004', 'N', '12/01/2006', 'CAO VĂN ẤN', 'ĐỒNG NAI'),
+('005', 'X', '04/04/2006', 'LÊ VĂN NUÔI', 'BÌNH DƯƠNG'),
+('006', 'X', '04/04/2006', 'TRIỂN CHIÊU', 'SÀI GÒN'),
+('007', 'N', '07/01/2006', 'CÔNG TÔN THẮNG', 'BÌNH DƯƠNG');
+
+INSERT INTO CTHOADON (SOCTU, MASACH, MALOAI, SOLUONG) VALUES
+('001', 'ACC001', 'TH01', 5),
+('001', 'SHC003', 'SH05', 15),
+('001', 'WRD002', 'TH01', 3),
+('002', 'EXC003', 'TH01', 12),
+('002', 'VLP001', 'VL04', 20),
+('003', 'EXC003', 'TH01', 10),
+('005', 'ACC001', 'TH01', 10),
+('005', 'WRD002', 'TH01', 25),
+('007', 'EXC003', 'TH01', 7);
+    `.trim(),
+    mermaidErd: `
+erDiagram
+    HOADON ||--o{ CTHOADON : "chi tiết chứng từ"
+    DMSACH ||--o{ CTHOADON : "đầu sách"
+    LOAISACH ||--o{ CTHOADON : "phân loại"
+    LOAISACH {
+        string MALOAI PK "Mã loại sách (T,4)"
+        string LOAISACH "Tên loại sách (T,20)"
+    }
+    DMSACH {
+        string MASACH PK "Mã sách (T,6)"
+        string TENSACH "Tên sách (T,30)"
+        float DONGIA "Đơn giá (N,Single)"
+    }
+    HOADON {
+        string SOCTU PK "Số chứng từ (T,3)"
+        string LOAICTU "Loại chứng từ N/X (T,1)"
+        date NGAYCTU "Ngày chứng từ (D,Shortdate)"
+        string HOTEN "Họ tên khách hàng (T,30)"
+        string DIACHI "Địa chỉ (T,15)"
+    }
+    CTHOADON {
+        string SOCTU PK,FK "Số chứng từ (T,3)"
+        string MASACH PK,FK "Mã sách (T,6)"
+        string MALOAI PK,FK "Mã loại sách (T,4)"
+        int SOLUONG "Số lượng (N,integer)"
+    }
+    `.trim(),
+    sampleQueries: [
+      {
+        title: 'Chi tiết hóa đơn: Số chứng từ, Họ tên, Tên sách, Loại sách, Số lượng, Đơn giá & Thành tiền',
+        sql: `SELECT ct.SOCTU, hd.LOAICTU, hd.HOTEN, s.TENSACH, ls.LOAISACH, ct.SOLUONG, s.DONGIA, (ct.SOLUONG * s.DONGIA) AS THANHTIEN\nFROM CTHOADON ct\nJOIN HOADON hd ON ct.SOCTU = hd.SOCTU\nJOIN DMSACH s ON ct.MASACH = s.MASACH\nJOIN LOAISACH ls ON ct.MALOAI = ls.MALOAI\nORDER BY ct.SOCTU, ct.MASACH;`,
+        explanation: 'Kết nối cả 4 bảng CTHOADON, HOADON, DMSACH và LOAISACH để hiển thị chi tiết từng chứng từ mua bán sách và tính Thành tiền = SOLUONG * DONGIA.',
+        difficulty: 'Cơ bản',
+      },
+      {
+        title: 'Thống kê tổng số lượng sách và tổng thành tiền theo từng Loại sách (GROUP BY)',
+        sql: `SELECT ls.MALOAI, ls.LOAISACH, SUM(ct.SOLUONG) AS TongSoLuong, SUM(ct.SOLUONG * s.DONGIA) AS TongThanhTien\nFROM LOAISACH ls\nJOIN CTHOADON ct ON ls.MALOAI = ct.MALOAI\nJOIN DMSACH s ON ct.MASACH = s.MASACH\nGROUP BY ls.MALOAI, ls.LOAISACH\nORDER BY TongThanhTien DESC;`,
+        explanation: 'Gom nhóm theo từng loại sách (TIN HỌC, SINH HỌC, VẬT LÝ) để thống kê tổng lượng sách lưu chuyển và doanh số.',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Thống kê tổng số lượng và tổng trị giá theo từng Số chứng từ (SOCTU)',
+        sql: `SELECT hd.SOCTU, hd.LOAICTU, hd.NGAYCTU, hd.HOTEN, hd.DIACHI, SUM(ct.SOLUONG) AS TongSoLuong, SUM(ct.SOLUONG * s.DONGIA) AS TongTriGia\nFROM HOADON hd\nJOIN CTHOADON ct ON hd.SOCTU = ct.SOCTU\nJOIN DMSACH s ON ct.MASACH = s.MASACH\nGROUP BY hd.SOCTU, hd.LOAICTU, hd.NGAYCTU, hd.HOTEN, hd.DIACHI\nORDER BY TongTriGia DESC;`,
+        explanation: 'Tổng hợp tổng số cuốn sách và tổng tiền trên từng hóa đơn chứng từ.',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Tìm các đầu sách trong bảng DMSACH chưa từng xuất hiện trong bảng CTHOADON (LEFT JOIN & IS NULL)',
+        sql: `SELECT s.MASACH, s.TENSACH, s.DONGIA\nFROM DMSACH s\nLEFT JOIN CTHOADON ct ON s.MASACH = ct.MASACH\nWHERE ct.SOCTU IS NULL;`,
+        explanation: 'Sử dụng LEFT JOIN từ DMSACH sang CTHOADON kết hợp WHERE ct.SOCTU IS NULL để phát hiện 2 cuốn sách chưa phát sinh giao dịch là HHP004 (HÓA HỌC CĂN BẢN) và VLC002 (VẬT LÝ CAO CẤP).',
+        difficulty: 'Nâng cao',
+      },
+      {
+        title: 'Tìm các loại sách trong bảng LOAISACH chưa có giao dịch nào trong bảng CTHOADON',
+        sql: `SELECT ls.MALOAI, ls.LOAISACH\nFROM LOAISACH ls\nLEFT JOIN CTHOADON ct ON ls.MALOAI = ct.MALOAI\nWHERE ct.SOCTU IS NULL;`,
+        explanation: 'Phát hiện 2 loại sách chưa có chứng từ nhập/xuất trong CTHOADON là HH03 (HÓA HỌC) và VH02 (VĂN HỌC).',
+        difficulty: 'Nâng cao',
+      },
+    ],
+  },
 };
