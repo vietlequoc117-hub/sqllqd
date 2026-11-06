@@ -1,4 +1,19 @@
-export type DatabaseId = 'HOC_SINH' | 'KINH_DOANH' | 'HOC_TAP' | 'AM_NHAC' | 'QL_XE' | 'QL_VANG' | 'QL_CANBO' | 'QL_TV' | 'CSDL_QLDIEN' | 'CSDL_QLLUONG' | 'CSDL_VANTAI' | 'CSDL_QLKHO' | 'CSDL_KDSACH' | 'CSDL_QLTAU' | 'CSDL_CUUHOA';
+export type DatabaseId =
+  | 'HOC_SINH'
+  | 'CSDL_QLLUONG'
+  | 'KINH_DOANH'
+  | 'HOC_TAP'
+  | 'QL_XE'
+  | 'QL_VANG'
+  | 'QL_CANBO'
+  | 'CSDL_QLDIEN'
+  | 'AM_NHAC'
+  | 'QL_TV'
+  | 'CSDL_VANTAI'
+  | 'CSDL_QLKHO'
+  | 'CSDL_KDSACH'
+  | 'CSDL_QLTAU'
+  | 'CSDL_CUUHOA';
 
 export type ExerciseLevel = 'Nhận biết' | 'Thông hiểu' | 'Vận dụng';
 export type QuizLevel = 'Nhận biết' | 'Thông hiểu' | 'Vận dụng';

@@ -3,7 +3,7 @@ import { DatabaseConfig, DatabaseId } from '../types';
 export const DATABASES: Record<DatabaseId, DatabaseConfig> = {
   HOC_SINH: {
     id: 'HOC_SINH',
-    name: 'CSDL Học Sinh',
+    name: 'CSDL_HOCSINH',
     subtitle: 'Bảng điểm & Hồ sơ học sinh (Hình 1)',
     description: 'Cơ sở dữ liệu quản lý thông tin lý lịch, tổ học tập và điểm số hai môn Toán, Văn của học sinh phổ thông.',
     badge: 'Đơn Bảng • Giáo Dục',
@@ -82,9 +82,103 @@ erDiagram
     ],
   },
 
+  CSDL_QLLUONG: {
+    id: 'CSDL_QLLUONG',
+    name: 'CSDL_TIENLUONG',
+    subtitle: 'Danh mục đơn vị & Bảng lương nhân viên (2 Bảng)',
+    description: 'Cơ sở dữ liệu quản lý tiền lương gồm 2 bảng quan hệ: DMDV (MADV, TENDV, DIACHI) và BANGLUONG (MANV, HOTEN, DIACHI, MADV, HSLUONG, NGAYCONG).',
+    badge: '2 Bảng • Quản Lý Lương',
+    iconClass: 'fa-solid fa-money-check-dollar',
+    ddl: `
+CREATE TABLE DMDV (
+  MADV TEXT(2) PRIMARY KEY,
+  TENDV TEXT(15) NOT NULL,
+  DIACHI TEXT(40)
+);
+
+CREATE TABLE BANGLUONG (
+  MANV TEXT(4) PRIMARY KEY,
+  HOTEN TEXT(20) NOT NULL,
+  DIACHI TEXT(30),
+  MADV TEXT(2) NOT NULL,
+  HSLUONG REAL NOT NULL,
+  NGAYCONG INTEGER NOT NULL,
+  FOREIGN KEY (MADV) REFERENCES DMDV(MADV)
+);
+    `.trim(),
+    seed: `
+INSERT INTO DMDV (MADV, TENDV, DIACHI) VALUES
+('01', 'CỬA HÀNG SỐ 01', '50 HÙNG VƯƠNG'),
+('02', 'CỬA HÀNG SỐ 02', '15 CMT8'),
+('03', 'CÔNG TY ABC', '40 ĐOÀN TRẦN NGHIỆP'),
+('04', 'XÍ NGHIỆP 204', 'ĐỒNG AN - THUẬN AN'),
+('05', 'XÍ NGHIỆP GỐM', 'MINH TÂM - TXTDM');
+
+INSERT INTO BANGLUONG (MANV, HOTEN, DIACHI, MADV, HSLUONG, NGAYCONG) VALUES
+('BV01', 'TRẦN THANH HẢI', 'THỊ XÃ THỦ DẦU MỘT', '04', 4.5, 27),
+('GD01', 'HỒ BÍCH NGA', 'THỊ XÃ THỦ DẦU MỘT', '02', 5.3, 27),
+('KT01', 'NGUYỄN PHƯƠNG ANH', 'THUẬN AN', '01', 3.5, 17),
+('KT02', 'NGUYỄN QUỐC TUẤN', 'THUẬN AN', '02', 4.0, 30),
+('KT05', 'ĐÀO TIẾN', 'PHÚ GIÁO', '05', 4.2, 25),
+('KT06', 'VŨ MÃO', 'PHÚ GIÁO', '05', 3.8, 20),
+('NV01', 'NGUYỄN KHẮC DINH', 'TÂN UYÊN', '01', 3.5, 26),
+('NV02', 'TẠ VĂN MINH', 'TÂN UYÊN', '01', 4.5, 27),
+('NV03', 'BÙI THANH MAI', 'TÂN UYÊN', '03', 3.6, 24);
+    `.trim(),
+    mermaidErd: `
+erDiagram
+    DMDV ||--o{ BANGLUONG : "quản lý nhân viên"
+    DMDV {
+        string MADV PK "Mã đơn vị (T,2)"
+        string TENDV "Tên đơn vị (T,15)"
+        string DIACHI "Địa chỉ đơn vị (T,40)"
+    }
+    BANGLUONG {
+        string MANV PK "Mã nhân viên (T,4)"
+        string HOTEN "Họ và tên (T,20)"
+        string DIACHI "Địa chỉ cư trú (T,30)"
+        string MADV FK "Mã đơn vị tham chiếu DMDV (T,2)"
+        double HSLUONG "Hệ số lương (N,double)"
+        byte NGAYCONG "Số ngày công (N,byte)"
+    }
+    `.trim(),
+    sampleQueries: [
+      {
+        title: 'Danh sách nhân viên kèm Tên đơn vị công tác, Hệ số lương và Ngày công (JOIN)',
+        sql: `SELECT bl.MANV, bl.HOTEN, bl.DIACHI, dv.TENDV, bl.HSLUONG, bl.NGAYCONG\nFROM BANGLUONG bl\nJOIN DMDV dv ON bl.MADV = dv.MADV\nORDER BY bl.MADV, bl.MANV;`,
+        explanation: 'Kết nối bảng BANGLUONG và DMDV qua khóa ngoại MADV để hiển thị tên đơn vị công tác của từng nhân viên.',
+        difficulty: 'Cơ bản',
+      },
+      {
+        title: 'Tính Lương thực lĩnh = HSLUONG * 1800000 * NGAYCONG / 26 cho từng nhân viên',
+        sql: `SELECT bl.MANV, bl.HOTEN, dv.TENDV, bl.HSLUONG, bl.NGAYCONG, ROUND(bl.HSLUONG * 1800000 * bl.NGAYCONG / 26, 0) AS LUONG_THUC_LINH\nFROM BANGLUONG bl\nJOIN DMDV dv ON bl.MADV = dv.MADV\nORDER BY LUONG_THUC_LINH DESC;`,
+        explanation: 'Sử dụng biểu thức số học tính tiền lương dựa trên Hệ số lương và Ngày công, kết hợp hàm ROUND làm tròn.',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Thống kê số lượng nhân viên và hệ số lương trung bình theo từng Đơn vị (GROUP BY)',
+        sql: `SELECT dv.MADV, dv.TENDV, COUNT(bl.MANV) AS SoNhanVien, ROUND(AVG(bl.HSLUONG), 2) AS HSLuong_TB, SUM(bl.NGAYCONG) AS TongNgayCong\nFROM DMDV dv\nLEFT JOIN BANGLUONG bl ON dv.MADV = bl.MADV\nGROUP BY dv.MADV, dv.TENDV\nORDER BY SoNhanVien DESC;`,
+        explanation: 'Gom nhóm theo từng đơn vị để đếm quân số, tính hệ số lương trung bình và tổng ngày công.',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Tìm các nhân viên thuộc nhóm Kế toán (MANV bắt đầu bằng "KT") có NGAYCONG >= 20',
+        sql: `SELECT MANV, HOTEN, DIACHI, MADV, HSLUONG, NGAYCONG\nFROM BANGLUONG\nWHERE MANV LIKE 'KT%' AND NGAYCONG >= 20;`,
+        explanation: 'Sử dụng toán tử LIKE \'KT%\' để lọc nhân viên có mã bắt đầu bằng KT và kết hợp điều kiện NGAYCONG >= 20.',
+        difficulty: 'Cơ bản',
+      },
+      {
+        title: 'Tìm nhân viên có hệ số lương (HSLUONG) cao nhất trong mỗi Đơn vị (Subquery)',
+        sql: `SELECT bl.MADV, dv.TENDV, bl.MANV, bl.HOTEN, bl.HSLUONG, bl.NGAYCONG\nFROM BANGLUONG bl\nJOIN DMDV dv ON bl.MADV = dv.MADV\nWHERE bl.HSLUONG = (\n  SELECT MAX(sub.HSLUONG)\n  FROM BANGLUONG sub\n  WHERE sub.MADV = bl.MADV\n)\nORDER BY bl.MADV;`,
+        explanation: 'Sử dụng truy vấn con tương quan (Correlated Subquery) tìm người có hệ số lương cao nhất tại từng đơn vị.',
+        difficulty: 'Nâng cao',
+      },
+    ],
+  },
+
   KINH_DOANH: {
     id: 'KINH_DOANH',
-    name: 'CSDL Kinh Doanh',
+    name: 'CSDL_KINHDOANH',
     subtitle: 'Khách hàng, Mặt hàng & Hóa đơn (Hình 2)',
     description: 'Cơ sở dữ liệu bán hàng gồm 3 bảng quan hệ: Khách hàng đặt mua các Mặt hàng thông qua Hóa đơn bán lẻ.',
     badge: '3 Bảng • Bán Hàng',
@@ -188,7 +282,7 @@ erDiagram
 
   HOC_TAP: {
     id: 'HOC_TAP',
-    name: 'CSDL Học Tập',
+    name: 'CSDL_HOCTAP',
     subtitle: 'Học sinh, Môn học & Bảng điểm (Hình 3)',
     description: 'Cơ sở dữ liệu theo dõi quá trình học tập, các môn học và lịch sử điểm số các lần kiểm tra của học sinh.',
     badge: '3 Bảng • Điểm Số',
@@ -292,124 +386,9 @@ erDiagram
     ],
   },
 
-  AM_NHAC: {
-    id: 'AM_NHAC',
-    name: 'CSDL Âm Nhạc',
-    subtitle: 'Nhạc sĩ, Ca sĩ, Bản nhạc & Bản thu âm (Hình 5)',
-    description: 'Cơ sở dữ liệu âm nhạc chuẩn xác 100% theo Hình 5: Lưu trữ thông tin Nhạc sĩ, Ca sĩ, Bản nhạc và Bản thu âm.',
-    badge: '4 Bảng • Âm Nhạc',
-    iconClass: 'fa-solid fa-music',
-    ddl: `
-CREATE TABLE NHAC_SI (
-  Aid INTEGER PRIMARY KEY,
-  TenNS TEXT NOT NULL
-);
-
-CREATE TABLE CA_SI (
-  Sid TEXT PRIMARY KEY,
-  TenCS TEXT NOT NULL
-);
-
-CREATE TABLE BAN_NHAC (
-  Mid TEXT PRIMARY KEY,
-  Aid INTEGER NOT NULL,
-  TenBN TEXT NOT NULL,
-  FOREIGN KEY(Aid) REFERENCES NHAC_SI(Aid)
-);
-
-CREATE TABLE BAN_THU_AM (
-  Mid TEXT NOT NULL,
-  Sid TEXT NOT NULL,
-  PRIMARY KEY (Mid, Sid),
-  FOREIGN KEY(Mid) REFERENCES BAN_NHAC(Mid),
-  FOREIGN KEY(Sid) REFERENCES CA_SI(Sid)
-);
-    `.trim(),
-    seed: `
-INSERT INTO NHAC_SI (Aid, TenNS) VALUES
-(1, 'Đỗ Nhuận'),
-(2, 'Văn Cao'),
-(3, 'Hoàng Việt'),
-(4, 'Nguyễn Tài Tuệ');
-
-INSERT INTO CA_SI (Sid, TenCS) VALUES
-('TK', 'Trần Khánh'),
-('LD', 'Lê Dung'),
-('TN', 'Tân Nhân'),
-('QH', 'Quốc Hương');
-
-INSERT INTO BAN_NHAC (Mid, Aid, TenBN) VALUES
-('0001', 1, 'Du kích Sông Thao'),
-('0002', 2, 'Trường ca Sông Lô'),
-('0003', 3, 'Tình ca'),
-('0004', 4, 'Xa khơi'),
-('0005', 1, 'Việt Nam quê hương tôi'),
-('0006', 2, 'Tiến về Hà Nội');
-
-INSERT INTO BAN_THU_AM (Mid, Sid) VALUES
-('0001', 'TK'),
-('0001', 'QH'),
-('0002', 'TK'),
-('0003', 'QH'),
-('0003', 'LD'),
-('0004', 'TN'),
-('0005', 'LD'),
-('0006', 'TK');
-    `.trim(),
-    mermaidErd: `
-erDiagram
-    NHAC_SI ||--o{ BAN_NHAC : "sáng tác"
-    BAN_NHAC ||--o{ BAN_THU_AM : "được ghi âm"
-    CA_SI ||--o{ BAN_THU_AM : "thể hiện bài hát"
-    NHAC_SI {
-        int Aid PK "Mã nhạc sĩ"
-        string TenNS "Tên nhạc sĩ"
-    }
-    CA_SI {
-        string Sid PK "Mã ca sĩ"
-        string TenCS "Tên ca sĩ"
-    }
-    BAN_NHAC {
-        string Mid PK "Mã bản nhạc"
-        int Aid FK "Tham chiếu Nhạc sĩ"
-        string TenBN "Tên bản nhạc"
-    }
-    BAN_THU_AM {
-        string Mid PK "Khóa chính và Khóa ngoại BAN_NHAC"
-        string Sid PK "Khóa chính và Khóa ngoại CA_SI"
-    }
-    `.trim(),
-    sampleQueries: [
-      {
-        title: 'Danh sách tất cả bản thu âm: Tên bài hát, Ca sĩ & Nhạc sĩ sáng tác',
-        sql: `SELECT bn.Mid, bn.TenBN, cs.TenCS, ns.TenNS\nFROM BAN_THU_AM bta\nJOIN BAN_NHAC bn ON bta.Mid = bn.Mid\nJOIN CA_SI cs ON bta.Sid = cs.Sid\nJOIN NHAC_SI ns ON bn.Aid = ns.Aid\nORDER BY bn.Mid, cs.TenCS;`,
-        explanation: 'Kết hợp cả 4 bảng trong CSDL Âm nhạc để xem đầy đủ thông tin mỗi bản thu âm.',
-        difficulty: 'Cơ bản',
-      },
-      {
-        title: 'Những bản nhạc được thể hiện bởi nhiều hơn 1 ca sĩ',
-        sql: `SELECT bn.Mid, bn.TenBN, COUNT(bta.Sid) AS So_ca_si_thu_am\nFROM BAN_NHAC bn\nJOIN BAN_THU_AM bta ON bn.Mid = bta.Mid\nGROUP BY bn.Mid, bn.TenBN\nHAVING COUNT(bta.Sid) > 1;`,
-        explanation: 'Dùng GROUP BY kết hợp điều kiện lọc nhóm HAVING COUNT(bta.Sid) > 1.',
-        difficulty: 'Trung bình',
-      },
-      {
-        title: 'Thống kê số lượng tác phẩm của từng nhạc sĩ đã sáng tác',
-        sql: `SELECT ns.Aid, ns.TenNS, COUNT(bn.Mid) AS So_luong_tac_pham\nFROM NHAC_SI ns\nLEFT JOIN BAN_NHAC bn ON ns.Aid = bn.Aid\nGROUP BY ns.Aid, ns.TenNS\nORDER BY So_luong_tac_pham DESC;`,
-        explanation: 'Đếm số bài hát do mỗi nhạc sĩ sáng tác bằng LEFT JOIN và hàm COUNT.',
-        difficulty: 'Trung bình',
-      },
-      {
-        title: 'Tìm các ca sĩ đã từng thể hiện sáng tác của nhạc sĩ Văn Cao',
-        sql: `SELECT DISTINCT cs.Sid, cs.TenCS\nFROM CA_SI cs\nJOIN BAN_THU_AM bta ON cs.Sid = bta.Sid\nJOIN BAN_NHAC bn ON bta.Mid = bn.Mid\nJOIN NHAC_SI ns ON bn.Aid = ns.Aid\nWHERE ns.TenNS = 'Văn Cao';`,
-        explanation: 'Sử dụng DISTINCT để loại bỏ ca sĩ trùng lặp khi hát nhiều bài của nhạc sĩ Văn Cao.',
-        difficulty: 'Nâng cao',
-      },
-    ],
-  },
-
   QL_XE: {
     id: 'QL_XE',
-    name: 'CSDL QL_XE',
+    name: 'CSDL_XE',
     subtitle: 'Loại xe, Danh mục xe & Hóa đơn bán hàng',
     description: 'Cơ sở dữ liệu quản lý bán xe gồm 3 bảng quan hệ: LOAI_XE, DANH_MUC_XE và HOA_DON bán lẻ.',
     badge: '3 Bảng • Quản Lý Xe',
@@ -523,7 +502,7 @@ erDiagram
 
   QL_VANG: {
     id: 'QL_VANG',
-    name: 'CSDL QL_VANG',
+    name: 'CSDL_VANG',
     subtitle: 'Quản Lý Kinh Doanh Vàng Bạc Đá Quý (3 Bảng)',
     description: 'Cơ sở dữ liệu quản lý tiệm vàng gồm bảng Loại vàng (LOAI_VANG), Danh mục sản phẩm vàng & trang sức (SAN_PHAM), và Phiếu bán hàng (PHIEU_BAN) có trọng lượng, tiền công và đơn giá niêm yết.',
     badge: '3 Bảng • Kinh Doanh Vàng',
@@ -644,7 +623,7 @@ erDiagram
 
   QL_CANBO: {
     id: 'QL_CANBO',
-    name: 'CSDL QL_Canbo',
+    name: 'CSDL QL_CANBO',
     subtitle: 'Quản Lý Cán Bộ & Phòng Ban (3 Bảng)',
     description: 'Cơ sở dữ liệu quản lý nhân sự cơ quan gồm 3 bảng: Phòng ban (PHONG), Danh sách cán bộ (CANBO) và Trình độ văn hóa, chuyên môn & ngoại ngữ (TRINHDOVANHOA).',
     badge: '3 Bảng • Quản Lý Cán Bộ',
@@ -759,9 +738,237 @@ erDiagram
     ],
   },
 
+  CSDL_QLDIEN: {
+    id: 'CSDL_QLDIEN',
+    name: 'CSDL_DIENLUC',
+    subtitle: 'Khách hàng, Sử dụng & Chi tiết tiêu thụ điện (3 Bảng)',
+    description: 'Cơ sở dữ liệu quản lý tiêu thụ điện gồm 3 bảng quan hệ: KHACHHANG (MAKH, TENKHACH, DIACHI), SUDUNG (MASD, LOAISD, DONGIA) và CHITIET (MASD, MAKH, SOKW, THANHTIEN).',
+    badge: '3 Bảng • Quản Lý Điện',
+    iconClass: 'fa-solid fa-bolt',
+    ddl: `
+CREATE TABLE KHACHHANG (
+  MAKH TEXT(4) PRIMARY KEY,
+  TENKHACH TEXT(10) NOT NULL,
+  DIACHI TEXT(40)
+);
+
+CREATE TABLE SUDUNG (
+  MASD TEXT(2) PRIMARY KEY,
+  LOAISD TEXT(15) NOT NULL,
+  DONGIA INTEGER NOT NULL
+);
+
+CREATE TABLE CHITIET (
+  MASD TEXT(2) NOT NULL,
+  MAKH TEXT(4) NOT NULL,
+  SOKW INTEGER NOT NULL,
+  THANHTIEN REAL,
+  PRIMARY KEY (MASD, MAKH),
+  FOREIGN KEY (MASD) REFERENCES SUDUNG(MASD),
+  FOREIGN KEY (MAKH) REFERENCES KHACHHANG(MAKH)
+);
+    `.trim(),
+    seed: `
+INSERT INTO KHACHHANG (MAKH, TENKHACH, DIACHI) VALUES
+('KH01', 'THANH', '12 YERSIN PHÚ CƯỜNG'),
+('KH02', 'BÌNH', '04 BẠCH ĐẰNG PHÚ CƯỜNG'),
+('KH03', 'HẢO', '12 DT743 PHÚ HÒA'),
+('KH04', 'TIẾN', '04 ĐẠI LỘ BÌNH DƯƠNG'),
+('KH05', 'HÒA', '03 DT743 PHÚ HÒA'),
+('KH06', 'VÂN', '12 CMT8 PHÚ CƯỜNG');
+
+INSERT INTO SUDUNG (MASD, LOAISD, DONGIA) VALUES
+('KD', 'KINH DOANH', 750),
+('SH', 'SINH HOẠT', 500),
+('SX', 'SẢN XUẤT', 100);
+
+INSERT INTO CHITIET (MASD, MAKH, SOKW, THANHTIEN) VALUES
+('KD', 'KH01', 100, NULL),
+('KD', 'KH02', 200, NULL),
+('KD', 'KH04', 50, NULL),
+('KD', 'KH05', 300, NULL),
+('SH', 'KH01', 150, NULL),
+('SH', 'KH02', 50, NULL),
+('SH', 'KH03', 350, NULL),
+('SH', 'KH04', 400, NULL),
+('SH', 'KH05', 200, NULL),
+('SX', 'KH01', 150, NULL),
+('SX', 'KH02', 220, NULL),
+('SX', 'KH03', 300, NULL);
+    `.trim(),
+    mermaidErd: `
+erDiagram
+    KHACHHANG ||--o{ CHITIET : "tiêu thụ"
+    SUDUNG ||--o{ CHITIET : "áp dụng đơn giá"
+    KHACHHANG {
+        string MAKH PK "Mã khách hàng (T,4)"
+        string TENKHACH "Tên khách hàng (T,10)"
+        string DIACHI "Địa chỉ (T,40)"
+    }
+    SUDUNG {
+        string MASD PK "Mã sử dụng (T,2)"
+        string LOAISD "Loại sử dụng (T,15)"
+        int DONGIA "Đơn giá điện (N,Int)"
+    }
+    CHITIET {
+        string MASD PK,FK "Mã sử dụng (T,2)"
+        string MAKH PK,FK "Mã khách hàng (T,4)"
+        int SOKW "Số KW tiêu thụ (N,Int)"
+        double THANHTIEN "Thành tiền (N,Double)"
+    }
+    `.trim(),
+    sampleQueries: [
+      {
+        title: 'Chi tiết tiêu thụ điện kèm Tên khách, Loại sử dụng và tính Thành tiền (SOKW * DONGIA)',
+        sql: `SELECT ct.MAKH, kh.TENKHACH, sd.LOAISD, ct.SOKW, sd.DONGIA, (ct.SOKW * sd.DONGIA) AS THANHTIEN\nFROM CHITIET ct\nJOIN KHACHHANG kh ON ct.MAKH = kh.MAKH\nJOIN SUDUNG sd ON ct.MASD = sd.MASD\nORDER BY ct.MAKH, ct.MASD;`,
+        explanation: 'Kết nối 3 bảng KHACHHANG, SUDUNG, CHITIET và tính biểu thức Thành tiền = SOKW * DONGIA.',
+        difficulty: 'Cơ bản',
+      },
+      {
+        title: 'Cập nhật cột THANHTIEN = SOKW * DONGIA cho toàn bộ bảng CHITIET (UPDATE)',
+        sql: `UPDATE CHITIET\nSET THANHTIEN = SOKW * (\n  SELECT DONGIA\n  FROM SUDUNG\n  WHERE SUDUNG.MASD = CHITIET.MASD\n);`,
+        explanation: 'Sử dụng lệnh UPDATE kết hợp truy vấn con (Subquery) lấy DONGIA từ bảng SUDUNG để điền giá trị cho cột THANHTIEN.',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Thống kê tổng số KW và tổng tiền điện theo từng Loại sử dụng (GROUP BY)',
+        sql: `SELECT sd.MASD, sd.LOAISD, SUM(ct.SOKW) AS TongSoKW, SUM(ct.SOKW * sd.DONGIA) AS TongThanhTien\nFROM SUDUNG sd\nJOIN CHITIET ct ON sd.MASD = ct.MASD\nGROUP BY sd.MASD, sd.LOAISD\nORDER BY TongThanhTien DESC;`,
+        explanation: 'Gom nhóm theo loại hình sử dụng điện (KINH DOANH, SINH HOẠT, SẢN XUẤT) để tính tổng sản lượng KW và doanh thu.',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Tìm khách hàng ở phường "PHÚ CƯỜNG" có sử dụng điện (LIKE)',
+        sql: `SELECT MAKH, TENKHACH, DIACHI\nFROM KHACHHANG\nWHERE DIACHI LIKE '%PHÚ CƯỜNG%';`,
+        explanation: 'Sử dụng toán tử LIKE với ký tự đại diện % để lọc các khách hàng có địa chỉ tại Phú Cường.',
+        difficulty: 'Cơ bản',
+      },
+      {
+        title: 'Tìm khách hàng chưa phát sinh chi tiết sử dụng điện nào (LEFT JOIN & IS NULL)',
+        sql: `SELECT kh.MAKH, kh.TENKHACH, kh.DIACHI\nFROM KHACHHANG kh\nLEFT JOIN CHITIET ct ON kh.MAKH = ct.MAKH\nWHERE ct.MASD IS NULL;`,
+        explanation: 'Dùng LEFT JOIN và kiểm tra ct.MASD IS NULL để tìm ra khách hàng KH06 (VÂN) chưa có dữ liệu trong bảng CHITIET.',
+        difficulty: 'Nâng cao',
+      },
+    ],
+  },
+
+  AM_NHAC: {
+    id: 'AM_NHAC',
+    name: 'CSDL_AMNHAC',
+    subtitle: 'Nhạc sĩ, Ca sĩ, Bản nhạc & Bản thu âm (Hình 5)',
+    description: 'Cơ sở dữ liệu âm nhạc chuẩn xác 100% theo Hình 5: Lưu trữ thông tin Nhạc sĩ, Ca sĩ, Bản nhạc và Bản thu âm.',
+    badge: '4 Bảng • Âm Nhạc',
+    iconClass: 'fa-solid fa-music',
+    ddl: `
+CREATE TABLE NHAC_SI (
+  Aid INTEGER PRIMARY KEY,
+  TenNS TEXT NOT NULL
+);
+
+CREATE TABLE CA_SI (
+  Sid TEXT PRIMARY KEY,
+  TenCS TEXT NOT NULL
+);
+
+CREATE TABLE BAN_NHAC (
+  Mid TEXT PRIMARY KEY,
+  Aid INTEGER NOT NULL,
+  TenBN TEXT NOT NULL,
+  FOREIGN KEY(Aid) REFERENCES NHAC_SI(Aid)
+);
+
+CREATE TABLE BAN_THU_AM (
+  Mid TEXT NOT NULL,
+  Sid TEXT NOT NULL,
+  PRIMARY KEY (Mid, Sid),
+  FOREIGN KEY(Mid) REFERENCES BAN_NHAC(Mid),
+  FOREIGN KEY(Sid) REFERENCES CA_SI(Sid)
+);
+    `.trim(),
+    seed: `
+INSERT INTO NHAC_SI (Aid, TenNS) VALUES
+(1, 'Đỗ Nhuận'),
+(2, 'Văn Cao'),
+(3, 'Hoàng Việt'),
+(4, 'Nguyễn Tài Tuệ');
+
+INSERT INTO CA_SI (Sid, TenCS) VALUES
+('TK', 'Trần Khánh'),
+('LD', 'Lê Dung'),
+('TN', 'Tân Nhân'),
+('QH', 'Quốc Hương');
+
+INSERT INTO BAN_NHAC (Mid, Aid, TenBN) VALUES
+('0001', 1, 'Du kích Sông Thao'),
+('0002', 2, 'Trường ca Sông Lô'),
+('0003', 3, 'Tình ca'),
+('0004', 4, 'Xa khơi'),
+('0005', 1, 'Việt Nam quê hương tôi'),
+('0006', 2, 'Tiến về Hà Nội');
+
+INSERT INTO BAN_THU_AM (Mid, Sid) VALUES
+('0001', 'TK'),
+('0001', 'QH'),
+('0002', 'TK'),
+('0003', 'QH'),
+('0003', 'LD'),
+('0004', 'TN'),
+('0005', 'LD'),
+('0006', 'TK');
+    `.trim(),
+    mermaidErd: `
+erDiagram
+    NHAC_SI ||--o{ BAN_NHAC : "sáng tác"
+    BAN_NHAC ||--o{ BAN_THU_AM : "được ghi âm"
+    CA_SI ||--o{ BAN_THU_AM : "thể hiện bài hát"
+    NHAC_SI {
+        int Aid PK "Mã nhạc sĩ"
+        string TenNS "Tên nhạc sĩ"
+    }
+    CA_SI {
+        string Sid PK "Mã ca sĩ"
+        string TenCS "Tên ca sĩ"
+    }
+    BAN_NHAC {
+        string Mid PK "Mã bản nhạc"
+        int Aid FK "Tham chiếu Nhạc sĩ"
+        string TenBN "Tên bản nhạc"
+    }
+    BAN_THU_AM {
+        string Mid PK "Khóa chính và Khóa ngoại BAN_NHAC"
+        string Sid PK "Khóa chính và Khóa ngoại CA_SI"
+    }
+    `.trim(),
+    sampleQueries: [
+      {
+        title: 'Danh sách tất cả bản thu âm: Tên bài hát, Ca sĩ & Nhạc sĩ sáng tác',
+        sql: `SELECT bn.Mid, bn.TenBN, cs.TenCS, ns.TenNS\nFROM BAN_THU_AM bta\nJOIN BAN_NHAC bn ON bta.Mid = bn.Mid\nJOIN CA_SI cs ON bta.Sid = cs.Sid\nJOIN NHAC_SI ns ON bn.Aid = ns.Aid\nORDER BY bn.Mid, cs.TenCS;`,
+        explanation: 'Kết hợp cả 4 bảng trong CSDL Âm nhạc để xem đầy đủ thông tin mỗi bản thu âm.',
+        difficulty: 'Cơ bản',
+      },
+      {
+        title: 'Những bản nhạc được thể hiện bởi nhiều hơn 1 ca sĩ',
+        sql: `SELECT bn.Mid, bn.TenBN, COUNT(bta.Sid) AS So_ca_si_thu_am\nFROM BAN_NHAC bn\nJOIN BAN_THU_AM bta ON bn.Mid = bta.Mid\nGROUP BY bn.Mid, bn.TenBN\nHAVING COUNT(bta.Sid) > 1;`,
+        explanation: 'Dùng GROUP BY kết hợp điều kiện lọc nhóm HAVING COUNT(bta.Sid) > 1.',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Thống kê số lượng tác phẩm của từng nhạc sĩ đã sáng tác',
+        sql: `SELECT ns.Aid, ns.TenNS, COUNT(bn.Mid) AS So_luong_tac_pham\nFROM NHAC_SI ns\nLEFT JOIN BAN_NHAC bn ON ns.Aid = bn.Aid\nGROUP BY ns.Aid, ns.TenNS\nORDER BY So_luong_tac_pham DESC;`,
+        explanation: 'Đếm số bài hát do mỗi nhạc sĩ sáng tác bằng LEFT JOIN và hàm COUNT.',
+        difficulty: 'Trung bình',
+      },
+      {
+        title: 'Tìm các ca sĩ đã từng thể hiện sáng tác của nhạc sĩ Văn Cao',
+        sql: `SELECT DISTINCT cs.Sid, cs.TenCS\nFROM CA_SI cs\nJOIN BAN_THU_AM bta ON cs.Sid = bta.Sid\nJOIN BAN_NHAC bn ON bta.Mid = bn.Mid\nJOIN NHAC_SI ns ON bn.Aid = ns.Aid\nWHERE ns.TenNS = 'Văn Cao';`,
+        explanation: 'Sử dụng DISTINCT để loại bỏ ca sĩ trùng lặp khi hát nhiều bài của nhạc sĩ Văn Cao.',
+        difficulty: 'Nâng cao',
+      },
+    ],
+  },
+
   QL_TV: {
     id: 'QL_TV',
-    name: 'CSDL QL_TV',
+    name: 'CSDL_THUVIEN',
     subtitle: 'Quản Lý Thư Viện (4 Bảng)',
     description: 'Cơ sở dữ liệu quản lý thư viện trường học gồm 4 bảng: Tác giả (TACGIA), Sách (SACH), Độc giả (DOCGIA) và Nhật ký Mượn trả sách (MUON_TRA).',
     badge: '4 Bảng • Quản Lý Thư Viện',
@@ -906,213 +1113,6 @@ erDiagram
     ],
   },
 
-  CSDL_QLDIEN: {
-    id: 'CSDL_QLDIEN',
-    name: 'CSDL_QLDIEN',
-    subtitle: 'Khách hàng, Sử dụng & Chi tiết tiêu thụ điện (3 Bảng)',
-    description: 'Cơ sở dữ liệu quản lý tiêu thụ điện gồm 3 bảng quan hệ: KHACHHANG (MAKH, TENKHACH, DIACHI), SUDUNG (MASD, LOAISD, DONGIA) và CHITIET (MASD, MAKH, SOKW, THANHTIEN).',
-    badge: '3 Bảng • Quản Lý Điện',
-    iconClass: 'fa-solid fa-bolt',
-    ddl: `
-CREATE TABLE KHACHHANG (
-  MAKH TEXT(4) PRIMARY KEY,
-  TENKHACH TEXT(10) NOT NULL,
-  DIACHI TEXT(40)
-);
-
-CREATE TABLE SUDUNG (
-  MASD TEXT(2) PRIMARY KEY,
-  LOAISD TEXT(15) NOT NULL,
-  DONGIA INTEGER NOT NULL
-);
-
-CREATE TABLE CHITIET (
-  MASD TEXT(2) NOT NULL,
-  MAKH TEXT(4) NOT NULL,
-  SOKW INTEGER NOT NULL,
-  THANHTIEN REAL,
-  PRIMARY KEY (MASD, MAKH),
-  FOREIGN KEY (MASD) REFERENCES SUDUNG(MASD),
-  FOREIGN KEY (MAKH) REFERENCES KHACHHANG(MAKH)
-);
-    `.trim(),
-    seed: `
-INSERT INTO KHACHHANG (MAKH, TENKHACH, DIACHI) VALUES
-('KH01', 'THANH', '12 YERSIN PHÚ CƯỜNG'),
-('KH02', 'BÌNH', '04 BẠCH ĐẰNG PHÚ CƯỜNG'),
-('KH03', 'HẢO', '12 DT743 PHÚ HÒA'),
-('KH04', 'TIẾN', '04 ĐẠI LỘ BÌNH DƯƠNG'),
-('KH05', 'HÒA', '03 DT743 PHÚ HÒA'),
-('KH06', 'VÂN', '12 CMT8 PHÚ CƯỜNG');
-
-INSERT INTO SUDUNG (MASD, LOAISD, DONGIA) VALUES
-('KD', 'KINH DOANH', 750),
-('SH', 'SINH HOẠT', 500),
-('SX', 'SẢN XUẤT', 100);
-
-INSERT INTO CHITIET (MASD, MAKH, SOKW, THANHTIEN) VALUES
-('KD', 'KH01', 100, NULL),
-('KD', 'KH02', 200, NULL),
-('KD', 'KH04', 50, NULL),
-('KD', 'KH05', 300, NULL),
-('SH', 'KH01', 150, NULL),
-('SH', 'KH02', 50, NULL),
-('SH', 'KH03', 350, NULL),
-('SH', 'KH04', 400, NULL),
-('SH', 'KH05', 200, NULL),
-('SX', 'KH01', 150, NULL),
-('SX', 'KH02', 220, NULL),
-('SX', 'KH03', 300, NULL);
-    `.trim(),
-    mermaidErd: `
-erDiagram
-    KHACHHANG ||--o{ CHITIET : "tiêu thụ"
-    SUDUNG ||--o{ CHITIET : "áp dụng đơn giá"
-    KHACHHANG {
-        string MAKH PK "Mã khách hàng (T,4)"
-        string TENKHACH "Tên khách hàng (T,10)"
-        string DIACHI "Địa chỉ (T,40)"
-    }
-    SUDUNG {
-        string MASD PK "Mã sử dụng (T,2)"
-        string LOAISD "Loại sử dụng (T,15)"
-        int DONGIA "Đơn giá điện (N,Int)"
-    }
-    CHITIET {
-        string MASD PK,FK "Mã sử dụng (T,2)"
-        string MAKH PK,FK "Mã khách hàng (T,4)"
-        int SOKW "Số KW tiêu thụ (N,Int)"
-        double THANHTIEN "Thành tiền (N,Double)"
-    }
-    `.trim(),
-    sampleQueries: [
-      {
-        title: 'Chi tiết tiêu thụ điện kèm Tên khách, Loại sử dụng và tính Thành tiền (SOKW * DONGIA)',
-        sql: `SELECT ct.MAKH, kh.TENKHACH, sd.LOAISD, ct.SOKW, sd.DONGIA, (ct.SOKW * sd.DONGIA) AS THANHTIEN\nFROM CHITIET ct\nJOIN KHACHHANG kh ON ct.MAKH = kh.MAKH\nJOIN SUDUNG sd ON ct.MASD = sd.MASD\nORDER BY ct.MAKH, ct.MASD;`,
-        explanation: 'Kết nối 3 bảng KHACHHANG, SUDUNG, CHITIET và tính biểu thức Thành tiền = SOKW * DONGIA.',
-        difficulty: 'Cơ bản',
-      },
-      {
-        title: 'Cập nhật cột THANHTIEN = SOKW * DONGIA cho toàn bộ bảng CHITIET (UPDATE)',
-        sql: `UPDATE CHITIET\nSET THANHTIEN = SOKW * (\n  SELECT DONGIA\n  FROM SUDUNG\n  WHERE SUDUNG.MASD = CHITIET.MASD\n);`,
-        explanation: 'Sử dụng lệnh UPDATE kết hợp truy vấn con (Subquery) lấy DONGIA từ bảng SUDUNG để điền giá trị cho cột THANHTIEN.',
-        difficulty: 'Trung bình',
-      },
-      {
-        title: 'Thống kê tổng số KW và tổng tiền điện theo từng Loại sử dụng (GROUP BY)',
-        sql: `SELECT sd.MASD, sd.LOAISD, SUM(ct.SOKW) AS TongSoKW, SUM(ct.SOKW * sd.DONGIA) AS TongThanhTien\nFROM SUDUNG sd\nJOIN CHITIET ct ON sd.MASD = ct.MASD\nGROUP BY sd.MASD, sd.LOAISD\nORDER BY TongThanhTien DESC;`,
-        explanation: 'Gom nhóm theo loại hình sử dụng điện (KINH DOANH, SINH HOẠT, SẢN XUẤT) để tính tổng sản lượng KW và doanh thu.',
-        difficulty: 'Trung bình',
-      },
-      {
-        title: 'Tìm khách hàng ở phường "PHÚ CƯỜNG" có sử dụng điện (LIKE)',
-        sql: `SELECT MAKH, TENKHACH, DIACHI\nFROM KHACHHANG\nWHERE DIACHI LIKE '%PHÚ CƯỜNG%';`,
-        explanation: 'Sử dụng toán tử LIKE với ký tự đại diện % để lọc các khách hàng có địa chỉ tại Phú Cường.',
-        difficulty: 'Cơ bản',
-      },
-      {
-        title: 'Tìm khách hàng chưa phát sinh chi tiết sử dụng điện nào (LEFT JOIN & IS NULL)',
-        sql: `SELECT kh.MAKH, kh.TENKHACH, kh.DIACHI\nFROM KHACHHANG kh\nLEFT JOIN CHITIET ct ON kh.MAKH = ct.MAKH\nWHERE ct.MASD IS NULL;`,
-        explanation: 'Dùng LEFT JOIN và kiểm tra ct.MASD IS NULL để tìm ra khách hàng KH06 (VÂN) chưa có dữ liệu trong bảng CHITIET.',
-        difficulty: 'Nâng cao',
-      },
-    ],
-  },
-
-  CSDL_QLLUONG: {
-    id: 'CSDL_QLLUONG',
-    name: 'CSDL_QLLUONG',
-    subtitle: 'Danh mục đơn vị & Bảng lương nhân viên (2 Bảng)',
-    description: 'Cơ sở dữ liệu quản lý tiền lương gồm 2 bảng quan hệ: DMDV (MADV, TENDV, DIACHI) và BANGLUONG (MANV, HOTEN, DIACHI, MADV, HSLUONG, NGAYCONG).',
-    badge: '2 Bảng • Quản Lý Lương',
-    iconClass: 'fa-solid fa-money-check-dollar',
-    ddl: `
-CREATE TABLE DMDV (
-  MADV TEXT(2) PRIMARY KEY,
-  TENDV TEXT(15) NOT NULL,
-  DIACHI TEXT(40)
-);
-
-CREATE TABLE BANGLUONG (
-  MANV TEXT(4) PRIMARY KEY,
-  HOTEN TEXT(20) NOT NULL,
-  DIACHI TEXT(30),
-  MADV TEXT(2) NOT NULL,
-  HSLUONG REAL NOT NULL,
-  NGAYCONG INTEGER NOT NULL,
-  FOREIGN KEY (MADV) REFERENCES DMDV(MADV)
-);
-    `.trim(),
-    seed: `
-INSERT INTO DMDV (MADV, TENDV, DIACHI) VALUES
-('01', 'CỬA HÀNG SỐ 01', '50 HÙNG VƯƠNG'),
-('02', 'CỬA HÀNG SỐ 02', '15 CMT8'),
-('03', 'CÔNG TY ABC', '40 ĐOÀN TRẦN NGHIỆP'),
-('04', 'XÍ NGHIỆP 204', 'ĐỒNG AN - THUẬN AN'),
-('05', 'XÍ NGHIỆP GỐM', 'MINH TÂM - TXTDM');
-
-INSERT INTO BANGLUONG (MANV, HOTEN, DIACHI, MADV, HSLUONG, NGAYCONG) VALUES
-('BV01', 'TRẦN THANH HẢI', 'THỊ XÃ THỦ DẦU MỘT', '04', 4.5, 27),
-('GD01', 'HỒ BÍCH NGA', 'THỊ XÃ THỦ DẦU MỘT', '02', 5.3, 27),
-('KT01', 'NGUYỄN PHƯƠNG ANH', 'THUẬN AN', '01', 3.5, 17),
-('KT02', 'NGUYỄN QUỐC TUẤN', 'THUẬN AN', '02', 4.0, 30),
-('KT05', 'ĐÀO TIẾN', 'PHÚ GIÁO', '05', 4.2, 25),
-('KT06', 'VŨ MÃO', 'PHÚ GIÁO', '05', 3.8, 20),
-('NV01', 'NGUYỄN KHẮC DINH', 'TÂN UYÊN', '01', 3.5, 26),
-('NV02', 'TẠ VĂN MINH', 'TÂN UYÊN', '01', 4.5, 27),
-('NV03', 'BÙI THANH MAI', 'TÂN UYÊN', '03', 3.6, 24);
-    `.trim(),
-    mermaidErd: `
-erDiagram
-    DMDV ||--o{ BANGLUONG : "quản lý nhân viên"
-    DMDV {
-        string MADV PK "Mã đơn vị (T,2)"
-        string TENDV "Tên đơn vị (T,15)"
-        string DIACHI "Địa chỉ đơn vị (T,40)"
-    }
-    BANGLUONG {
-        string MANV PK "Mã nhân viên (T,4)"
-        string HOTEN "Họ và tên (T,20)"
-        string DIACHI "Địa chỉ cư trú (T,30)"
-        string MADV FK "Mã đơn vị tham chiếu DMDV (T,2)"
-        double HSLUONG "Hệ số lương (N,double)"
-        byte NGAYCONG "Số ngày công (N,byte)"
-    }
-    `.trim(),
-    sampleQueries: [
-      {
-        title: 'Danh sách nhân viên kèm Tên đơn vị công tác, Hệ số lương và Ngày công (JOIN)',
-        sql: `SELECT bl.MANV, bl.HOTEN, bl.DIACHI, dv.TENDV, bl.HSLUONG, bl.NGAYCONG\nFROM BANGLUONG bl\nJOIN DMDV dv ON bl.MADV = dv.MADV\nORDER BY bl.MADV, bl.MANV;`,
-        explanation: 'Kết nối bảng BANGLUONG và DMDV qua khóa ngoại MADV để hiển thị tên đơn vị công tác của từng nhân viên.',
-        difficulty: 'Cơ bản',
-      },
-      {
-        title: 'Tính Lương thực lĩnh = HSLUONG * 1800000 * NGAYCONG / 26 cho từng nhân viên',
-        sql: `SELECT bl.MANV, bl.HOTEN, dv.TENDV, bl.HSLUONG, bl.NGAYCONG, ROUND(bl.HSLUONG * 1800000 * bl.NGAYCONG / 26, 0) AS LUONG_THUC_LINH\nFROM BANGLUONG bl\nJOIN DMDV dv ON bl.MADV = dv.MADV\nORDER BY LUONG_THUC_LINH DESC;`,
-        explanation: 'Sử dụng biểu thức số học tính tiền lương dựa trên Hệ số lương và Ngày công, kết hợp hàm ROUND làm tròn.',
-        difficulty: 'Trung bình',
-      },
-      {
-        title: 'Thống kê số lượng nhân viên và hệ số lương trung bình theo từng Đơn vị (GROUP BY)',
-        sql: `SELECT dv.MADV, dv.TENDV, COUNT(bl.MANV) AS SoNhanVien, ROUND(AVG(bl.HSLUONG), 2) AS HSLuong_TB, SUM(bl.NGAYCONG) AS TongNgayCong\nFROM DMDV dv\nLEFT JOIN BANGLUONG bl ON dv.MADV = bl.MADV\nGROUP BY dv.MADV, dv.TENDV\nORDER BY SoNhanVien DESC;`,
-        explanation: 'Gom nhóm theo từng đơn vị để đếm quân số, tính hệ số lương trung bình và tổng ngày công.',
-        difficulty: 'Trung bình',
-      },
-      {
-        title: 'Tìm các nhân viên thuộc nhóm Kế toán (MANV bắt đầu bằng "KT") có NGAYCONG >= 20',
-        sql: `SELECT MANV, HOTEN, DIACHI, MADV, HSLUONG, NGAYCONG\nFROM BANGLUONG\nWHERE MANV LIKE 'KT%' AND NGAYCONG >= 20;`,
-        explanation: 'Sử dụng toán tử LIKE \'KT%\' để lọc nhân viên có mã bắt đầu bằng KT và kết hợp điều kiện NGAYCONG >= 20.',
-        difficulty: 'Cơ bản',
-      },
-      {
-        title: 'Tìm nhân viên có hệ số lương (HSLUONG) cao nhất trong mỗi Đơn vị (Subquery)',
-        sql: `SELECT bl.MADV, dv.TENDV, bl.MANV, bl.HOTEN, bl.HSLUONG, bl.NGAYCONG\nFROM BANGLUONG bl\nJOIN DMDV dv ON bl.MADV = dv.MADV\nWHERE bl.HSLUONG = (\n  SELECT MAX(sub.HSLUONG)\n  FROM BANGLUONG sub\n  WHERE sub.MADV = bl.MADV\n)\nORDER BY bl.MADV;`,
-        explanation: 'Sử dụng truy vấn con tương quan (Correlated Subquery) tìm người có hệ số lương cao nhất tại từng đơn vị.',
-        difficulty: 'Nâng cao',
-      },
-    ],
-  },
-
   CSDL_VANTAI: {
     id: 'CSDL_VANTAI',
     name: 'CSDL_VANTAI',
@@ -1244,7 +1244,7 @@ erDiagram
 
   CSDL_QLKHO: {
     id: 'CSDL_QLKHO',
-    name: 'CSDL_QLKHO',
+    name: 'CSDL_NXKHO',
     subtitle: 'Nhập xuất kho, Danh mục kho, Hàng hóa & Chi tiết nhập xuất (4 Bảng)',
     description: 'Cơ sở dữ liệu quản lý nhập xuất kho gồm 4 bảng quan hệ: NXKHO (SOHD, NGAY, LOAIHD), DMKHO (MAKHO, TENKHO, DIACHI), DMHH (MAHH, TENHH, DONGIA) và CTNX (SOHD, MAHH, MAKHO, SOLUONG).',
     badge: '4 Bảng • Quản Lý Kho',
@@ -1514,7 +1514,7 @@ erDiagram
 
   CSDL_QLTAU: {
     id: 'CSDL_QLTAU',
-    name: 'CSDL_QLTAU',
+    name: 'CSDL_TAUHANG',
     subtitle: 'Lịch trình, Tàu, Thuyền viên & Mặt hàng vận chuyển (4 Bảng)',
     description: 'Cơ sở dữ liệu quản lý vận tải đường thủy gồm 4 bảng quan hệ: TAU (MaTau, TenTau, TrongTaiToiDa), THUYENVIEN (MaThuyenVien, TenThuyenVien, ChucDanh, MucLuong), MATHANG (MaMatHang, TenMatHang, SoLuong, SoGiayPhep) và LICHTRINH (Malichtrinh, MaTau, MaThuyenVien, MaMatHang, DinhVi, CangXuatPhat, CangDen, GioKhoiHanh, GioCapBen).',
     badge: '4 Bảng • Quản Lý Tàu',
